@@ -67,3 +67,30 @@ std::vector<std::string> find_intersection_street_names(unsigned intersection_id
     return names;
     //this will suffer from the same problems as the prev function
 }
+
+bool are_directly_connected(unsigned intersection_id1, unsigned intersection_id2){
+    //so the corner case here is if it has curvepoints or not I think??
+    //but basically do they share a road and if so is the road one way
+    //is an intersection always connected to itself? or does a street seg need to curve back into itself?
+    //**read above unless I get answers later
+    //if an intersection is always connected to itself I can just return true if they are =
+    //and finally this would be easier if I had made the global variable first but oh well
+    //bool returniee=false;
+    std::vector<unsigned> segsInt1=find_intersection_street_segments(intersection_id1);
+    std::vector<unsigned> segsInt2=find_intersection_street_segments(intersection_id2);
+    //so I have the two lists
+    //literally O(n^2) incoming
+    //if you have a better idea please implement it
+    for(int i=0;i<segsInt1.size();i++){
+        for(int c=0;c<segsInt2.size();c++){
+            if(segsInt1[i]==segsInt2[c]){
+                if(getInfoStreetSegment(segsInt1[i]).oneWay){
+                    return true;
+                }
+            }
+        }
+    }
+    
+    return false;
+    //this is really not going to pass the speed test
+}
