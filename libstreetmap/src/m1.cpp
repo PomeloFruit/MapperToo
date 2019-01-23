@@ -26,17 +26,17 @@
 //Global Variables
 
 
-bool load_map(std::string /*map_path*/) {
+bool load_map(std::string path/*map_path*/) {
     bool load_successful = false; //Indicates whether the map has loaded 
                                   //successfully
 
     //
     //Load your map related data structures here
     //
-   
     
+    load_successful = loadStreetsDatabaseBIN(path);
 
-    load_successful = true; //Make sure this is updated to reflect whether
+    //load_successful = true; //Make sure this is updated to reflect whether
                             //loading the map succeeded or failed
 
     return load_successful;
@@ -205,20 +205,20 @@ double find_distance_between_two_points(LatLon point1, LatLon point2){
 
 
 //Returns the length of the given street segment in meters
-double find_street_segment_length(unsigned street_segment_id){
+//double find_street_segment_length(unsigned street_segment_id){
     
-}
+//}
 
 //Returns the length of the specified street in meters
-double find_street_length(unsigned street_id){
+//double find_street_length(unsigned street_id){
     
-}
+//}
 
 //Returns the travel time to drive a street segment in seconds 
 //(time = distance/speed_limit)
-double find_street_segment_travel_time(unsigned street_segment_id){
+//double find_street_segment_travel_time(unsigned street_segment_id){
     
-}
+//}
 
 unsigned find_closest_point_of_interest(LatLon my_position){
     double min = 9999999999;                    //initializing minimum to a large number 
