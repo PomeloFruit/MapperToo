@@ -203,7 +203,22 @@ double find_distance_between_two_points(LatLon point1, LatLon point2){
 
 //Returns the length of the given street segment in meters
 double find_street_segment_length(unsigned street_segment_id){
+    double totalLength = 0;
     
+    int numSegments = getInfoStreetSegment(street_segment_id).curvePointCount;
+    LatLon point1, point2;
+    
+    point1 = getIntersectionPosition(InfoStreetSegment(street_segment_id).from);
+    
+    for(int i=0;i<numSegments;i++){ 
+        point2 = getStreetSegmentCurvePoint(i,street_segment_id);
+        totalLength += find_distance_between_two_points(point1,point2);
+        point1 = point2;
+    }
+    
+    point2 = getIntersectionPosition(InfoStreetSegment(street_segment_id).to);
+    
+    totalLength += find_distance_between_two_points(point1,point2);
 }
 
 //Returns the length of the specified street in meters
