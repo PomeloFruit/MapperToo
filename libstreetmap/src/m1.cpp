@@ -23,7 +23,6 @@
 
 //==============================================================================
 //Global Variables
-double averageLat;
 
 
 bool load_map(std::string /*map_path*/) {
@@ -33,8 +32,7 @@ bool load_map(std::string /*map_path*/) {
     //
     //Load your map related data structures here
     //
-    
-    findAverageLatitude();
+   
     
 
     load_successful = true; //Make sure this is updated to reflect whether
@@ -46,29 +44,6 @@ bool load_map(std::string /*map_path*/) {
 void close_map() {
     //Clean-up your map related data structures here
     
-}
-
-double findAverageLatitude(){
-    double minLat = 90;
-    double maxLat = -90;
-    double intersectionLat = 0;
-    double averageLat = 0;
-    
-    int numIntersections = getNumIntersections();
-    
-    for(int i=0;i<numIntersections;i++){
-        
-        intersectionLat = getIntersectionPosition(IntersectionIndex i).lat();
-                
-        if(intersectionLat>maxLat){
-            maxLat = intersectionLat;
-        } else if (intersectionLat<minLat){
-            minLat = intersectionLat;
-        }
-    }
-    
-    averageLat = (minLat + maxLat)/2;
-    return averageLat;
 }
 
 
@@ -172,12 +147,57 @@ std::vector<unsigned> find_adjacent_intersections(unsigned intersection_id){
 
 
 
+//double findAverageLatitude(){
+//    double minLat = 90;
+//    double maxLat = -90;
+//    double intersectionLat = 0;
+//    double averageLat = 0;
+//    
+//    int numIntersections = getNumIntersections();
+//    
+//    for(int i=0;i<numIntersections;i++){
+//        
+//        intersectionLat = getIntersectionPosition(IntersectionIndex i).lat();
+//                
+//        if(intersectionLat>maxLat){
+//            maxLat = intersectionLat;
+//        } else if (intersectionLat<minLat){
+//            minLat = intersectionLat;
+//        }
+//    }
+//    
+//    averageLat = (minLat + maxLat)/2;
+//    return averageLat;
+//}
+
+
 
 
 
 //Returns the distance between two coordinates in meters
 double find_distance_between_two_points(LatLon point1, LatLon point2){
+    double pt1LatInRad = (point1.lat())*DEG_TO_RAD;
+    double pt2LatInRad = (point2.lat())*DEG_TO_RAD;
+    double pt1LonInRad = (point1.lon())*DEG_TO_RAD;
+    double pt2LonInRad = (point2.lon())*DEG_TO_RAD;
     
+    double pt1x,pt1y,pt2x,pt2y;
+    double dxSquared,dySquared,hypotenuse,distance;
+    
+    double averageLatInRad = (pt1LatInRad+pt2LatInRad)/2;
+    double projectionFactor = cos(averageLatInRad);
+    
+    pt1x = pt1LonInRad*projectionFactor;
+    pt2x = pt2LonInRad*projectionFactor;
+    pt1y = pt1LatInRad;
+    pt2y = pt2LatInRad;
+    
+    dxSquared = pow(pt2x-pt1x,2);
+    dySquared = pow(pt2y-pt1y,2);
+    hypotenuse = sqrt(dxSquared+dySquared);
+    
+    distance = EARTH_RADIUS_IN_METERS*hypotenuse;
+    return distance;
 }
 
 
