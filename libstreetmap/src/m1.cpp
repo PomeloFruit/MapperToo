@@ -82,7 +82,7 @@ void close_map() {
     closeStreetDatabase();
     
     //Clean-up your map related data structures here
-    
+    closeStreetDatabase();
 }
 
 std::vector<unsigned> find_intersection_street_segments(unsigned intersection_id){
@@ -338,7 +338,8 @@ unsigned find_closest_point_of_interest(LatLon my_position){
     int nearestPointIndex = 0;                  //contains the index of the nearest point 
     
     for (int i = 0; i < getNumPointsOfInterest()-1; i++){                                               //looping through all points of interest on the map
-        double temp = find_distance_between_two_points(my_position, getPointOfInterestPosition(i));     //finding distance between a point of interest and current position
+        double temp = find_distance_between_two_points(my_position, 
+                getPointOfInterestPosition(i));                                                         //finding distance between a point of interest and current position
         if(temp <= min){
             min = temp; 
             nearestPointIndex = i;                                                                      //storing the index of the point of interest if it is the min
@@ -349,14 +350,15 @@ unsigned find_closest_point_of_interest(LatLon my_position){
 }
 
 unsigned find_closest_intersection(LatLon my_position){
-    double min = 9999999999;                    //initializing minimum to a large number 
-    int nearestIntIndex = 0;                  //contains the index of the nearest point 
-    
-    for (int i = 0; i < getNumIntersections()-1; i++){                                               //looping through all intersections on the map
-        double temp = find_distance_between_two_points(my_position, getIntersectionPosition(i));     //finding distance between an intersection and current position
+    double min = 9999999999;                                                                            //initializing minimum to a large number 
+    int nearestIntIndex = 0;                                                                            //contains the index of the nearest point 
+        
+    for (int i = 0; i < getNumIntersections()-1; i++){                                                  //looping through all intersections on the map
+        double temp = find_distance_between_two_points(my_position, 
+                getIntersectionPosition(i));                                                            //finding distance between an intersection and current position
         if(temp <= min){
             min = temp; 
-            nearestIntIndex = i;                                                                      //storing the index of the intersection if it is the min
+            nearestIntIndex = i;                                                                        //storing the index of the intersection if it is the min
         }
     }
     return (unsigned)nearestIntIndex;   
