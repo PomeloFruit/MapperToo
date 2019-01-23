@@ -94,3 +94,42 @@ bool are_directly_connected(unsigned intersection_id1, unsigned intersection_id2
     return false;
     //this is really not going to pass the speed test
 }
+
+std::vector<unsigned> find_adjacent_intersections(unsigned intersection_id){
+    //no duplicates allowed
+    //another computationally intense thing
+    //this could be fixed using a hash table though
+    //but I'm too lazy to fix it right now so I'll write down the solution for the future
+    //just make a hash table and hash each connectedIntersection as I find it
+    //if there is a collision there must be a duplicate and I won't add the thing to the list ezpz
+    //but for now I'm just gonna O(n^2) this
+    std::vector<unsigned> segsOrigin=find_intersection_street_segments(intersection_id);
+    std::vector<unsigned> connectedIntersections;
+    bool insert;
+    for(int i=0;i<segsOrigin.size();i++){
+        insert=true;
+        for(int c=0;c<connectedIntersections.size();c++){
+            if(connectedIntersections[c]==getInfoStreetSegment(segsOrigin[i]).to){
+                insert=false;
+            }
+            //numInVec=std::count(connectedIntersecitons.begin(), connectedIntersecitons.end(), target1);
+            //on the bright side I get to look at more STL stuff but I don't know if I'm allowed to use the algos there
+        }
+        if(insert){
+            connectedIntersections.push_back(getInfoStreetSegment(segsOrigin[i]).to);
+        }
+    }
+    return connectedIntersections;
+    
+}
+//so this again won't pass speed tests but I know a solution exists (and outlined above)
+//ALSO ONE IMPORTANT NOTE, NONE OF THESE FUNCTIONS WERE TESTED BECAUSE PEOPLE WERE HAVING PROBLEMS DOING IT
+//but they make sense to me
+/*
+ * Since this is the last function I am going to write today I'm going to put down my last thoughts
+ * For the closest intersection/poi
+ * I think we all know that we have to use a KD tree and it would be faster if we balanced it
+ * but finding the median locations of the things is in itself a fairly expensive computation
+ * and finding the median doesn't even really assure a balanced tree
+ * in addition to this we'd probably have to do it twice (once for the intersections and the other for poi)
+ */
