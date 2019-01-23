@@ -21,6 +21,11 @@
 #include "m1.h"
 #include "StreetsDatabaseAPI.h"
 
+//==============================================================================
+//Global Variables
+double averageLat;
+
+
 bool load_map(std::string /*map_path*/) {
     bool load_successful = false; //Indicates whether the map has loaded 
                                   //successfully
@@ -28,7 +33,8 @@ bool load_map(std::string /*map_path*/) {
     //
     //Load your map related data structures here
     //
-
+    
+    findAverageLatitude();
     
 
     load_successful = true; //Make sure this is updated to reflect whether
@@ -40,6 +46,29 @@ bool load_map(std::string /*map_path*/) {
 void close_map() {
     //Clean-up your map related data structures here
     
+}
+
+double findAverageLatitude(){
+    double minLat = 90;
+    double maxLat = -90;
+    double intersectionLat = 0;
+    double averageLat = 0;
+    
+    int numIntersections = getNumIntersections();
+    
+    for(int i=0;i<numIntersections;i++){
+        
+        intersectionLat = getIntersectionPosition(IntersectionIndex i).lat();
+                
+        if(intersectionLat>maxLat){
+            maxLat = intersectionLat;
+        } else if (intersectionLat<minLat){
+            minLat = intersectionLat;
+        }
+    }
+    
+    averageLat = (minLat + maxLat)/2;
+    return averageLat;
 }
 
 
@@ -136,3 +165,34 @@ std::vector<unsigned> find_adjacent_intersections(unsigned intersection_id){
  * and finding the median doesn't even really assure a balanced tree
  * in addition to this we'd probably have to do it twice (once for the intersections and the other for poi)
  */
+
+
+
+
+
+
+
+
+
+
+//Returns the distance between two coordinates in meters
+double find_distance_between_two_points(LatLon point1, LatLon point2){
+    
+}
+
+
+//Returns the length of the given street segment in meters
+double find_street_segment_length(unsigned street_segment_id){
+    
+}
+
+//Returns the length of the specified street in meters
+double find_street_length(unsigned street_id){
+    
+}
+
+//Returns the travel time to drive a street segment in seconds 
+//(time = distance/speed_limit)
+double find_street_segment_travel_time(unsigned street_segment_id){
+    
+}
