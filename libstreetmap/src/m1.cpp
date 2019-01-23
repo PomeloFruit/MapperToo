@@ -20,6 +20,7 @@
  */
 #include "m1.h"
 #include "StreetsDatabaseAPI.h"
+#include <math.h>
 
 //==============================================================================
 //Global Variables
@@ -61,6 +62,7 @@ std::vector<unsigned> find_intersection_street_segments(unsigned intersection_id
     //create a global variable and make a nested for loops for nested vectors
             
 }
+
 std::vector<std::string> find_intersection_street_names(unsigned intersection_id){
     //this is supposed to return duplicate names here also so don't worry about
     std::vector<std::string> names;
@@ -129,6 +131,7 @@ std::vector<unsigned> find_adjacent_intersections(unsigned intersection_id){
     return connectedIntersections;
     
 }
+
 //so this again won't pass speed tests but I know a solution exists (and outlined above)
 //ALSO ONE IMPORTANT NOTE, NONE OF THESE FUNCTIONS WERE TESTED BECAUSE PEOPLE WERE HAVING PROBLEMS DOING IT
 //but they make sense to me
@@ -216,3 +219,34 @@ double find_street_length(unsigned street_id){
 double find_street_segment_travel_time(unsigned street_segment_id){
     
 }
+
+unsigned find_closest_point_of_interest(LatLon my_position){
+    double min = 9999999999;                    //initializing minimum to a large number 
+    int nearestPointIndex = 0;                  //contains the index of the nearest point 
+    
+    for (int i = 0; i < getNumPointsOfInterest()-1; i++){                                               //looping through all points of interest on the map
+        double temp = find_distance_between_two_points(my_position, getPointOfInterestPosition(i));     //finding distance between a point of interest and current position
+        if(temp <= min){
+            min = temp; 
+            nearestPointIndex = i;                                                                      //storing the index of the point of interest if it is the min
+        }
+    }
+    
+    return nearestPointIndex;                                                                           //return the POI index at the end
+}
+
+unsigned find_closest_intersection(LatLon my_position){
+    double min = 9999999999;                    //initializing minimum to a large number 
+    int nearestIntIndex = 0;                  //contains the index of the nearest point 
+    
+    for (int i = 0; i < getNumIntersections()-1; i++){                                               //looping through all intersections on the map
+        double temp = find_distance_between_two_points(my_position, getIntersectionPosition(i));     //finding distance between an intersection and current position
+        if(temp <= min){
+            min = temp; 
+            nearestIntIndex = i;                                                                      //storing the index of the intersection if it is the min
+        }
+    }
+    
+    return nearestIntIndex;   
+}
+
