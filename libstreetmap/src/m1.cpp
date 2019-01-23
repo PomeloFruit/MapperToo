@@ -20,6 +20,7 @@
  */
 #include "m1.h"
 #include "StreetsDatabaseAPI.h"
+#include <math.h>
 
 //==============================================================================
 //Global Variables
@@ -146,40 +147,12 @@ std::vector<unsigned> find_adjacent_intersections(unsigned intersection_id){
 
 
 
-
-//double findAverageLatitude(){
-//    double minLat = 90;
-//    double maxLat = -90;
-//    double intersectionLat = 0;
-//    double averageLat = 0;
-//    
-//    int numIntersections = getNumIntersections();
-//    
-//    for(int i=0;i<numIntersections;i++){
-//        
-//        intersectionLat = getIntersectionPosition(IntersectionIndex i).lat();
-//                
-//        if(intersectionLat>maxLat){
-//            maxLat = intersectionLat;
-//        } else if (intersectionLat<minLat){
-//            minLat = intersectionLat;
-//        }
-//    }
-//    
-//    averageLat = (minLat + maxLat)/2;
-//    return averageLat;
-//}
-
-
-
-
-
 //Returns the distance between two coordinates in meters
 double find_distance_between_two_points(LatLon point1, LatLon point2){
-    double pt1LatInRad = (point1.lat())*DEG_TO_RAD;
-    double pt2LatInRad = (point2.lat())*DEG_TO_RAD;
-    double pt1LonInRad = (point1.lon())*DEG_TO_RAD;
-    double pt2LonInRad = (point2.lon())*DEG_TO_RAD;
+    double pt1LatInRad = point1.lat()*DEG_TO_RAD;
+    double pt2LatInRad = point2.lat()*DEG_TO_RAD;
+    double pt1LonInRad = point1.lon()*DEG_TO_RAD;
+    double pt2LonInRad = point2.lon()*DEG_TO_RAD;
     
     double pt1x,pt1y,pt2x,pt2y;
     double dxSquared,dySquared,hypotenuse,distance;
@@ -208,7 +181,7 @@ double find_street_segment_length(unsigned street_segment_id){
     int numSegments = getInfoStreetSegment(street_segment_id).curvePointCount;
     LatLon point1, point2;
     
-    point1 = getIntersectionPosition(InfoStreetSegment(street_segment_id).from);
+    point1 = getIntersectionPosition(getInfoStreetSegment(street_segment_id).from);
     
     for(int i=0;i<numSegments;i++){ 
         point2 = getStreetSegmentCurvePoint(i,street_segment_id);
@@ -216,18 +189,42 @@ double find_street_segment_length(unsigned street_segment_id){
         point1 = point2;
     }
     
-    point2 = getIntersectionPosition(InfoStreetSegment(street_segment_id).to);
+    point2 = getIntersectionPosition(getInfoStreetSegment(street_segment_id).to);
     
     totalLength += find_distance_between_two_points(point1,point2);
+    return totalLength;
 }
 
-//Returns the length of the specified street in meters
-double find_street_length(unsigned street_id){
-    
-}
+////Returns the length of the specified street in meters
+//double find_street_length(unsigned street_id){
+//    std::vector<unsigned> segmentIds;
+//    int numSegments = 0;
+//    double totalLength = 0;
+//    
+//    segmentIds = find_street_street_segments(street_id);
+//    numSegments = segmentIds.size();
+//    
+//    for(int i=0;i<numSegments;i++){
+//        totalLength += find_street_segment_length(segmentIds[i]);
+//    }
+//    
+//    return totalLength;
+//}
 
 //Returns the travel time to drive a street segment in seconds 
 //(time = distance/speed_limit)
+
+//convert km/h to m/s = km/h * 1000 / 3600 = km/h / 3.6
 double find_street_segment_travel_time(unsigned street_segment_id){
+    double length, time; 
+    double speedLimitMS;
+    float speedLimitKmH;
     
+    speedLimitKmH = getInfoStreetSegment(street_segment_id);
+    speedLimitMS = speedLimitKmH/3.6;
+    
+    length = find_street_segment_length(street_segment_id);
+    time = length / speedLimitMS;
+    
+    return time;
 }
