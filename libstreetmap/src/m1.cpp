@@ -41,3 +41,19 @@ void close_map() {
     //Clean-up your map related data structures here
     
 }
+
+
+
+std::vector<unsigned> find_intersection_street_segments(unsigned intersection_id){
+    std::vector<unsigned> ids;
+    int numOfSegs=getIntersectionStreetSegmentCount(intersection_id);
+    for(int i=0;i<numOfSegs;i++){
+        ids.push_back(getIntersectionStreetSegment(i, intersection_id));
+    }
+    return ids;
+    //so as of now this or any of the other things I write won't pass the performance test
+    //but don't worry I have it all under control just like these versions
+    //to fix this one and probably all the other ones I'm about to write 
+    //create a global variable and make a nested for loops for nested vectors
+            
+}
