@@ -84,7 +84,10 @@ bool are_directly_connected(unsigned intersection_id1, unsigned intersection_id2
     for(int i=0;i<segsInt1.size();i++){
         for(int c=0;c<segsInt2.size();c++){
             if(segsInt1[i]==segsInt2[c]){
-                if(getInfoStreetSegment(segsInt1[i]).oneWay){
+                if(!getInfoStreetSegment(segsInt1[i]).oneWay){
+                    return true;
+                }
+                else if(getInfoStreetSegment(segsInt1[i]).oneWay&&(getInfoStreetSegment(segsInt1[i]).from==intersection_id1)){
                     return true;
                 }
             }
