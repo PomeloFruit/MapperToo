@@ -57,3 +57,13 @@ std::vector<unsigned> find_intersection_street_segments(unsigned intersection_id
     //create a global variable and make a nested for loops for nested vectors
             
 }
+std::vector<std::string> find_intersection_street_names(unsigned intersection_id){
+    //this is supposed to return duplicate names here also so don't worry about
+    std::vector<std::string> names;
+    int numOfSegs=getIntersectionStreetSegmentCount(intersection_id);
+    for(int i=0;i<numOfSegs;i++){
+        names.push_back(getStreetName(getIntersectionStreetSegment(i, intersection_id))); //It's gross but it works I think
+    }
+    return names;
+    //this will suffer from the same problems as the prev function
+}
