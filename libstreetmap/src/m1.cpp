@@ -22,11 +22,18 @@
 #include "StreetsDatabaseAPI.h"
 #include <unordered_map>
 #include <math.h>
+#include <algorithm>
+#include <string>
 using namespace std;
 
 //==============================================================================
 //Global Variables
+
+//===========================REQUIRES WORK========================================
 unordered_map<string,vector<int>> streetNameMap;
+//which one to use?
+unordered_map<string,int> streetNameMap;
+//what's up with this
 vector<vector<unsigned>,vector<string>> streetSegIDVector;
 
 bool load_map(std::string path/*map_path*/) {
@@ -51,10 +58,6 @@ bool load_map(std::string path/*map_path*/) {
         }
     }
 
-    
-    
-    
-    
 //    for(unsigned i=0;i<getNumIntersections();i++){
 //        streetSegIDVector[i]=vector<unsigned>;
 //        numOfSegs=getIntersectionStreetSegmentCount(i);
@@ -73,6 +76,16 @@ bool load_map(std::string path/*map_path*/) {
 //        }
 //    }
 
+    load_successful = loadStreetsDatabaseBIN(path);
+    
+    //std::vector <int> street;
+    //for(int i = 0; i < getNumStreets(); i++){
+    //    street.push_back()
+    //}
+
+    //load_successful = true; //Make sure this is updated to reflect whether
+                            //loading the map succeeded or failed
+
     return load_successful;
 }
 
@@ -86,7 +99,7 @@ void close_map() {
 }
 
 std::vector<unsigned> find_intersection_street_segments(unsigned intersection_id){
-    streetSegIDVector[intersection_id]
+    streetSegIDVector[intersection_id];
     std::vector<unsigned> segmentsIds;
     int numOfSegs=getIntersectionStreetSegmentCount(intersection_id);
     for(int i=0;i<numOfSegs;i++){
@@ -98,21 +111,6 @@ std::vector<unsigned> find_intersection_street_segments(unsigned intersection_id
     //to fix this one and probably all the other ones I'm about to write 
     //create a global variable and make a nested for loops for nested vectors
            
-}
-
-
-std::vector<unsigned> find_intersection_street_segments(unsigned intersection_id){
-    std::vector<unsigned> ids;
-    int numOfSegs=getIntersectionStreetSegmentCount(intersection_id);
-    for(int i=0;i<numOfSegs;i++){
-        ids.push_back(getIntersectionStreetSegment(i, intersection_id));
-    }
-    return ids;
-    //so as of now this or any of the other things I write won't pass the performance test
-    //but don't worry I have it all under control just like these versions
-    //to fix this one and probably all the other ones I'm about to write 
-    //create a global variable and make a nested for loops for nested vectors
-            
 }
 
 std::vector<std::string> find_intersection_street_names(unsigned intersection_id){
@@ -147,27 +145,6 @@ bool are_directly_connected(unsigned intersection_id1, unsigned intersection_id2
         }
     }
     //I'm dumb
-    //they are directly connected if there is a segment between them (only check one of them)
-    //and if the segment is one way it is only invalid if to is id1
-    //if to is intersection to return true
-    //bool returniee=false;
-    std::vector<unsigned> segsInt1=find_intersection_street_segments(intersection_id1);
-    std::vector<unsigned> segsInt2=find_intersection_street_segments(intersection_id2);
-    //so I have the two lists
-    //literally O(n^2) incoming
-    //if you have a better idea please implement it
-    for(int i=0;i<segsInt1.size();i++){
-        for(int c=0;c<segsInt2.size();c++){
-            if(segsInt1[i]==segsInt2[c]){
-                if(!getInfoStreetSegment(segsInt1[i]).oneWay){
-                    return true;
-                }
-                else if(getInfoStreetSegment(segsInt1[i]).oneWay&&(getInfoStreetSegment(segsInt1[i]).from==intersection_id1)){
-                    return true;
-                }
-            }
-        }
-    }
     return false;
     //this is really not going to pass the speed test
 }
@@ -212,26 +189,6 @@ std::vector<unsigned> find_adjacent_intersections(unsigned intersection_id){
         }
     }
     return connectedIntersections;
-    //if a way is found to make the is directly connected function faster we could just call it here
-    //or we could call this in the place of is directly connected maybe
-    std::vector<unsigned> segsOrigin=find_intersection_street_segments(intersection_id);
-    std::vector<unsigned> connectedIntersections;
-    bool insert;
-    for(int i=0;i<segsOrigin.size();i++){
-        insert=true;
-        for(int c=0;c<connectedIntersections.size();c++){
-            if(connectedIntersections[c]==getInfoStreetSegment(segsOrigin[i]).to){
-                insert=false;
-            }
-            //numInVec=std::count(connectedIntersecitons.begin(), connectedIntersecitons.end(), target1);
-            //on the bright side I get to look at more STL stuff but I don't know if I'm allowed to use the algos there
-        }
-        if(insert){
-            connectedIntersections.push_back(getInfoStreetSegment(segsOrigin[i]).to);
-        }
-    }
-    return connectedIntersections;
-   
 }
 
 //so this again won't pass speed tests but I know a solution exists (and outlined above)
@@ -246,11 +203,46 @@ std::vector<unsigned> find_adjacent_intersections(unsigned intersection_id){
  * in addition to this we'd probably have to do it twice (once for the intersections and the other for poi)
  */
 
+//===========================REQUIRES WORK========================================
+std::vector<unsigned> find_street_street_segments(unsigned street_id){
+    string streetName = getStreetName(street_id);
+    //need to create an iterator since streetNameMap.find() returns an iterator 
+    //auto streetIt = streetNameMap.find(streetName);
+    
+    //need to return the unsigned vector that the iterator is pointing to 
+    //return streetIt;  
+}
 
+std::vector<unsigned> find_all_street_intersections(unsigned street_id){
+    vector<unsigned> allSegmentsOnStreet;
+    vector<unsigned> intersectionIDs;
+    std::vector<unsigned>::iterator intersectionIt;
+    
+    unsigned intersectionID1,intersectionID2;
+    int numSegments;
+    
+    allSegmentsOnStreet = find_street_street_segments(street_id);
+    numSegments = allSegmentsOnStreet.size();
+    for(int i=0;i<numSegments;i++){
+        intersectionID1 = getInfoStreetSegment(allSegmentsOnStreet[i]).from;
+        intersectionID2 = getInfoStreetSegment(allSegmentsOnStreet[i]).to;
+        
+        intersectionIt = std::find(intersectionIDs.begin(), intersectionIDs.end(), intersectionID1);
+        
+        if(intersectionIt == intersectionIDs.end()){
+            intersectionIDs.push_back(intersectionID1);
+        }
+        
+        intersectionIt = std::find(intersectionIDs.begin(), intersectionIDs.end(), intersectionID2);
+        
+        if(intersectionIt == intersectionIDs.end()){
+            intersectionIDs.push_back(intersectionID2);
+        }
+    }
+    
+}
 
-
-
-
+//WORKS
 //Returns the distance between two coordinates in meters
 double find_distance_between_two_points(LatLon point1, LatLon point2){
     double pt1LatInRad = point1.lat()*DEG_TO_RAD;
@@ -333,11 +325,12 @@ double find_street_segment_travel_time(unsigned street_segment_id){
     return time;
 }
 
+// WORKS
 unsigned find_closest_point_of_interest(LatLon my_position){
     double min = 9999999999;                    //initializing minimum to a large number 
     int nearestPointIndex = 0;                  //contains the index of the nearest point 
     
-    for (int i = 0; i < getNumPointsOfInterest()-1; i++){                                               //looping through all points of interest on the map
+    for (int i = 0; i < getNumPointsOfInterest(); i++){                                               //looping through all points of interest on the map
         double temp = find_distance_between_two_points(my_position, 
                 getPointOfInterestPosition(i));                                                         //finding distance between a point of interest and current position
         if(temp <= min){
@@ -349,11 +342,12 @@ unsigned find_closest_point_of_interest(LatLon my_position){
     return (unsigned)nearestPointIndex;                                                                           //return the POI index at the end
 }
 
+//WORKS
 unsigned find_closest_intersection(LatLon my_position){
     double min = 9999999999;                                                                            //initializing minimum to a large number 
     int nearestIntIndex = 0;                                                                            //contains the index of the nearest point 
         
-    for (int i = 0; i < getNumIntersections()-1; i++){                                                  //looping through all intersections on the map
+    for (int i = 0; i < getNumIntersections(); i++){                                                  //looping through all intersections on the map
         double temp = find_distance_between_two_points(my_position, 
                 getIntersectionPosition(i));                                                            //finding distance between an intersection and current position
         if(temp <= min){
@@ -364,4 +358,21 @@ unsigned find_closest_intersection(LatLon my_position){
     return (unsigned)nearestIntIndex;   
 }
 
-//lmao
+//===========================REQUIRES WORK========================================
+std::vector<unsigned> find_street_ids_from_partial_street_name(std::string street_prefix){
+    std::vector<unsigned> strseetMatch; 
+    std::transform(street_prefix.begin(), street_prefix.end(), street_prefix.begin(), ::tolower); 
+    
+    for (int i = 0; i < getNumStreets(); i++){
+        std::string temp = getStreetName(i); 
+        std::string tempLowerCase = temp; 
+        std::transform(tempLowerCase.begin(), tempLowerCase.end(), tempLowerCase.begin(), ::tolower);
+        tempLowerCase = tempLowerCase.substr(0, street_prefix.length()); 
+        
+        if(street_prefix.compare(tempLowerCase) == 0){
+            //need to return all the street ids of the street segments that have the same name as the given string
+        }
+    }
+    
+    //return streetMatch; 
+}
