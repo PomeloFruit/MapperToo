@@ -1,0 +1,80 @@
+[33mcommit c45895d189302467dd07c70e9d80c4303251663f[m
+Merge: b8c7cf9 bf7ad77
+Author: Andrew <lauand16@ug223.eecg.toronto.edu>
+Date:   Wed Jan 23 14:18:09 2019 -0500
+
+    Merge branch 'master' of /groups/ECE297S/cd-029/mapper_repo
+
+[33mcommit b8c7cf971d2bf6e614bda067499e2cd0e2f6c88d[m
+Author: Andrew <lauand16@ug223.eecg.toronto.edu>
+Date:   Wed Jan 23 14:09:14 2019 -0500
+
+    added find_street_segment_travel_time functionality / untested
+
+[33mcommit bf7ad774b8ae2249b1cfd063b789064c943de4ee[m
+Author: Alan Du <alan.du@mail.utoronto.ca>
+Date:   Wed Jan 23 14:06:40 2019 -0500
+
+    Simple implementation of LoadMap
+
+[33mcommit 616a234fa6f93b56b6ff623d7b2e793db0e0dd31[m
+Author: Andrew <lauand16@ug223.eecg.toronto.edu>
+Date:   Wed Jan 23 13:40:48 2019 -0500
+
+    added find_street_segment_length functionality / untested
+
+[33mcommit 6ce8ce77a9cfba93b13afcd7bccad8cf4977009c[m
+Author: Alan Du <alan.du@mail.utoronto.ca>
+Date:   Wed Jan 23 13:30:01 2019 -0500
+
+    Merged Version - Merged the findDistanceBetweenTwoPoints function and the findClosestPOI and
+    findClosestIntersection functions
+    Still untested.
+
+[33mcommit f0dc673a3d581e6df58d93dad8be5d3425dca2d2[m
+Author: Andrew <lauand16@ug174.eecg.toronto.edu>
+Date:   Wed Jan 23 10:53:36 2019 -0500
+
+    added find_distance_between_two_points functionality
+
+[33mcommit 00f7082552fc56e7c2a0b25dbd028aa07d34ef6c[m
+Author: Andrew <lauand16@ug174.eecg.toronto.edu>
+Date:   Wed Jan 23 10:32:49 2019 -0500
+
+    created findAverageLatitude function
+
+[33mcommit d17f1e8a9800a2ff84ede9146e954c709b83e52e[m
+Author: Ian Sartor <ian.sartor@mail.utoronto.ca>
+Date:   Wed Jan 23 09:19:33 2019 -0500
+
+    bug fix function 3
+
+[33mcommit f2d60b46096b42853ea146768a27e243de2044fa[m
+Author: Ian Sartor <ian.sartor@mail.utoronto.ca>
+Date:   Tue Jan 22 21:43:34 2019 -0500
+
+    last function working, won't pass speed tests but I know how to fix (also closing comments)
+
+[33mcommit 94b0d074a79d6d1a1976427080a26adba13ffc0f[m
+Author: Ian Sartor <ian.sartor@mail.utoronto.ca>
+Date:   Tue Jan 22 20:50:19 2019 -0500
+
+    third working function(it's O(n^2) so please look at it and make it better)
+
+[33mcommit 41022a5c72ca868adde68ac88222b5a8cbb5b137[m
+Author: Ian Sartor <ian.sartor@mail.utoronto.ca>
+Date:   Tue Jan 22 20:25:40 2019 -0500
+
+    Second function working (same issues as first function)
+
+[33mcommit f4e83096b361681f47a8733971aa73957d907ec2[m
+Author: Ian Sartor <ian.sartor@mail.utoronto.ca>
+Date:   Tue Jan 22 20:04:13 2019 -0500
+
+    Working first function (performance doesn't work yet)
+
+[33mcommit c4e95f14acc03038a20aa6155ebff96e02b360ae[m
+Author: Lau  Andrew Chun Yiu <lauand16@ug209.eecg.toronto.edu>
+Date:   Mon Jan 21 12:08:44 2019 -0500
+
+    Initial Milestone 1 commit by /nfs/ug/cad/cad2/ece297s/.public_v186/bin/.scripts/ece297init for lauand16

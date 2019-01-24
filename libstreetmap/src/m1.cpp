@@ -64,6 +64,21 @@ std::vector<unsigned> find_intersection_street_segments(unsigned intersection_id
            
 }
 
+
+std::vector<unsigned> find_intersection_street_segments(unsigned intersection_id){
+    std::vector<unsigned> ids;
+    int numOfSegs=getIntersectionStreetSegmentCount(intersection_id);
+    for(int i=0;i<numOfSegs;i++){
+        ids.push_back(getIntersectionStreetSegment(i, intersection_id));
+    }
+    return ids;
+    //so as of now this or any of the other things I write won't pass the performance test
+    //but don't worry I have it all under control just like these versions
+    //to fix this one and probably all the other ones I'm about to write 
+    //create a global variable and make a nested for loops for nested vectors
+            
+}
+
 std::vector<std::string> find_intersection_street_names(unsigned intersection_id){
     //this is supposed to return duplicate names here also so don't worry about
     std::vector<std::string> names;
@@ -99,7 +114,24 @@ bool are_directly_connected(unsigned intersection_id1, unsigned intersection_id2
     //they are directly connected if there is a segment between them (only check one of them)
     //and if the segment is one way it is only invalid if to is id1
     //if to is intersection to return true
-    
+    //bool returniee=false;
+    std::vector<unsigned> segsInt1=find_intersection_street_segments(intersection_id1);
+    std::vector<unsigned> segsInt2=find_intersection_street_segments(intersection_id2);
+    //so I have the two lists
+    //literally O(n^2) incoming
+    //if you have a better idea please implement it
+    for(int i=0;i<segsInt1.size();i++){
+        for(int c=0;c<segsInt2.size();c++){
+            if(segsInt1[i]==segsInt2[c]){
+                if(!getInfoStreetSegment(segsInt1[i]).oneWay){
+                    return true;
+                }
+                else if(getInfoStreetSegment(segsInt1[i]).oneWay&&(getInfoStreetSegment(segsInt1[i]).from==intersection_id1)){
+                    return true;
+                }
+            }
+        }
+    }
     return false;
     //this is really not going to pass the speed test
 }
@@ -146,6 +178,24 @@ std::vector<unsigned> find_adjacent_intersections(unsigned intersection_id){
     return connectedIntersections;
     //if a way is found to make the is directly connected function faster we could just call it here
     //or we could call this in the place of is directly connected maybe
+    std::vector<unsigned> segsOrigin=find_intersection_street_segments(intersection_id);
+    std::vector<unsigned> connectedIntersections;
+    bool insert;
+    for(int i=0;i<segsOrigin.size();i++){
+        insert=true;
+        for(int c=0;c<connectedIntersections.size();c++){
+            if(connectedIntersections[c]==getInfoStreetSegment(segsOrigin[i]).to){
+                insert=false;
+            }
+            //numInVec=std::count(connectedIntersecitons.begin(), connectedIntersecitons.end(), target1);
+            //on the bright side I get to look at more STL stuff but I don't know if I'm allowed to use the algos there
+        }
+        if(insert){
+            connectedIntersections.push_back(getInfoStreetSegment(segsOrigin[i]).to);
+        }
+    }
+    return connectedIntersections;
+   
 }
 
 //so this again won't pass speed tests but I know a solution exists (and outlined above)
@@ -213,22 +263,22 @@ double find_street_segment_length(unsigned street_segment_id){
     return totalLength;
 }
 
-//
-////Returns the length of the specified street in meters
-//double find_street_length(unsigned street_id){
-//    std::vector<unsigned> segmentIds;
-//    int numSegments = 0;
-//    double totalLength = 0;
-//    
-//    segmentIds = find_street_street_segments(street_id);
-//    numSegments = segmentIds.size();
-//    
-//    for(int i=0;i<numSegments;i++){
-//        totalLength += find_street_segment_length(segmentIds[i]);
-//    }
-//    
-//    return totalLength;
-//}
+
+//Returns the length of the specified street in meters
+double find_street_length(unsigned street_id){
+    std::vector<unsigned> segmentIds;
+    int numSegments = 0;
+    double totalLength = 0;
+    
+    segmentIds = find_street_street_segments(street_id);
+    numSegments = segmentIds.size();
+    
+    for(int i=0;i<numSegments;i++){
+        totalLength += find_street_segment_length(segmentIds[i]);
+    }
+    
+    return totalLength;
+}
 
 //Returns the travel time to drive a street segment in seconds 
 //(time = distance/speed_limit)
