@@ -20,7 +20,9 @@
  */
 #include "m1.h"
 #include "StreetsDatabaseAPI.h"
+#include <unordered_map>
 #include <math.h>
+using namespace std;
 
 //==============================================================================
 //Global Variables
@@ -33,6 +35,16 @@ bool load_map(std::string path/*map_path*/) {
     //
     //Load your map related data structures here
     //
+    
+    string segmentName;
+    
+        
+    unordered_map<string,int> streetNameMap;
+    for(int i=0;i<getNumStreetSegments();i++){
+        segmentName = (getInfoStreetSegment(i).streetID)
+        
+        streetNameMap.insert(make_pair());
+    }
     
     load_successful = loadStreetsDatabaseBIN(path);
 
@@ -309,7 +321,7 @@ unsigned find_closest_point_of_interest(LatLon my_position){
         }
     }
     
-    return nearestPointIndex;                                                                           //return the POI index at the end
+    return (unsigned)nearestPointIndex;                                                                           //return the POI index at the end
 }
 
 unsigned find_closest_intersection(LatLon my_position){
@@ -323,8 +335,7 @@ unsigned find_closest_intersection(LatLon my_position){
             nearestIntIndex = i;                                                                      //storing the index of the intersection if it is the min
         }
     }
-    
-    return nearestIntIndex;   
+    return (unsigned)nearestIntIndex;   
 }
 
 //lmao
