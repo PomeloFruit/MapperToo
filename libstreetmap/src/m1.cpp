@@ -26,8 +26,8 @@ using namespace std;
 
 //==============================================================================
 //Global Variables
-unordered_map<string,int> streetNameMap;
-vector<vector<unsigned>,vector<string>> streetSegIDVector ;
+unordered_map<string,vector<int>> streetNameMap;
+vector<vector<unsigned>,vector<string>> streetSegIDVector;
 
 bool load_map(std::string path/*map_path*/) {
     bool load_successful = true; //Indicates whether the map has loaded 
@@ -43,27 +43,35 @@ bool load_map(std::string path/*map_path*/) {
     load_successful = loadStreetsDatabaseBIN(path);
     
     for(int i=0;i<getNumStreetSegments();i++){
-        currentSegmentName = getStreetName((getInfoStreetSegment(i).streetID);
-        streetNameMap.insert(make_pair(currentSegmentName,i));
-    }
-    
-    for(unsigned i=0;i<getNumIntersections();i++){
-        streetSegIDVector[i]=vector<unsigned>;
-        numOfSegs=getIntersectionStreetSegmentCount(i);
-        for(unsigned j=0;j<numOfSegs;i++){
-            streetSegIDVector[i].push_back(getStreetName(getIntersectionStreetSegment(j,i))
-            streetSegIDVector[i].push_back(getIntersectionStreetSegment(j, i));
+        currentSegmentName = getStreetName(getInfoStreetSegment(i).streetID);
+        if(streetNameMap.find(currentSegmentName)== streetNameMap.end()){
+            streetNameMap.insert(make_pair(currentSegmentName,vector<int>(i)));
+        } else {
+            streetNameMap[currentSegmentName].push_back(i);
         }
     }
+
     
-     for(unsigned i=0;i<getNumIntersections();i++){
-        streetSegIDVector[i]=vector<string>;
-        numOfSegs=getIntersectionStreetSegmentCount(i);
-        for(unsigned j=0;j<numOfSegs;i++){
-            streetSegIDVector[i].push_back(getStreetName(getIntersectionStreetSegment(j,i))
-            streetSegIDVector[i].push_back(getIntersectionStreetSegment(j, i));
-        }
-    }
+    
+    
+    
+//    for(unsigned i=0;i<getNumIntersections();i++){
+//        streetSegIDVector[i]=vector<unsigned>;
+//        numOfSegs=getIntersectionStreetSegmentCount(i);
+//        for(unsigned j=0;j<numOfSegs;i++){
+//            streetSegIDVector[i].push_back(getStreetName(getIntersectionStreetSegment(j,i))
+//            streetSegIDVector[i].push_back(getIntersectionStreetSegment(j, i));
+//        }
+//    }
+//    
+//     for(unsigned i=0;i<getNumIntersections();i++){
+//        streetSegIDVector[i]=vector<string>;
+//        numOfSegs=getIntersectionStreetSegmentCount(i);
+//        for(unsigned j=0;j<numOfSegs;i++){
+//            streetSegIDVector[i].push_back(getStreetName(getIntersectionStreetSegment(j,i))
+//            streetSegIDVector[i].push_back(getIntersectionStreetSegment(j, i));
+//        }
+//    }
 
     return load_successful;
 }
