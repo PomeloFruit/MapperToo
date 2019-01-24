@@ -26,7 +26,8 @@ using namespace std;
 
 //==============================================================================
 //Global Variables
-
+unordered_map<string,int> streetNameMap;
+vector<vector<unsigned>,vector<string>> streetSegIDVector ;
 
 bool load_map(std::string path/*map_path*/) {
     bool load_successful = true; //Indicates whether the map has loaded 
@@ -36,20 +37,33 @@ bool load_map(std::string path/*map_path*/) {
     //Load your map related data structures here
     //
     
-    string segmentName;
+    string currentSegmentName;
+    int numOfSegs;
+
+    load_successful = loadStreetsDatabaseBIN(path);
     
-        
-    unordered_map<string,int> streetNameMap;
     for(int i=0;i<getNumStreetSegments();i++){
-        segmentName = (getInfoStreetSegment(i).streetID)
-        
-        streetNameMap.insert(make_pair());
+        currentSegmentName = getStreetName((getInfoStreetSegment(i).streetID);
+        streetNameMap.insert(make_pair(currentSegmentName,i));
     }
     
-    load_successful = loadStreetsDatabaseBIN(path);
-
-    //load_successful = true; //Make sure this is updated to reflect whether
-                            //loading the map succeeded or failed
+    for(unsigned i=0;i<getNumIntersections();i++){
+        streetSegIDVector[i]=vector<unsigned>;
+        numOfSegs=getIntersectionStreetSegmentCount(i);
+        for(unsigned j=0;j<numOfSegs;i++){
+            streetSegIDVector[i].push_back(getStreetName(getIntersectionStreetSegment(j,i))
+            streetSegIDVector[i].push_back(getIntersectionStreetSegment(j, i));
+        }
+    }
+    
+     for(unsigned i=0;i<getNumIntersections();i++){
+        streetSegIDVector[i]=vector<string>;
+        numOfSegs=getIntersectionStreetSegmentCount(i);
+        for(unsigned j=0;j<numOfSegs;i++){
+            streetSegIDVector[i].push_back(getStreetName(getIntersectionStreetSegment(j,i))
+            streetSegIDVector[i].push_back(getIntersectionStreetSegment(j, i));
+        }
+    }
 
     return load_successful;
 }
@@ -58,12 +72,14 @@ void close_map() {
 
     //so according to this I just don't have the right street segments for some of these
     closeStreetDatabase();
+    
     //Clean-up your map related data structures here
     
 }
 
 std::vector<unsigned> find_intersection_street_segments(unsigned intersection_id){
-    std::vector<unsigned> ids;
+    streetSegIDVector[intersection_id]
+    std::vector<unsigned> segmentsIds;
     int numOfSegs=getIntersectionStreetSegmentCount(intersection_id);
     for(int i=0;i<numOfSegs;i++){
         ids.push_back(getIntersectionStreetSegment(i, intersection_id));
