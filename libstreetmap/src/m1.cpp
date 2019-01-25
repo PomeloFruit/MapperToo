@@ -46,22 +46,23 @@ bool load_map(std::string path/*map_path*/) {
         currentSegmentName = getStreetName(getInfoStreetSegment(i).streetID);
         streetNameMap.insert(make_pair(currentSegmentName,i));
     }
-    
+    std::vector<unsigned> intersectionIds;
+    std::vector<string> segNames;
     for(int i=0;i<getNumIntersections();i++){
         numOfSegs=getIntersectionStreetSegmentCount(i);
-        std::vector<unsigned> intersectionIds;
-        std::vector<string> segNames;
+        segNames.clear();
+        intersectionIds.clear();
         //make new!!!!!!!!!!!!!
         streetSegIDVector.push_back(intersectionIds);
         streetSegNameVector.push_back(segNames);
         for(int j=0;j<numOfSegs;j++){
-            cout<<"L1"<<'\n';
+            //cout<<"L1"<<'\n';
             std::string name=getStreetName((getInfoStreetSegment(getIntersectionStreetSegment(j, i))).streetID);
-            cout<<"L2"<<'\n';
+            //cout<<"L2"<<'\n';
             streetSegNameVector[i].push_back(name);
-            cout<<"L3"<<'\n';
+            //cout<<"L3"<<'\n';
             streetSegIDVector[i].push_back(getIntersectionStreetSegment(j, i));
-            cout<<"L4"<<'\n';
+            //cout<<"L4"<<'\n';
         }
     }
     
