@@ -55,9 +55,13 @@ bool load_map(std::string path/*map_path*/) {
         streetSegIDVector.push_back(intersectionIds);
         streetSegNameVector.push_back(segNames);
         for(int j=0;j<numOfSegs;j++){
+            cout<<"L1"<<'\n';
             std::string name=getStreetName((getInfoStreetSegment(getIntersectionStreetSegment(j, i))).streetID);
+            cout<<"L2"<<'\n';
             streetSegNameVector[i].push_back(name);
+            cout<<"L3"<<'\n';
             streetSegIDVector[i].push_back(getIntersectionStreetSegment(j, i));
+            cout<<"L4"<<'\n';
         }
     }
     
