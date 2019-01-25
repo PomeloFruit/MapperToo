@@ -31,10 +31,8 @@ using namespace std;
 
 //===========================REQUIRES WORK========================================
 unordered_map<string,vector<int>> streetNameMap;
-//which one to use?
-unordered_map<string,int> streetNameMap;
 //what's up with this
-vector<vector<unsigned>,vector<string>> streetSegIDVector;
+//vector<vector<unsigned>,vector<string>> streetSegIDVector;
 
 bool load_map(std::string path/*map_path*/) {
     bool load_successful = true; //Indicates whether the map has loaded 
@@ -99,8 +97,8 @@ void close_map() {
 }
 
 std::vector<unsigned> find_intersection_street_segments(unsigned intersection_id){
-    streetSegIDVector[intersection_id];
-    std::vector<unsigned> segmentsIds;
+    //streetSegIDVector[intersection_id];
+    std::vector<unsigned> ids;
     int numOfSegs=getIntersectionStreetSegmentCount(intersection_id);
     for(int i=0;i<numOfSegs;i++){
         ids.push_back(getIntersectionStreetSegment(i, intersection_id));
@@ -339,7 +337,7 @@ unsigned find_closest_point_of_interest(LatLon my_position){
         }
     }
     
-    return (unsigned)nearestPointIndex;                                                                           //return the POI index at the end
+    return unsigned(nearestPointIndex);                                                                           //return the POI index at the end
 }
 
 //WORKS
@@ -355,7 +353,7 @@ unsigned find_closest_intersection(LatLon my_position){
             nearestIntIndex = i;                                                                        //storing the index of the intersection if it is the min
         }
     }
-    return (unsigned)nearestIntIndex;   
+    return unsigned(nearestIntIndex);   
 }
 
 //===========================REQUIRES WORK========================================
