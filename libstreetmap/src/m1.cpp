@@ -46,6 +46,9 @@ bool load_map(std::string path/*map_path*/) {
         currentSegmentName = getStreetName(getInfoStreetSegment(i).streetID);
         streetNameMap.insert(make_pair(currentSegmentName,i));
     }
+    
+    
+    
     std::vector<unsigned> intersectionIds;
     std::vector<string> segNames;
     for(int i=0;i<getNumIntersections();i++){
@@ -53,20 +56,24 @@ bool load_map(std::string path/*map_path*/) {
         segNames.clear();
         intersectionIds.clear();
         //make new!!!!!!!!!!!!!
-        streetSegIDVector.push_back(intersectionIds);
-        streetSegNameVector.push_back(segNames);
         for(int j=0;j<numOfSegs;j++){
             //cout<<"L1"<<'\n';
-            std::string name=getStreetName((getInfoStreetSegment(getIntersectionStreetSegment(j, i))).streetID);
+            //std::string name=getStreetName((getInfoStreetSegment(getIntersectionStreetSegment(j, i))).streetID);
             //cout<<"L2"<<'\n';
-            streetSegNameVector[i].push_back(name);
-            //cout<<"L3"<<'\n';
-            streetSegIDVector[i].push_back(getIntersectionStreetSegment(j, i));
+            segNames.push_back(getStreetName((getInfoStreetSegment(getIntersectionStreetSegment(j, i))).streetID));
+            intersectionIds.push_back(getIntersectionStreetSegment(j, i));
             //cout<<"L4"<<'\n';
         }
+        streetSegNameVector.push_back(segNames);
+            //cout<<"L3"<<'\n';
+        streetSegIDVector.push_back(intersectionIds);
+       
+//                   streetSegNameVector[i].push_back(getStreetName((getInfoStreetSegment(getIntersectionStreetSegment(j, i))).streetID));
+//            //cout<<"L3"<<'\n';
+//            streetSegIDVector[i].push_back(getIntersectionStreetSegment(j, i));
     }
     
-
+    cout<<getIntersectionStreetSegmentCount(85859);
     return load_successful;
 }
 
@@ -92,6 +99,12 @@ std::vector<unsigned> find_intersection_street_segments(unsigned intersection_id
 
 
 std::vector<std::string> find_intersection_street_names(unsigned intersection_id){
+    //std::vector<std::string> names;
+    //int numSegs=getIntersectionStreetSegmentCount(intersection_id);
+    //for(int i=0;i<numSegs;i++){
+    //    names.push_back(getStreetName((getInfoStreetSegment(getIntersectionStreetSegment(i, intersection_id))).streetID));
+    //}
+    //return names;
     return streetSegNameVector[intersection_id];
     //so as of now this or any of the other things I write won't pass the performance test
     //but don't worry I have it all under control just like these versions
