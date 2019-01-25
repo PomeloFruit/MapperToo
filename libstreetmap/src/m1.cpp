@@ -228,13 +228,13 @@ std::vector<unsigned> find_adjacent_intersections(unsigned intersection_id){
  * in addition to this we'd probably have to do it twice (once for the intersections and the other for poi)
  */
 
-
+//we gotta fix these two below me c:
 std::vector<unsigned> find_street_street_segments(unsigned street_id){
     std::string streetName = getStreetName(street_id);
     return streetNameMap[streetName]; 
       
 }
-
+//this is probably the easier fix c:
 std::vector<unsigned> find_all_street_intersections(unsigned street_id){
     std::vector<unsigned> allSegmentsOnStreet;
     std::vector<unsigned> intersectionIDs;
@@ -315,20 +315,20 @@ double find_street_segment_length(unsigned street_segment_id){
 
 
 //Returns the length of the specified street in meters
-//double find_street_length(unsigned street_id){
-//    std::vector<unsigned> segmentIds;
-//    int numSegments = 0;
-//    double totalLength = 0;
-//    
-//    segmentIds = find_street_street_segments(street_id);
-//    numSegments = segmentIds.size();
-//    
-//    for(int i=0;i<numSegments;i++){
-//        totalLength += find_street_segment_length(segmentIds[i]);
-//    }
-//    
-//    return totalLength;
-//}
+double find_street_length(unsigned street_id){
+    std::vector<unsigned> segmentIds;
+    int numSegments = 0;
+    double totalLength = 0;
+    
+    segmentIds = find_street_street_segments(street_id);
+    numSegments = segmentIds.size();
+    
+    for(int i=0;i<numSegments;i++){
+        totalLength += find_street_segment_length(segmentIds[i]);
+    }
+    
+    return totalLength;
+}
 
 //Returns the travel time to drive a street segment in seconds 
 //(time = distance/speed_limit)
@@ -377,6 +377,11 @@ unsigned find_closest_intersection(LatLon my_position){
         }
     }
     return unsigned(nearestIntIndex);   
+}
+
+std::vector<unsigned> find_intersection_ids_from_street_ids(unsigned street_id1, unsigned street_id2){
+    std::vector<unsigned> streetIDMatch; 
+    return streetIDMatch;
 }
 
 
