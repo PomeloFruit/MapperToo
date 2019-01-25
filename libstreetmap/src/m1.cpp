@@ -27,8 +27,8 @@ using namespace std;
 //==============================================================================
 //Global Variables
 unordered_map<string,int> streetNameMap;
-vector<vector<unsigned>,vector<string>> streetSegIDVector ;
-
+vector<vector<unsigned>> streetSegIDVector;
+vector<vector<string>> streetSegNameVector;
 bool load_map(std::string path/*map_path*/) {
     bool load_successful = true; //Indicates whether the map has loaded 
                                   //successfully
@@ -43,30 +43,28 @@ bool load_map(std::string path/*map_path*/) {
     load_successful = loadStreetsDatabaseBIN(path);
     
     for(int i=0;i<getNumStreetSegments();i++){
-        currentSegmentName = getStreetName((getInfoStreetSegment(i).streetID);
+        currentSegmentName = getStreetName(getInfoStreetSegment(i).streetID);
         streetNameMap.insert(make_pair(currentSegmentName,i));
     }
     
-    for(unsigned i=0;i<getNumIntersections();i++){
-        streetSegIDVector[i]=vector<unsigned>;
+    for(int i=0;i<getNumIntersections();i++){
         numOfSegs=getIntersectionStreetSegmentCount(i);
-        for(unsigned j=0;j<numOfSegs;i++){
-            streetSegIDVector[i].push_back(getStreetName(getIntersectionStreetSegment(j,i))
+        std::vector<unsigned> intersectionIds;
+        std::vector<string> segNames;
+        //make new!!!!!!!!!!!!!
+        streetSegIDVector.push_back(intersectionIds);
+        streetSegNameVector.push_back(segNames);
+        for(int j=0;j<numOfSegs;j++){
+            std::string name=getStreetName((getInfoStreetSegment(getIntersectionStreetSegment(j, i))).streetID);
+            streetSegNameVector[i].push_back(name);
             streetSegIDVector[i].push_back(getIntersectionStreetSegment(j, i));
         }
     }
     
-     for(unsigned i=0;i<getNumIntersections();i++){
-        streetSegIDVector[i]=vector<string>;
-        numOfSegs=getIntersectionStreetSegmentCount(i);
-        for(unsigned j=0;j<numOfSegs;i++){
-            streetSegIDVector[i].push_back(getStreetName(getIntersectionStreetSegment(j,i))
-            streetSegIDVector[i].push_back(getIntersectionStreetSegment(j, i));
-        }
-    }
 
     return load_successful;
 }
+
 
 void close_map() {
 
@@ -77,14 +75,9 @@ void close_map() {
     
 }
 
+
 std::vector<unsigned> find_intersection_street_segments(unsigned intersection_id){
-    streetSegIDVector[intersection_id]
-    std::vector<unsigned> segmentsIds;
-    int numOfSegs=getIntersectionStreetSegmentCount(intersection_id);
-    for(int i=0;i<numOfSegs;i++){
-        ids.push_back(getIntersectionStreetSegment(i, intersection_id));
-    }
-    return ids;
+    return streetSegIDVector[intersection_id];
     //so as of now this or any of the other things I write won't pass the performance test
     //but don't worry I have it all under control just like these versions
     //to fix this one and probably all the other ones I'm about to write 
@@ -93,30 +86,14 @@ std::vector<unsigned> find_intersection_street_segments(unsigned intersection_id
 }
 
 
-std::vector<unsigned> find_intersection_street_segments(unsigned intersection_id){
-    std::vector<unsigned> ids;
-    int numOfSegs=getIntersectionStreetSegmentCount(intersection_id);
-    for(int i=0;i<numOfSegs;i++){
-        ids.push_back(getIntersectionStreetSegment(i, intersection_id));
-    }
-    return ids;
+std::vector<std::string> find_intersection_street_names(unsigned intersection_id){
+    return streetSegNameVector[intersection_id];
     //so as of now this or any of the other things I write won't pass the performance test
     //but don't worry I have it all under control just like these versions
     //to fix this one and probably all the other ones I'm about to write 
     //create a global variable and make a nested for loops for nested vectors
-            
 }
 
-std::vector<std::string> find_intersection_street_names(unsigned intersection_id){
-    //this is supposed to return duplicate names here also so don't worry about
-    std::vector<std::string> names;
-    int numOfSegs=getIntersectionStreetSegmentCount(intersection_id);
-    for(int i=0;i<numOfSegs;i++){
-        names.push_back(getStreetName(getIntersectionStreetSegment(i, intersection_id))); //It's gross but it works I think
-    }
-    return names;
-    //this will suffer from the same problems as the prev function
-}
 
 bool are_directly_connected(unsigned intersection_id1, unsigned intersection_id2){
     //so the corner case here is if it has curvepoints or not I think??
@@ -127,7 +104,9 @@ bool are_directly_connected(unsigned intersection_id1, unsigned intersection_id2
     //and finally this would be easier if I had made the global variable first but oh well
     //NOW O(n)
     std::vector<unsigned> segsInt1=find_intersection_street_segments(intersection_id1);
-
+    if(intersection_id1==intersection_id2){
+        return true;
+    }
     for(unsigned i=0;i<segsInt1.size();i++){
         if((unsigned(getInfoStreetSegment(segsInt1[i]).to)==intersection_id2)){
             return true;
@@ -138,31 +117,10 @@ bool are_directly_connected(unsigned intersection_id1, unsigned intersection_id2
             }
         }
     }
-    //I'm dumb
-    //they are directly connected if there is a segment between them (only check one of them)
-    //and if the segment is one way it is only invalid if to is id1
-    //if to is intersection to return true
-    //bool returniee=false;
-    std::vector<unsigned> segsInt1=find_intersection_street_segments(intersection_id1);
-    std::vector<unsigned> segsInt2=find_intersection_street_segments(intersection_id2);
-    //so I have the two lists
-    //literally O(n^2) incoming
-    //if you have a better idea please implement it
-    for(int i=0;i<segsInt1.size();i++){
-        for(int c=0;c<segsInt2.size();c++){
-            if(segsInt1[i]==segsInt2[c]){
-                if(!getInfoStreetSegment(segsInt1[i]).oneWay){
-                    return true;
-                }
-                else if(getInfoStreetSegment(segsInt1[i]).oneWay&&(getInfoStreetSegment(segsInt1[i]).from==intersection_id1)){
-                    return true;
-                }
-            }
-        }
-    }
     return false;
     //this is really not going to pass the speed test
 }
+
 
 std::vector<unsigned> find_adjacent_intersections(unsigned intersection_id){
     //no duplicates allowed
@@ -204,26 +162,6 @@ std::vector<unsigned> find_adjacent_intersections(unsigned intersection_id){
         }
     }
     return connectedIntersections;
-    //if a way is found to make the is directly connected function faster we could just call it here
-    //or we could call this in the place of is directly connected maybe
-    std::vector<unsigned> segsOrigin=find_intersection_street_segments(intersection_id);
-    std::vector<unsigned> connectedIntersections;
-    bool insert;
-    for(int i=0;i<segsOrigin.size();i++){
-        insert=true;
-        for(int c=0;c<connectedIntersections.size();c++){
-            if(connectedIntersections[c]==getInfoStreetSegment(segsOrigin[i]).to){
-                insert=false;
-            }
-            //numInVec=std::count(connectedIntersecitons.begin(), connectedIntersecitons.end(), target1);
-            //on the bright side I get to look at more STL stuff but I don't know if I'm allowed to use the algos there
-        }
-        if(insert){
-            connectedIntersections.push_back(getInfoStreetSegment(segsOrigin[i]).to);
-        }
-    }
-    return connectedIntersections;
-   
 }
 
 //so this again won't pass speed tests but I know a solution exists (and outlined above)
@@ -293,20 +231,20 @@ double find_street_segment_length(unsigned street_segment_id){
 
 
 //Returns the length of the specified street in meters
-double find_street_length(unsigned street_id){
-    std::vector<unsigned> segmentIds;
-    int numSegments = 0;
-    double totalLength = 0;
-    
-    segmentIds = find_street_street_segments(street_id);
-    numSegments = segmentIds.size();
-    
-    for(int i=0;i<numSegments;i++){
-        totalLength += find_street_segment_length(segmentIds[i]);
-    }
-    
-    return totalLength;
-}
+//double find_street_length(unsigned street_id){
+//    std::vector<unsigned> segmentIds;
+//    int numSegments = 0;
+//    double totalLength = 0;
+//    
+//    segmentIds = find_street_street_segments(street_id);
+//    numSegments = segmentIds.size();
+//    
+//    for(int i=0;i<numSegments;i++){
+//        totalLength += find_street_segment_length(segmentIds[i]);
+//    }
+//    
+//    return totalLength;
+//}
 
 //Returns the travel time to drive a street segment in seconds 
 //(time = distance/speed_limit)
