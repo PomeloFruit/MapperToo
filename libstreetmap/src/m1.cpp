@@ -24,13 +24,12 @@
 #include <math.h>
 #include <algorithm>
 #include <string>
-using namespace std;
 
 //==============================================================================
 //Global Variables
 
 //===========================REQUIRES WORK========================================
-unordered_map<string,vector<int>> streetNameMap;
+std::unordered_map<std::string, std::vector<unsigned>> streetNameMap;
 //what's up with this
 //vector<vector<unsigned>,vector<string>> streetSegIDVector;
 
@@ -42,7 +41,7 @@ bool load_map(std::string path/*map_path*/) {
     //Load your map related data structures here
     //
     
-    string currentSegmentName;
+    std::string currentSegmentName;
     int numOfSegs;
 
     load_successful = loadStreetsDatabaseBIN(path);
@@ -50,9 +49,9 @@ bool load_map(std::string path/*map_path*/) {
     for(int i=0;i<getNumStreetSegments();i++){
         currentSegmentName = getStreetName(getInfoStreetSegment(i).streetID);
         if(streetNameMap.find(currentSegmentName)== streetNameMap.end()){
-            streetNameMap.insert(make_pair(currentSegmentName,vector<int>(i)));
+            streetNameMap.insert(std::make_pair(currentSegmentName,std::vector<unsigned>(unsigned(i))));
         } else {
-            streetNameMap[currentSegmentName].push_back(i);
+            streetNameMap[currentSegmentName].push_back(unsigned(i));
         }
     }
 
@@ -90,8 +89,6 @@ bool load_map(std::string path/*map_path*/) {
 void close_map() {
 
     //so according to this I just don't have the right street segments for some of these
-    closeStreetDatabase();
-    
     //Clean-up your map related data structures here
     closeStreetDatabase();
 }
@@ -201,19 +198,16 @@ std::vector<unsigned> find_adjacent_intersections(unsigned intersection_id){
  * in addition to this we'd probably have to do it twice (once for the intersections and the other for poi)
  */
 
-//===========================REQUIRES WORK========================================
+
 std::vector<unsigned> find_street_street_segments(unsigned street_id){
-    string streetName = getStreetName(street_id);
-    //need to create an iterator since streetNameMap.find() returns an iterator 
-    //auto streetIt = streetNameMap.find(streetName);
-    
-    //need to return the unsigned vector that the iterator is pointing to 
-    //return streetIt;  
+    std::string streetName = getStreetName(street_id);
+    return streetNameMap[streetName]; 
+      
 }
 
 std::vector<unsigned> find_all_street_intersections(unsigned street_id){
-    vector<unsigned> allSegmentsOnStreet;
-    vector<unsigned> intersectionIDs;
+    std::vector<unsigned> allSegmentsOnStreet;
+    std::vector<unsigned> intersectionIDs;
     std::vector<unsigned>::iterator intersectionIt;
     
     unsigned intersectionID1,intersectionID2;
@@ -237,7 +231,7 @@ std::vector<unsigned> find_all_street_intersections(unsigned street_id){
             intersectionIDs.push_back(intersectionID2);
         }
     }
-    
+    return intersectionIDs;
 }
 
 //WORKS
@@ -329,8 +323,7 @@ unsigned find_closest_point_of_interest(LatLon my_position){
     int nearestPointIndex = 0;                  //contains the index of the nearest point 
     
     for (int i = 0; i < getNumPointsOfInterest(); i++){                                               //looping through all points of interest on the map
-        double temp = find_distance_between_two_points(my_position, 
-                getPointOfInterestPosition(i));                                                         //finding distance between a point of interest and current position
+        double temp = find_distance_between_two_points(my_position, getPointOfInterestPosition(i));   //finding distance between a point of interest and current position
         if(temp <= min){
             min = temp; 
             nearestPointIndex = i;                                                                      //storing the index of the point of interest if it is the min
@@ -356,21 +349,21 @@ unsigned find_closest_intersection(LatLon my_position){
     return unsigned(nearestIntIndex);   
 }
 
-//===========================REQUIRES WORK========================================
+
 std::vector<unsigned> find_street_ids_from_partial_street_name(std::string street_prefix){
-    std::vector<unsigned> strseetMatch; 
+    std::vector<unsigned> streetIDMatch; 
     std::transform(street_prefix.begin(), street_prefix.end(), street_prefix.begin(), ::tolower); 
     
     for (int i = 0; i < getNumStreets(); i++){
-        std::string temp = getStreetName(i); 
-        std::string tempLowerCase = temp; 
+        std::string tempLowerCase = getStreetName(i); 
         std::transform(tempLowerCase.begin(), tempLowerCase.end(), tempLowerCase.begin(), ::tolower);
         tempLowerCase = tempLowerCase.substr(0, street_prefix.length()); 
         
         if(street_prefix.compare(tempLowerCase) == 0){
+            streetIDMatch.push_back(unsigned(i)); 
             //need to return all the street ids of the street segments that have the same name as the given string
         }
     }
     
-    //return streetMatch; 
+    return streetIDMatch; 
 }
