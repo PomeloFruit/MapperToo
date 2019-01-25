@@ -28,20 +28,10 @@
 //==============================================================================
 //Global Variables
 
-<<<<<<< HEAD
-
-=======
->>>>>>> 6d4f47de70c8d25e065d6fe6fa47605b762bdc99
 //===========================REQUIRES WORK========================================
-std::unordered_map<std::string, std::vector<unsigned>> streetNameMap;
-//what's up with this
-//vector<vector<unsigned>,vector<string>> streetSegIDVector;
-<<<<<<< HEAD
-
+std::map<int, std::vector<unsigned>> streetNameMap;
 std::vector<std::vector<unsigned>> streetSegIDVector;
 std::vector<std::vector<std::string>> streetSegNameVector;
-=======
->>>>>>> 6d4f47de70c8d25e065d6fe6fa47605b762bdc99
 
 bool load_map(std::string path/*map_path*/) {
     bool load_successful = true; //Indicates whether the map has loaded 
@@ -50,22 +40,22 @@ bool load_map(std::string path/*map_path*/) {
     //
     //Load your map related data structures here
     //
-    
-    std::string currentSegmentName;
+
+    int currentSegmentID;
     int numOfSegs;
 
     load_successful = loadStreetsDatabaseBIN(path);
-    
+
     for(int i=0;i<getNumStreetSegments();i++){
-        currentSegmentName = getStreetName(getInfoStreetSegment(i).streetID);
-        if(streetNameMap.find(currentSegmentName)== streetNameMap.end()){
-            streetNameMap.insert(std::make_pair(currentSegmentName,std::vector<unsigned>(unsigned(i))));
-        } else {
-            streetNameMap[currentSegmentName].push_back(unsigned(i));
-<<<<<<< HEAD
-            streetNameMap.insert(std::make_pair(currentSegmentName,i));
+        currentSegmentID = getInfoStreetSegment(i).streetID;
+        if(streetNameMap.find(currentSegmentID)== streetNameMap.end()){
+            streetNameMap.insert(std::make_pair(currentSegmentID,std::vector<unsigned>(unsigned(i))));
+        } else  {
+            streetNameMap[currentSegmentID].push_back(unsigned(i));
+            streetNameMap.insert(std::make_pair(currentSegmentID,i));
         }
     }
+
     std::vector<unsigned> intersectionIds;
     std::vector<std::string> segNames;
     for(int i=0;i<getNumIntersections();i++){
@@ -84,14 +74,13 @@ bool load_map(std::string path/*map_path*/) {
         streetSegNameVector.push_back(segNames);
             //cout<<"L3"<<'\n';
         streetSegIDVector.push_back(intersectionIds);
-       
 //                   streetSegNameVector[i].push_back(getStreetName((getInfoStreetSegment(getIntersectionStreetSegment(j, i))).streetID));
 //            //cout<<"L3"<<'\n';
 //            streetSegIDVector[i].push_back(getIntersectionStreetSegment(j, i));
     }
-=======
-        }
-    }
+
+//        }
+//    }
 
 //    for(unsigned i=0;i<getNumIntersections();i++){
 //        streetSegIDVector[i]=vector<unsigned>;
@@ -111,7 +100,7 @@ bool load_map(std::string path/*map_path*/) {
 //        }
 //    }
 
-    load_successful = loadStreetsDatabaseBIN(path);
+//    load_successful = loadStreetsDatabaseBIN(path);
     
     //std::vector <int> street;
     //for(int i = 0; i < getNumStreets(); i++){
@@ -120,7 +109,6 @@ bool load_map(std::string path/*map_path*/) {
 
     //load_successful = true; //Make sure this is updated to reflect whether
                             //loading the map succeeded or failed
->>>>>>> 6d4f47de70c8d25e065d6fe6fa47605b762bdc99
 
 //    for(unsigned i=0;i<getNumIntersections();i++){
 //        streetSegIDVector[i]=vector<unsigned>;
@@ -159,7 +147,6 @@ void close_map() {
     //so according to this I just don't have the right street segments for some of these
     //Clean-up your map related data structures here
     closeStreetDatabase();
-<<<<<<< HEAD
 }
 
 
@@ -176,10 +163,9 @@ std::vector<unsigned> find_intersection_street_segments(unsigned intersection_id
 
 std::vector<std::string> find_intersection_street_names(unsigned intersection_id){
     return streetSegNameVector[intersection_id];
-=======
 }
 
-std::vector<unsigned> find_intersection_street_segments(unsigned intersection_id){
+/*std::vector<unsigned> find_intersection_street_segments(unsigned intersection_id){
     //streetSegIDVector[intersection_id];
     std::vector<unsigned> ids;
     int numOfSegs=getIntersectionStreetSegmentCount(intersection_id);
@@ -187,25 +173,18 @@ std::vector<unsigned> find_intersection_street_segments(unsigned intersection_id
         ids.push_back(getIntersectionStreetSegment(i, intersection_id));
     }
     return ids;
->>>>>>> 6d4f47de70c8d25e065d6fe6fa47605b762bdc99
-    //so as of now this or any of the other things I write won't pass the performance test
+   //so as of now this or any of the other things I write won't pass the performance test
     //but don't worry I have it all under control just like these versions
     //to fix this one and probably all the other ones I'm about to write 
     //create a global variable and make a nested for loops for nested vectors
-<<<<<<< HEAD
-=======
-           
-}
->>>>>>> 6d4f47de70c8d25e065d6fe6fa47605b762bdc99
-
-}
+}*/
 
 
 bool are_directly_connected(unsigned intersection_id1, unsigned intersection_id2){
     //so the corner case here is if it has curvepoints or not I think??
     //but basically do they share a road and if so is the road one way
     //is an intersection always connected to itself? or does a street seg need to curve back into itself?
-    //**read above unless I get answers later
+    //read above unless I get answers later
     //if an intersection is always connected to itself I can just return true if they are =
     //and finally this would be easier if I had made the global variable first but oh well
     //NOW O(n)
@@ -225,10 +204,6 @@ bool are_directly_connected(unsigned intersection_id1, unsigned intersection_id2
     }
 
     //I'm dumb
-<<<<<<< HEAD
-
-=======
->>>>>>> 6d4f47de70c8d25e065d6fe6fa47605b762bdc99
     return false;
     //this is really not going to pass the speed test
 }
@@ -324,19 +299,16 @@ std::vector<unsigned> find_all_street_intersections(unsigned street_id){
     return intersectionIDs;
 }
 
-<<<<<<< HEAD
-=======
-std::vector<unsigned> find_street_street_segments(unsigned street_id){
+/*std::vector<unsigned> find_street_street_segments(unsigned street_id){
     std::string streetName = getStreetName(street_id);
     return streetNameMap[streetName]; 
-      
-}
+}*/
 
+/*
 std::vector<unsigned> find_all_street_intersections(unsigned street_id){
     std::vector<unsigned> allSegmentsOnStreet;
     std::vector<unsigned> intersectionIDs;
     std::vector<unsigned>::iterator intersectionIt;
-    
     unsigned intersectionID1,intersectionID2;
     int numSegments;
     
@@ -360,8 +332,7 @@ std::vector<unsigned> find_all_street_intersections(unsigned street_id){
     }
     return intersectionIDs;
 }
-
->>>>>>> 6d4f47de70c8d25e065d6fe6fa47605b762bdc99
+*/
 //WORKS
 //Returns the distance between two coordinates in meters
 double find_distance_between_two_points(LatLon point1, LatLon point2){
@@ -475,14 +446,12 @@ unsigned find_closest_intersection(LatLon my_position){
         }
     }
     return unsigned(nearestIntIndex);   
-<<<<<<< HEAD
+
 }
 
 std::vector<unsigned> find_intersection_ids_from_street_ids(unsigned street_id1, unsigned street_id2){
     std::vector<unsigned> streetIDMatch; 
     return streetIDMatch;
-=======
->>>>>>> 6d4f47de70c8d25e065d6fe6fa47605b762bdc99
 }
 
 
@@ -503,3 +472,4 @@ std::vector<unsigned> find_street_ids_from_partial_street_name(std::string stree
     
     return streetIDMatch; 
 }
+
