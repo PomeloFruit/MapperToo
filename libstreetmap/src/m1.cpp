@@ -20,7 +20,7 @@
  */
 #include "m1.h"
 #include "StreetsDatabaseAPI.h"
-#include <unordered_map>
+#include <map>
 #include <math.h>
 #include <algorithm>
 #include <string>
@@ -41,19 +41,21 @@ bool load_map(std::string path/*map_path*/) {
     //Load your map related data structures here
     //
 
-    int currentSegmentID;
+    int segmentStreetID;
     int numOfSegs;
 
     load_successful = loadStreetsDatabaseBIN(path);
 
     for(int i=0;i<getNumStreetSegments();i++){
-        currentSegmentID = getInfoStreetSegment(i).streetID;
-        if(streetNameMap.find(currentSegmentID)== streetNameMap.end()){
-            streetNameMap.insert(std::make_pair(currentSegmentID,std::vector<unsigned>(unsigned(i))));
-        } else  {
-            streetNameMap[currentSegmentID].push_back(unsigned(i));
-            streetNameMap.insert(std::make_pair(currentSegmentID,i));
-        }
+        segmentStreetID = getInfoStreetSegment(i).streetID;
+        if(streetNameMap.count(segmentStreetID)== 0){
+            streetNameMap.insert(std::make_pair(segmentStreetID,std::vector<unsigned>()));
+	    streetNameMap[segmentStreetID].clear();
+	}
+	streetNameMap[segmentStreetID].push_back(unsigned(i));
+    }
+    if(streetNameMap.size()!=(getNumStreets()-1)){
+	load_successful = false;
     }
 
     std::vector<unsigned> intersectionIds;
@@ -265,9 +267,7 @@ std::vector<unsigned> find_adjacent_intersections(unsigned intersection_id){
 
 //we gotta fix these two below me c:
 std::vector<unsigned> find_street_street_segments(unsigned street_id){
-    std::string streetName = getStreetName(street_id);
-    return streetNameMap[streetName]; 
-      
+    return streetNameMap[street_id];
 }
 //this is probably the easier fix c:
 std::vector<unsigned> find_all_street_intersections(unsigned street_id){
@@ -360,25 +360,22 @@ std::vector<unsigned> find_all_street_intersections(unsigned street_id){
 double find_distance_between_two_points(LatLon point1, LatLon point2){
     double pt1LatInRad = point1.lat()*DEG_TO_RAD;
     double pt2LatInRad = point2.lat()*DEG_TO_RAD;
-    double pt1LonInRad = point1.lon()*DEG_TO_RAD;
-    double pt2LonInRad = point2.lon()*DEG_TO_RAD;
     
     double pt1x,pt1y,pt2x,pt2y;
     double dxSquared,dySquared,hypotenuse,distance;
-    
-    double averageLatInRad = (pt1LatInRad+pt2LatInRad)/2;
+    double averageLatInRad = (pt1LatInRad+pt2LatInRad)/2.0;
     double projectionFactor = cos(averageLatInRad);
     
-    pt1x = pt1LonInRad*projectionFactor;
-    pt2x = pt2LonInRad*projectionFactor;
-    pt1y = pt1LatInRad;
-    pt2y = pt2LatInRad;
+    pt1x = point1.lon()*projectionFactor;
+    pt2x = point2.lon()*projectionFactor;
+    pt1y = point1.lat();
+    pt2y = point2.lat();
     
     dxSquared = pow(pt2x-pt1x,2);
     dySquared = pow(pt2y-pt1y,2);
     hypotenuse = sqrt(dxSquared+dySquared);
     
-    distance = EARTH_RADIUS_IN_METERS*hypotenuse;
+    distance = EARTH_RADIUS_IN_METERS*hypotenuse*DEG_TO_RAD;
     return distance;
 }
 
@@ -394,13 +391,13 @@ double find_street_segment_length(unsigned street_segment_id){
     
     for(int i=0;i<numSegments;i++){ 
         point2 = getStreetSegmentCurvePoint(i,street_segment_id);
-        totalLength += find_distance_between_two_points(point1,point2);
+        totalLength = totalLength + find_distance_between_two_points(point1,point2);
         point1 = point2;
     }
     
     point2 = getIntersectionPosition(getInfoStreetSegment(street_segment_id).to);
     
-    totalLength += find_distance_between_two_points(point1,point2);
+    totalLength = totalLength + find_distance_between_two_points(point1,point2);
     return totalLength;
 }
 
@@ -415,7 +412,7 @@ double find_street_length(unsigned street_id){
     numSegments = segmentIds.size();
     
     for(int i=0;i<numSegments;i++){
-        totalLength += find_street_segment_length(segmentIds[i]);
+        totalLength = totalLength + find_street_segment_length(segmentIds[i]);
     }
     
     return totalLength;
@@ -470,12 +467,6 @@ unsigned find_closest_intersection(LatLon my_position){
     return unsigned(nearestIntIndex);   
 
 }
-
-std::vector<unsigned> find_intersection_ids_from_street_ids(unsigned street_id1, unsigned street_id2){
-    std::vector<unsigned> streetIDMatch; 
-    return streetIDMatch;
-}
-
 
 std::vector<unsigned> find_street_ids_from_partial_street_name(std::string street_prefix){
     std::vector<unsigned> streetIDMatch; 
