@@ -304,6 +304,28 @@ std::vector<unsigned> find_all_street_intersections(unsigned street_id){
     return streetNameMap[streetName]; 
 }*/
 
+std::vector<unsigned> find_intersection_ids_from_street_ids(unsigned street_id1,unsigned street_id2){
+    std::vector<unsigned> street1IntersectionVector, street2IntersectionVector, intersectingIDs;
+    unsigned currentIntersection;
+    int numIntStreet1, numIntStreet2;
+
+    street1IntersectionVector = find_all_street_intersections(street_id1);
+    street2IntersectionVector = find_all_street_intersections(street_id2);
+    numIntStreet1 = street1IntersectionVector.size();
+    numIntStreet2 = street2IntersectionVector.size();
+
+    for(int id1=0;id1<numIntStreet1;id1++){
+	for(int id2=0;id2<numIntStreet2;id2++){
+	    currentIntersection = street1IntersectionVector[id1];
+	    if(currentIntersection  == street2IntersectionVector[id2]){
+		intersectingIDs.push_back(currentIntersection);
+	    }
+	}
+    }
+    return intersectingIDs;
+}
+
+
 /*
 std::vector<unsigned> find_all_street_intersections(unsigned street_id){
     std::vector<unsigned> allSegmentsOnStreet;
