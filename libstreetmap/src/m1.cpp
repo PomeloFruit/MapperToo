@@ -62,7 +62,7 @@ bool load_map(std::string path/*map_path*/) {
 
     for(int i=0;i<getNumStreets();i++){
 	currentStreetName = getStreetName(i);
-	std::tranform(currentStreetName.begin(), currentStreetName.end(), currentStreetName.begin(), ::tolower);
+	std::transform(currentStreetName.begin(), currentStreetName.end(), currentStreetName.begin(), ::tolower);
 	if(streetNameIndexMap.count(currentStreetName) == 0){
 	    streetNameIndexMap.insert(std::make_pair(currentStreetName,std::vector<unsigned>()));
 	    streetNameIndexMap[currentStreetName].clear();
@@ -491,9 +491,28 @@ unsigned find_closest_intersection(LatLon my_position){
 
 std::vector<unsigned> find_street_ids_from_partial_street_name(std::string street_prefix){
 //    std::cout << "Begin: find_street_ids_from_partial_street_name" << std::endl; 
-    std::vector<unsigned> streetIDMatch; 
-    std::transform(street_prefix.begin(), street_prefix.end(), street_prefix.begin(), ::tolower); 
+    std::vector<unsigned> streetIDMatch, IDsFromMap; 
+    std::transform(street_prefix.begin(), street_prefix.end(), street_prefix.begin(), ::tolower);
+    std::string currentName; 
     
+    std::map<std::string,std::vector<unsigned>>::iterator nameLowerIt = streetNameIndexMap.lower_bound(street_prefix);
+    std::map<std::string,std::vector<unsigned>>::iterator nameUpperIt = streetNameIndexMap.upper_bound(street_prefix);
+
+    while(nameLowerIt != nameUpperIt){
+	currentName = nameLowerIt->first;
+	IDsFromMap = nameLowerIt->second;
+	if(currentName.compare(0, street_prefix.size(), street_prefix) == 0){
+	    streetIDMatch.insert(streetIDMatch.end(), IDsFromMap.begin(), IDsFromMap.end());
+	}
+	nameLowerIt++;
+   }
+
+/*
+   while(nameIt != streetNameIndexMap.upper_bound(street_prefix){
+        if(currentName.compare(0, street_prefi
+    }
+
+/*
     for (int i = 0; i < getNumStreets(); i++){
         std::string tempLowerCase = getStreetName(i); 
         std::transform(tempLowerCase.begin(), tempLowerCase.end(), tempLowerCase.begin(), ::tolower);
@@ -504,7 +523,10 @@ std::vector<unsigned> find_street_ids_from_partial_street_name(std::string stree
             //need to return all the street ids of the street segments that have the same name as the given string
         }
     }
-    
+
+
+*/
+
     return streetIDMatch; 
 }
 
