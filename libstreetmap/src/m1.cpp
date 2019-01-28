@@ -31,6 +31,7 @@
 
 //===========================REQUIRES WORK========================================
 std::map<int, std::vector<unsigned>> streetNameMap;
+std::map<std::string, std::vector<unsigned>> streetNameIndexMap;
 std::vector<std::vector<unsigned>> streetSegIDVector;
 std::vector<std::vector<std::string>> streetSegNameVector;
 
@@ -54,6 +55,19 @@ bool load_map(std::string path/*map_path*/) {
 	    streetNameMap[segmentStreetID].clear();
 	}
 	streetNameMap[segmentStreetID].push_back(unsigned(i));
+    }
+
+    int streetID;
+    std::string currentStreetName;
+
+    for(int i=0;i<getNumStreets();i++){
+	currentStreetName = getStreetName(i);
+	std::tranform(currentStreetName.begin(), currentStreetName.end(), currentStreetName.begin(), ::tolower);
+	if(streetNameIndexMap.count(currentStreetName) == 0){
+	    streetNameIndexMap.insert(std::make_pair(currentStreetName,std::vector<unsigned>()));
+	    streetNameIndexMap[currentStreetName].clear();
+	}
+	streetNameIndexMap[currentStreetName].push_back(unsigned(i));
     }
 
     std::vector<unsigned> intersectionIds;
