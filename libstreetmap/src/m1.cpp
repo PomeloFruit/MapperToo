@@ -108,6 +108,10 @@ bool load_map(std::string path/*map_path*/) {
 
 void close_map() {
     //Clean-up your map related data structures here
+    streetNameMap.clear();
+    streetNameIndexMap.clear();
+    streetSegIDVector.clear();
+    streetSegNameVector.clear();
     closeStreetDatabase();
 }
 
@@ -165,9 +169,7 @@ bool are_directly_connected(unsigned intersection_id1, unsigned intersection_id2
         }
     }
 
-    //I'm dumb
     return false;
-    //this is really not going to pass the speed test
 }
 
 
@@ -225,18 +227,10 @@ std::vector<unsigned> find_adjacent_intersections(unsigned intersection_id){
  * in addition to this we'd probably have to do it twice (once for the intersections and the other for poi)
  */
 
-//we gotta fix these two below me c:
-std::vector<unsigned> find_street_street_segments(unsigned street_id){
-    //std::cout << "Begin: find_street_street_segments" << std::endl; 
-    //std::vector<unsigned> street; 
-    
-    //street = streetNameMap[street_id]; 
-    
+std::vector<unsigned> find_street_street_segments(unsigned street_id){    
     return streetNameMap[street_id];
-    
-    
 }
-//this is probably the easier fix c:
+
 std::vector<unsigned> find_all_street_intersections(unsigned street_id){
     std::vector<unsigned> allSegmentsOnStreet;
     std::vector<unsigned> intersectionIDs;
@@ -347,7 +341,7 @@ double find_street_length(unsigned street_id){
     for(int i=0;i<numSegments;i++){
         totalLength = totalLength + find_street_segment_length(segmentIds[i]);
     }
-    totalLength = totalLength/3.0; 
+    totalLength = totalLength; 
     return totalLength;
 }
 
@@ -409,21 +403,27 @@ std::vector<unsigned> find_street_ids_from_partial_street_name(std::string stree
     
     std::map<std::string,std::vector<unsigned>>::iterator nameLowerIt = streetNameIndexMap.lower_bound(street_prefix);
     std::map<std::string,std::vector<unsigned>>::iterator nameUpperIt = streetNameIndexMap.upper_bound(street_prefix);
+    nameLowerIt--;
+    nameUpperIt++;
 
     streetIDMatch.clear();
 
-    while((nameLowerIt != nameUpperIt)){
+    while(nameUpperIt != nameLowerIt){
 	currentName = "";
 	IDsFromMap.clear();
 
-	currentName = nameLowerIt->first;
-	IDsFromMap = nameLowerIt->second;
+	currentName = nameUpperIt->first;
+	IDsFromMap = nameUpperIt->second;
+        
+        std::cout << street_prefix << "_____" << currentName << std::endl;
+        std::cout << IDsFromMap[0] << std::endl;
+        
 	if(currentName.compare(0, street_prefix.size(), street_prefix) == 0){
 	    for(int i=0;i<IDsFromMap.size();i++){
                 streetIDMatch.push_back(IDsFromMap[i]);
 	    }
 	}
-	nameLowerIt++;
+	nameUpperIt--;
    }
     return streetIDMatch; 
 }
