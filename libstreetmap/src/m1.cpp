@@ -399,32 +399,107 @@ unsigned find_closest_intersection(LatLon my_position){
 std::vector<unsigned> find_street_ids_from_partial_street_name(std::string street_prefix){
     std::vector<unsigned> streetIDMatch, IDsFromMap; 
     std::transform(street_prefix.begin(), street_prefix.end(), street_prefix.begin(), ::tolower);
-    std::string currentName; 
+    std::string currentName;
+    
+    int idLower1,idLower2,idUpper1,idUpper2,lowestID, highestID,numLowerIDs,numUpperIDs;
     
     std::map<std::string,std::vector<unsigned>>::iterator nameLowerIt = streetNameIndexMap.lower_bound(street_prefix);
     std::map<std::string,std::vector<unsigned>>::iterator nameUpperIt = streetNameIndexMap.upper_bound(street_prefix);
-    nameLowerIt--;
-    nameUpperIt++;
+    
+    nameLowerIt++;
+    nameUpperIt--;
+    
+    /*
+    numLowerIDs = (nameLowerIt->second).size();
+    numUpperIDs = (nameUpperIt->second).size();
+        
+    lowestID=getNumStreets()-1;
+    highestID=0;
+    
+    idLower1 = nameLowerIt->second[0];
+    idLower2 = nameLowerIt->second[numLowerIDs];
+    idUpper1 = nameUpperIt->second[0];
+    idUpper2 = nameUpperIt->second[numUpperIDs];
+    
+    if(idLower1<lowestID){
+        lowestID=idLower1;
+    }
+    if(idLower2<lowestID){
+        lowestID=idLower2;
+    }
+    if(idUpper1<lowestID){
+        lowestID=idUpper1;
+    }
+    if(idUpper2<lowestID){
+        lowestID=idUpper2;
+    }
+    
+    if(idLower1>highestID){
+        highestID=idLower1;
+    }
+    if(idLower2>highestID){
+        highestID=idLower2;
+    }
+    if(idUpper1>highestID){
+        highestID=idUpper1;
+    }
+    if(idUpper2>highestID){
+        highestID=idUpper2;
+    }
+    
+    /*
+    if(lowestID<0){
+        lowestID=0;
+    }
+    if(highestID>(getNumStreets()-1){
+        highestID=getNumStreets()-1;
+    }
 
     streetIDMatch.clear();
+    
+    if((nameLowerIt != streetNameIndexMap.end()) && (nameUpperIt != streetNameIndexMap.end())){
+        std::cout << "===================================================================================" << std::endl;
+        std::cout << "lower___+++++__" << lowestID << std::endl;
+        std::cout << "upper___+++++__" << highestID << std::endl;
+    }
 
+    
+    for(int i=lowestID; i <= highestID;i++){
+        currentName = getStreetName(i);
+        IDsFromMap = streetNameIndexMap[currentName];
+        
+        std::cout << street_prefix << "_____" << currentName << std::endl;
+        
+        if(currentName.compare(0, street_prefix.size(), street_prefix) == 0){
+	    for(int id=0;id < IDsFromMap.size();id++){
+                //streetIDMatch.insert(streetIDMatch.end(), IDsFromMap.begin(), IDsFromMap.end());
+
+                streetIDMatch.push_back(IDsFromMap[id]);
+	    }
+	}
+    }
+    */
+    
     while(nameUpperIt != nameLowerIt){
 	currentName = "";
 	IDsFromMap.clear();
 
-	currentName = nameUpperIt->first;
-	IDsFromMap = nameUpperIt->second;
+	currentName = nameLowerIt->first;
+	IDsFromMap = nameLowerIt->second;
         
         std::cout << street_prefix << "_____" << currentName << std::endl;
         std::cout << IDsFromMap[0] << std::endl;
         
 	if(currentName.compare(0, street_prefix.size(), street_prefix) == 0){
 	    for(int i=0;i<IDsFromMap.size();i++){
-                streetIDMatch.push_back(IDsFromMap[i]);
-	    }
+                streetIDMatch.insert(streetIDMatch.end(), IDsFromMap.begin(), IDsFromMap.end());
+
+               // streetIDMatch.push_back(IDsFromMap[i]);
+	   }
 	}
-	nameUpperIt--;
+	nameLowerIt++;
    }
+    
     return streetIDMatch; 
 }
 
