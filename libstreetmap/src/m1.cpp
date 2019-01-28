@@ -24,6 +24,7 @@
 #include <math.h>
 #include <algorithm>
 #include <string>
+#include <iostream>
 
 //==============================================================================
 //Global Variables
@@ -267,10 +268,18 @@ std::vector<unsigned> find_adjacent_intersections(unsigned intersection_id){
 
 //we gotta fix these two below me c:
 std::vector<unsigned> find_street_street_segments(unsigned street_id){
+    //std::cout << "Begin: find_street_street_segments" << std::endl; 
+    //std::vector<unsigned> street; 
+    
+    //street = streetNameMap[street_id]; 
+    
     return streetNameMap[street_id];
+    
+    
 }
 //this is probably the easier fix c:
 std::vector<unsigned> find_all_street_intersections(unsigned street_id){
+    std::cout << "Begin: find_all_street_intersections" << std::endl; 
     std::vector<unsigned> allSegmentsOnStreet;
     std::vector<unsigned> intersectionIDs;
     std::vector<unsigned>::iterator intersectionIt;
@@ -305,6 +314,7 @@ std::vector<unsigned> find_all_street_intersections(unsigned street_id){
 }*/
 
 std::vector<unsigned> find_intersection_ids_from_street_ids(unsigned street_id1,unsigned street_id2){
+    std::cout << "Begin: find_intersection_ids_from_street_ids" << std::endl; 
     std::vector<unsigned> street1IntersectionVector, street2IntersectionVector, intersectingIDs;
     unsigned currentIntersection;
     int numIntStreet1, numIntStreet2;
@@ -469,6 +479,7 @@ unsigned find_closest_intersection(LatLon my_position){
 }
 
 std::vector<unsigned> find_street_ids_from_partial_street_name(std::string street_prefix){
+    std::cout << "Begin: find_street_ids_from_partial_street_name" << std::endl; 
     std::vector<unsigned> streetIDMatch; 
     std::transform(street_prefix.begin(), street_prefix.end(), street_prefix.begin(), ::tolower); 
     
