@@ -24,7 +24,6 @@
 #include <math.h>
 #include <algorithm>
 #include <string>
-#include <iostream>
 
 //==============================================================================
 //Global Variables
