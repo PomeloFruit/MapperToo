@@ -24,6 +24,7 @@
 #include <math.h>
 #include <algorithm>
 #include <string>
+#include <iostream>
 
 //==============================================================================
 //Global Variables
@@ -414,7 +415,7 @@ double find_street_length(unsigned street_id){
     for(int i=0;i<numSegments;i++){
         totalLength = totalLength + find_street_segment_length(segmentIds[i]);
     }
-    
+    totalLength = totalLength/3.0; 
     return totalLength;
 }
 
