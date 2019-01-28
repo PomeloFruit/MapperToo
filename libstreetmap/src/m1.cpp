@@ -35,7 +35,7 @@ std::vector<std::vector<unsigned>> streetSegIDVector;
 std::vector<std::vector<std::string>> streetSegNameVector;
 
 bool load_map(std::string path/*map_path*/) {
-    bool load_successful = true; //Indicates whether the map has loaded 
+    bool load_successful = false; //Indicates whether the map has loaded 
                                   //successfully
 
     //
@@ -54,9 +54,6 @@ bool load_map(std::string path/*map_path*/) {
 	    streetNameMap[segmentStreetID].clear();
 	}
 	streetNameMap[segmentStreetID].push_back(unsigned(i));
-    }
-    if(streetNameMap.size()!=(getNumStreets()-1)){
-	load_successful = false;
     }
 
     std::vector<unsigned> intersectionIds;
@@ -279,7 +276,7 @@ std::vector<unsigned> find_street_street_segments(unsigned street_id){
 }
 //this is probably the easier fix c:
 std::vector<unsigned> find_all_street_intersections(unsigned street_id){
-    std::cout << "Begin: find_all_street_intersections" << std::endl; 
+//    std::cout << "Begin: find_all_street_intersections" << std::endl; 
     std::vector<unsigned> allSegmentsOnStreet;
     std::vector<unsigned> intersectionIDs;
     std::vector<unsigned>::iterator intersectionIt;
@@ -314,7 +311,7 @@ std::vector<unsigned> find_all_street_intersections(unsigned street_id){
 }*/
 
 std::vector<unsigned> find_intersection_ids_from_street_ids(unsigned street_id1,unsigned street_id2){
-    std::cout << "Begin: find_intersection_ids_from_street_ids" << std::endl; 
+//    std::cout << "Begin: find_intersection_ids_from_street_ids" << std::endl; 
     std::vector<unsigned> street1IntersectionVector, street2IntersectionVector, intersectingIDs;
     unsigned currentIntersection;
     int numIntStreet1, numIntStreet2;
@@ -479,7 +476,7 @@ unsigned find_closest_intersection(LatLon my_position){
 }
 
 std::vector<unsigned> find_street_ids_from_partial_street_name(std::string street_prefix){
-    std::cout << "Begin: find_street_ids_from_partial_street_name" << std::endl; 
+//    std::cout << "Begin: find_street_ids_from_partial_street_name" << std::endl; 
     std::vector<unsigned> streetIDMatch; 
     std::transform(street_prefix.begin(), street_prefix.end(), street_prefix.begin(), ::tolower); 
     
