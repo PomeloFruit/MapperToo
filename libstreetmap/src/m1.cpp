@@ -57,7 +57,6 @@ bool load_map(std::string path/*map_path*/) {
 	streetNameMap[segmentStreetID].push_back(unsigned(i));
     }
 
-    int streetID;
     std::string currentStreetName;
 
     for(int i=0;i<getNumStreets();i++){
@@ -157,8 +156,6 @@ bool load_map(std::string path/*map_path*/) {
 
 
 void close_map() {
-
-    //so according to this I just don't have the right street segments for some of these
     //Clean-up your map related data structures here
     closeStreetDatabase();
 }
@@ -498,11 +495,18 @@ std::vector<unsigned> find_street_ids_from_partial_street_name(std::string stree
     std::map<std::string,std::vector<unsigned>>::iterator nameLowerIt = streetNameIndexMap.lower_bound(street_prefix);
     std::map<std::string,std::vector<unsigned>>::iterator nameUpperIt = streetNameIndexMap.upper_bound(street_prefix);
 
-    while(nameLowerIt != nameUpperIt){
+    streetIDMatch.clear();
+
+    while((nameLowerIt != nameUpperIt)){
+	currentName = "";
+	IDsFromMap.clear();
+
 	currentName = nameLowerIt->first;
 	IDsFromMap = nameLowerIt->second;
 	if(currentName.compare(0, street_prefix.size(), street_prefix) == 0){
-	    streetIDMatch.insert(streetIDMatch.end(), IDsFromMap.begin(), IDsFromMap.end());
+	    for(int i=0;i<IDsFromMap.size();i++){
+                streetIDMatch.push_back(IDsFromMap[i]);
+	    }
 	}
 	nameLowerIt++;
    }
