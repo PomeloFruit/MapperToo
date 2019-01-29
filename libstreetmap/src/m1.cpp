@@ -31,6 +31,10 @@
 //Global Variables
 
 //===========================REQUIRES WORK========================================
+double find_street_length_preload(unsigned street_id);
+double find_street_segment_length_preload(unsigned street_segment_id);
+double find_street_segment_travel_time_preload(unsigned street_segment_id);
+
 std::map<int, std::vector<unsigned>> streetNameMap;
 std::unordered_map<int, std::vector<unsigned>> streetMapFast; 
 
@@ -41,6 +45,10 @@ std::vector<std::vector<unsigned>> streetIntersections;
 
 std::vector<std::vector<unsigned>> streetSegIDVector;
 std::vector<std::vector<std::string>> streetSegNameVector;
+
+std::vector<double> segLength;
+std::vector<double> streetLength;
+std::vector<double> segTravelTime;
 
 bool load_map(std::string path/*map_path*/) {
     bool load_successful = false; //Indicates whether the map has loaded 
@@ -53,6 +61,10 @@ bool load_map(std::string path/*map_path*/) {
     load_successful = loadStreetsDatabaseBIN(path);
     
     if(load_successful){
+        
+        segLength.clear();
+        streetLength.clear();
+        
         for(int i=0;i<getNumStreetSegments();i++){
             
             int segmentStreetID;
@@ -72,7 +84,9 @@ bool load_map(std::string path/*map_path*/) {
                 streetMapFast[segmentStreetID].clear(); 
             }
             streetMapFast[segmentStreetID].push_back(unsigned(i));
-
+            
+            segLength.push_back(find_street_segment_length_preload(unsigned(i)));
+            segTravelTime.push_back(find_street_segment_travel_time_preload(unsigned(i)));
         }
         
         std::string currentStreetName;
@@ -88,6 +102,7 @@ bool load_map(std::string path/*map_path*/) {
                 }
                 streetNameIndexMap[temp].push_back(unsigned(i)); 
             }
+            streetLength.push_back(find_street_length_preload(unsigned(i)));
         }
         
         //creating vector of intersection vectors
@@ -136,7 +151,7 @@ bool load_map(std::string path/*map_path*/) {
         }
 
     }
-
+    
     return load_successful;
 }
 
@@ -147,7 +162,9 @@ void close_map() {
     streetNameIndexMap.clear();
     streetSegIDVector.clear();
     streetSegNameVector.clear();
-    streetMapFast.clear(); 
+    streetMapFast.clear();
+    segLength.clear();
+    streetLength.clear();
     closeStreetDatabase();
 }
 
@@ -264,9 +281,12 @@ double find_distance_between_two_points(LatLon point1, LatLon point2){
     distance = EARTH_RADIUS_IN_METERS*hypotenuse*DEG_TO_RAD;
     return distance;
 }
-
-//Returns the length of the given street segment in meters
 double find_street_segment_length(unsigned street_segment_id){
+    //std::cout<<segLength[int(street_segment_id)]<<'\n';
+    return segLength[int(street_segment_id)];
+}
+//Returns the length of the given street segment in meters
+double find_street_segment_length_preload(unsigned street_segment_id){
     double totalLength = 0;
     
     int numSegments = getInfoStreetSegment(street_segment_id).curvePointCount;
@@ -274,7 +294,7 @@ double find_street_segment_length(unsigned street_segment_id){
     
     point1 = getIntersectionPosition(getInfoStreetSegment(street_segment_id).from);
     
-    for(int i=0;i<numSegments;i++){ 
+    for(int i=0;i<numSegments;i++){
         point2 = getStreetSegmentCurvePoint(i,street_segment_id);
         totalLength = totalLength + find_distance_between_two_points(point1,point2);
         point1 = point2;
@@ -288,6 +308,9 @@ double find_street_segment_length(unsigned street_segment_id){
 
 //Returns the length of the specified street in meters
 double find_street_length(unsigned street_id){
+    return streetLength[int(street_id)];
+}
+double find_street_length_preload(unsigned street_id){
     std::vector<unsigned> segmentIds;
     int numSegments = 0;
     double totalLength = 0;
@@ -305,6 +328,9 @@ double find_street_length(unsigned street_id){
 //(time = distance/speed_limit)
 //convert km/h to m/s = km/h * 1000 / 3600 = km/h / 3.6
 double find_street_segment_travel_time(unsigned street_segment_id){
+    return segTravelTime[int(street_segment_id)];
+}
+double find_street_segment_travel_time_preload(unsigned street_segment_id){
     double length, time; 
     double speedLimitMS;
     float speedLimitKmH;
