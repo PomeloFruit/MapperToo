@@ -32,9 +32,11 @@
 
 //===========================REQUIRES WORK========================================
 std::map<int, std::vector<unsigned>> streetNameMap;
+std::unordered_map<int, std::vector<unsigned>> streetMapFast; 
+
 std::map<std::string, std::vector<unsigned>> streetNameIndexMap;
 
-std::unordered_map<int, std::vector<unsigned>> streetMapFast; 
+
 std::vector<std::vector<unsigned>> streetIntersections; 
 
 std::vector<std::vector<unsigned>> streetSegIDVector;
@@ -48,12 +50,13 @@ bool load_map(std::string path/*map_path*/) {
     //Load your map related data structures here
     //
 
-    int segmentStreetID;
-    int numOfSegs;
-
     load_successful = loadStreetsDatabaseBIN(path);
+    
     if(load_successful){
         for(int i=0;i<getNumStreetSegments();i++){
+            
+            int segmentStreetID;
+            
             segmentStreetID = getInfoStreetSegment(i).streetID;
             
             //creating regular map
@@ -72,10 +75,26 @@ bool load_map(std::string path/*map_path*/) {
 
         }
         
+        std::string currentStreetName;
+   
+        for(int i=0;i<getNumStreets();i++){
+            currentStreetName = getStreetName(i);
+            std::transform(currentStreetName.begin(), currentStreetName.end(), currentStreetName.begin(), ::tolower);
+            for(int j = 0; j <= int(currentStreetName.length()); j++){
+                std::string temp = currentStreetName.substr(0, j); 
+                if(streetNameIndexMap.count(temp) == 0){
+                    streetNameIndexMap.insert(std::make_pair(temp, std::vector<unsigned>()));
+                    streetNameIndexMap[temp].clear();
+                }
+                streetNameIndexMap[temp].push_back(unsigned(i)); 
+            }
+        }
+        
         //creating vector of intersection vectors
         std::vector<unsigned>::iterator intersectionIt;
         std::vector<unsigned> toBeInserted;
         unsigned intersectionID1,intersectionID2;
+        
         for(int i = 0; i < getNumStreets(); i++){
             std::vector<unsigned> allSegments = find_street_street_segments(unsigned(i)); 
             toBeInserted.clear();
@@ -98,27 +117,10 @@ bool load_map(std::string path/*map_path*/) {
             streetIntersections.push_back(toBeInserted); 
         }
         
-        
-         
-        //changed this probably want to revert 
-        std::string currentStreetName;
-   
-        for(int i=0;i<getNumStreets();i++){
-            currentStreetName = getStreetName(i);
-            std::transform(currentStreetName.begin(), currentStreetName.end(), currentStreetName.begin(), ::tolower);
-            for(int j = 0; j <= int(currentStreetName.length()); j++){
-                std::string temp = currentStreetName.substr(0, j); 
-                if(streetNameIndexMap.count(temp) == 0){
-                    streetNameIndexMap.insert(std::make_pair(temp, std::vector<unsigned>()));
-                    streetNameIndexMap[temp].clear();
-                }
-                streetNameIndexMap[temp].push_back(unsigned(i)); 
-            }
-        }
-                
-        
+        int numOfSegs;
         std::vector<unsigned> intersectionIds;
         std::vector<std::string> segNames;
+        
         for(int i=0;i<getNumIntersections();i++){
             numOfSegs=getIntersectionStreetSegmentCount(i);
             segNames.clear();
@@ -148,8 +150,6 @@ void close_map() {
     streetMapFast.clear(); 
     closeStreetDatabase();
 }
-
-
 
 std::vector<unsigned> find_intersection_street_segments(unsigned intersection_id){
     return streetSegIDVector[intersection_id];        
@@ -265,7 +265,6 @@ double find_distance_between_two_points(LatLon point1, LatLon point2){
     return distance;
 }
 
-//=====================precalculate this in load map ===========================
 //Returns the length of the given street segment in meters
 double find_street_segment_length(unsigned street_segment_id){
     double totalLength = 0;
@@ -287,7 +286,6 @@ double find_street_segment_length(unsigned street_segment_id){
     return totalLength;
 }
 
-//=====================precalculate this in load map ===========================
 //Returns the length of the specified street in meters
 double find_street_length(unsigned street_id){
     std::vector<unsigned> segmentIds;
@@ -351,127 +349,9 @@ unsigned find_closest_intersection(LatLon my_position){
 
 }
 
-//===============================NEEDS WORK=========================================
+//WORKS
+
 std::vector<unsigned> find_street_ids_from_partial_street_name(std::string street_prefix){
-    std::vector<unsigned> streetIDMatch, IDsFromMap,IDsFromMap2; 
-    std::transform(street_prefix.begin(), street_prefix.end(), street_prefix.begin(), ::tolower);
-    std::string currentName, currentName2;
-    
+    std::transform(street_prefix.begin(), street_prefix.end(), street_prefix.begin(), ::tolower);    
     return streetNameIndexMap[street_prefix];
-    
-    
-    //int idLower1,idLower2,idUpper1,idUpper2,lowestID, highestID,numLowerIDs,numUpperIDs;
-    
-    std::map<std::string,std::vector<unsigned>>::iterator nameLowerIt = streetNameIndexMap.lower_bound(street_prefix);
-    std::map<std::string,std::vector<unsigned>>::iterator nameUpperIt = streetNameIndexMap.upper_bound(street_prefix);
-    
-    nameLowerIt++;
-    nameUpperIt--;
-    
-    std::cout << "000000000000000000000000000000000000000000000000000000000000000" << std::endl;
-    currentName = nameLowerIt->first;
-	IDsFromMap = nameLowerIt->second;
-         currentName2 = nameUpperIt->first;
-	IDsFromMap2 = nameUpperIt->second;
-        
-        std::cout << street_prefix << "_____" << currentName << std::endl;
-        std::cout << IDsFromMap[0] << std::endl;
-        std::cout << street_prefix << "_____" << currentName2 << std::endl;
-        std::cout << IDsFromMap2[0] << std::endl;
-    
-    /*
-    numLowerIDs = (nameLowerIt->second).size();
-    numUpperIDs = (nameUpperIt->second).size();
-        
-    lowestID=getNumStreets()-1;
-    highestID=0;
-    
-    idLower1 = nameLowerIt->second[0];
-    idLower2 = nameLowerIt->second[numLowerIDs];
-    idUpper1 = nameUpperIt->second[0];
-    idUpper2 = nameUpperIt->second[numUpperIDs];
-    
-    if(idLower1<lowestID){
-        lowestID=idLower1;
-    }
-    if(idLower2<lowestID){
-        lowestID=idLower2;
-    }
-    if(idUpper1<lowestID){
-        lowestID=idUpper1;
-    }
-    if(idUpper2<lowestID){
-        lowestID=idUpper2;
-    }
-    
-    if(idLower1>highestID){
-        highestID=idLower1;
-    }
-    if(idLower2>highestID){
-        highestID=idLower2;
-    }
-    if(idUpper1>highestID){
-        highestID=idUpper1;
-    }
-    if(idUpper2>highestID){
-        highestID=idUpper2;
-    }
-    
-    /*
-    if(lowestID<0){
-        lowestID=0;
-    }
-    if(highestID>(getNumStreets()-1){
-        highestID=getNumStreets()-1;
-    }
-
-    streetIDMatch.clear();
-    
-    if((nameLowerIt != streetNameIndexMap.end()) && (nameUpperIt != streetNameIndexMap.end())){
-        std::cout << "===================================================================================" << std::endl;
-        std::cout << "lower___+++++__" << lowestID << std::endl;
-        std::cout << "upper___+++++__" << highestID << std::endl;
-    }
-
-    
-    for(int i=lowestID; i <= highestID;i++){
-        currentName = getStreetName(i);
-        IDsFromMap = streetNameIndexMap[currentName];
-        
-        std::cout << street_prefix << "_____" << currentName << std::endl;
-        
-        if(currentName.compare(0, street_prefix.size(), street_prefix) == 0){
-	    for(int id=0;id < IDsFromMap.size();id++){
-                //streetIDMatch.insert(streetIDMatch.end(), IDsFromMap.begin(), IDsFromMap.end());
-
-                streetIDMatch.push_back(IDsFromMap[id]);
-	    }
-	}
-    }
-    */
-        
-   /*
-    while((nameLowerIt != nameUpperIt) && (nameLowerIt != streetNameIndexMap.end()) ){
-	currentName = "";
-	IDsFromMap.clear();
-
-	currentName = nameLowerIt->first;
-	IDsFromMap = nameLowerIt->second;
-        
-        std::cout << street_prefix << "_____" << currentName << std::endl;
-        std::cout << IDsFromMap[0] << std::endl;
-        
-	if(currentName.compare(0, street_prefix.size(), street_prefix) == 0){
-	  //  for(int i=0;i<IDsFromMap.size();i++){
-                streetIDMatch.insert(streetIDMatch.end(), IDsFromMap.begin(), IDsFromMap.end());
-	   //}
-	}
-	nameLowerIt++;
-    }
-    
-    return streetIDMatch; 
-    * 
-    */
-   
 }
-
