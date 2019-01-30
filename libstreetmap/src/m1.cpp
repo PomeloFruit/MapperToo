@@ -37,27 +37,20 @@ double find_street_segment_length_preload(unsigned street_segment_id);
 double find_street_segment_travel_time_preload(unsigned street_segment_id);
 
 //============================= Global Variables ============================= 
-
-//map of <street ids, street segments with the same street ids>
-std::map<int, std::vector<unsigned>> streetNameMap;
-
-//This is an unordered map of <street ids, street segments with the same street ids>
+//unordered map of <street ids, street segments with the same street ids>
 std::unordered_map<int, std::vector<unsigned>> streetMapFast; 
 
-//This is a map of if <partial street name, street ids with the same partial street name>
+//map of if <partial street name, street ids with the same partial street name>
 //ie the name Bloor becomes five vectors: b, bl, blo, bloo, bloor
-std::map<std::string, std::vector<unsigned>> streetNameIndexMap;
+std::map<std::string, std::vector<unsigned>> partialStreetNameMap;
 
-//This is a vector of vectors of intersections on a street 
-std::vector<std::vector<unsigned>> streetIntersections; 
-
-
-
+//vector of vectors of intersections on a street 
+std::vector<std::vector<unsigned>> streetIntersectionsVector; 
 std::vector<std::vector<unsigned>> streetSegIDVector;
 std::vector<std::vector<std::string>> streetSegNameVector;
-std::vector<double> segLength;
-std::vector<double> streetLength;
-std::vector<double> segTravelTime;
+std::vector<double> segLengthVector;
+std::vector<double> streetLengthVector;
+std::vector<double> segTravelTimeVector;
 
 
 //========================= Function Implementations =========================
@@ -70,29 +63,20 @@ bool load_map(std::string path/*map_path*/) {
     if(load_successful){      
         
         //clears all global data structures before filling with new data
-        streetNameMap.clear();
         streetMapFast.clear();
-        streetNameIndexMap.clear();
-        streetIntersections.clear();
+        partialStreetNameMap.clear();
+        streetIntersectionsVector.clear();
         streetSegIDVector.clear();
-        segLength.clear();
-        streetLength.clear();
-        segTravelTime.clear();
+        segLengthVector.clear();
+        streetLengthVector.clear();
+        segTravelTimeVector.clear();
         
         int segStreetID;
         
         for(unsigned i=0; i<unsigned(getNumStreetSegments()); i++){
             
             segStreetID = getInfoStreetSegment(i).streetID;
-            
-            // inserts segmentID into vector at respective streetID position
-            // within streetNameMap
-            if(streetNameMap.count(segStreetID)== 0){
-                streetNameMap.insert(std::make_pair(segStreetID,IDVector()));
-                streetNameMap[segStreetID].clear();
-            }
-            streetNameMap[segStreetID].push_back(i);
-            
+                      
             // inserts segmentID into vector at respective streetID position
             // within streetMapFast
             if(streetMapFast.count(segStreetID) == 0){
@@ -101,20 +85,13 @@ bool load_map(std::string path/*map_path*/) {
             }
             streetMapFast[segStreetID].push_back(i);
             
-            // calculates and add segment length to segLength vector
-            // calculates and add travel time of segment to segTravelTime vector
-            segLength.push_back(find_street_segment_length_preload(i));
-            segTravelTime.push_back(find_street_segment_travel_time_preload(i));
+            // calculates and add segment length to segLengthVector vector
+            // calculates and add travel time of segment to segTravelTimeVector vector
+            segLengthVector.push_back(find_street_segment_length_preload(i));
+            segTravelTimeVector.push_back(find_street_segment_travel_time_preload(i));
         }
         
-        
-        ///////////////////////////////////////////////////////////////////////////////////////////
-        ///////////////////////////////////////////////////////////////////////////////////////////
-        ///////////////////////////////////////////////////////////////////////////////////////////
-        ///////////////////////////////////////////////////////////////////////////////////////////
-        ///////////////////////////////////////////////////////////////////////////////////////////
-        ///////////////////////////////////////////////////////////////////////////////////////////
-        
+  
         std::string currentStreetName;
         IDVector allSegments; 
         IDVector::iterator intersectionIt;
@@ -134,14 +111,14 @@ bool load_map(std::string path/*map_path*/) {
             for(int j = 1; j <= int(currentStreetName.length()); j++){
                 std::string temp = currentStreetName.substr(0, j); 
                 
-                if(streetNameIndexMap.count(temp) == 0){
-                    streetNameIndexMap.insert(std::make_pair(temp,IDVector()));
-                    streetNameIndexMap[temp].clear();
+                if(partialStreetNameMap.count(temp) == 0){
+                    partialStreetNameMap.insert(std::make_pair(temp,IDVector()));
+                    partialStreetNameMap[temp].clear();
                 }
-                streetNameIndexMap[temp].push_back(i); 
+                partialStreetNameMap[temp].push_back(i); 
             }
             
-            streetLength.push_back(find_street_length_preload(i));
+            streetLengthVector.push_back(find_street_length_preload(i));
             
             
             for(int j = 0; j < numSegments; j++){
@@ -161,19 +138,10 @@ bool load_map(std::string path/*map_path*/) {
                 }
                 
             }
-            streetIntersections.push_back(intersectionIDs); 
+            streetIntersectionsVector.push_back(intersectionIDs); 
         }
         
-        
-        ///////////////////////////////////////////////////////////////////////////////////////////
-        ///////////////////////////////////////////////////////////////////////////////////////////
-        ///////////////////////////////////////////////////////////////////////////////////////////
-        ///////////////////////////////////////////////////////////////////////////////////////////
-        ///////////////////////////////////////////////////////////////////////////////////////////
-        ///////////////////////////////////////////////////////////////////////////////////////////
-        ///////////////////////////////////////////////////////////////////////////////////////////
-        
-        
+                
         int numOfSegs;
         IDVector intersectionIds;
         std::vector<std::string> segNames;
@@ -192,17 +160,7 @@ bool load_map(std::string path/*map_path*/) {
             streetSegIDVector.push_back(intersectionIds);
         }
 
-    }
-    
-    ///////////////////////////////////////////////////////////////////////////////////////////
-    ///////////////////////////////////////////////////////////////////////////////////////////
-    ///////////////////////////////////////////////////////////////////////////////////////////
-    ///////////////////////////////////////////////////////////////////////////////////////////
-    ///////////////////////////////////////////////////////////////////////////////////////////
-    ///////////////////////////////////////////////////////////////////////////////////////////
-    ///////////////////////////////////////////////////////////////////////////////////////////
-    
-    
+    }    
     return load_successful;
 }
 
@@ -216,14 +174,13 @@ bool load_map(std::string path/*map_path*/) {
  */
 
 void close_map() {
-    streetNameMap.clear();
     streetMapFast.clear();
-    streetNameIndexMap.clear();
-    streetIntersections.clear();
+    partialStreetNameMap.clear();
+    streetIntersectionsVector.clear();
     streetSegIDVector.clear();
-    segLength.clear();
-    streetLength.clear();
-    segTravelTime.clear();
+    segLengthVector.clear();
+    streetLengthVector.clear();
+    segTravelTimeVector.clear();
     closeStreetDatabase();
 }
 
@@ -245,9 +202,12 @@ std::vector<unsigned> find_intersection_street_segments(unsigned intersection_id
 }
 
 /* find_intersection_street_names function
+ * - attempts to return street names connected to intersection_id
+ * 
  * @param intersection_id2 <unsigned> - id for source intersection
  * @return streetNames vector<std::string>- returns previously indexed vector of street segment names connected to intersection_id
  */
+
 std::vector<std::string> find_intersection_street_names(unsigned intersection_id){
     std::vector<std::string> streetNames;
     streetNames.clear();
@@ -267,6 +227,7 @@ std::vector<std::string> find_intersection_street_names(unsigned intersection_id
  * if either of them are connected to intersection_id2 unless the road is one way
  * then it checks if intersection_id1 is "to" if it is it will return false
  * otherwise it will return true (if intersection_id2 is found) 
+ * 
  * @param intersection_id1 <unsigned> - id for source intersection
  * @param intersection_id2 <unsigned> - id for destination intersection
  * @return <bool> - if they are directly connected it will return true otherwise false
@@ -299,6 +260,7 @@ bool are_directly_connected(unsigned intersection_id1, unsigned intersection_id2
  * it then determines if it should insert into the list or not
  * if intersection_id is "to" and the segment is one way it should not insert
  * it then inserts into the list based on isInvalidTo and isInvalidFrom
+ * 
  * @param intersection_id <unsigned> - id for source intersection
  * @return connectedIntersections vector<unsigned> - contains id's of all connected intersections
  */
@@ -375,7 +337,7 @@ std::vector<unsigned> find_all_street_intersections(unsigned street_id){
     intersections.clear();
     
     try {
-        intersections = streetIntersections.at(street_id);
+        intersections = streetIntersectionsVector.at(street_id);
     } catch(std::exception& e) {
         std::cout << "Street not found!" << std::endl;
     }
@@ -384,8 +346,18 @@ std::vector<unsigned> find_all_street_intersections(unsigned street_id){
 }
 
 
+/* find_intersection_ids_from_street_ids function
+ *  - finds intersections that are connected by both street_id1 and street_id2
+ * 
+ *  - gathers all intersections from street_id1 and street_id2
+ *  - compares intersection IDs from both streets
+ *      - if match is found, intersection ID is added to instersection IDs
+ * 
+ * @param street_id1 <unsigned> - id for street 1
+ * @param street_id2 <unsigned> - id for street 2
+ * @return distance std::vector<unsigned> - ids of intersections in both street_id1 and street_id2
+ */
 
-//=======================comment this===============================
 std::vector<unsigned> find_intersection_ids_from_street_ids(unsigned street_id1,unsigned street_id2){
     IDVector street1IntersectionVector, street2IntersectionVector, intersectingIDs;
     unsigned currentIntersection;
@@ -479,7 +451,7 @@ double find_street_segment_length_preload(unsigned street_segment_id){
 
 
 /* find_street_segment_length function
- * - attempts to find segment length of street__segment_id within segLength vector
+ * - attempts to find segment length of street__segment_id within segLengthVector vector
  *     - if fails to find street segment, error message is printed
  * 
  * @param street_segment_id <unsigned> - id for street segment
@@ -490,7 +462,7 @@ double find_street_segment_length(unsigned street_segment_id){
     double length = 0;
     
     try {
-        length = segLength.at(street_segment_id);
+        length = segLengthVector.at(street_segment_id);
     } catch(std::exception& e) {
         std::cout << "Street segment not found!" << std::endl;
     }
@@ -526,7 +498,7 @@ double find_street_length_preload(unsigned street_id){
 
 
 /* find_street_length function
- * - attempts to find street length of street_id within streetLength vector
+ * - attempts to find street length of street_id within streetLengthVector vector
  *     - if fails to find street, error message is printed
  * 
  * @param street_id <unsigned> - id for street
@@ -537,7 +509,7 @@ double find_street_length(unsigned street_id){
     double length = 0;
     
     try {
-        length = streetLength.at(street_id);
+        length = streetLengthVector.at(street_id);
     } catch(std::exception& e) {
         std::cout << "Street not found!" << std::endl;
     }
@@ -574,7 +546,7 @@ double find_street_segment_travel_time_preload(unsigned street_segment_id){
 
 
 /* find_street_segment_travel_time function
- * - attempts to find travel time for street_segment_id within segTravelTime vector
+ * - attempts to find travel time for street_segment_id within segTravelTimeVector vector
  *     - if fails to find street segment, error message is printed
  * 
  * @param street_segment_id<unsigned> - id for street segment
@@ -585,7 +557,7 @@ double find_street_segment_travel_time(unsigned street_segment_id){
     double time = 0;
     
     try {
-        time = segTravelTime.at(street_segment_id);
+        time = segTravelTimeVector.at(street_segment_id);
     } catch(std::exception& e) {
         std::cout << "Street segment not found!" << std::endl;
     }
@@ -643,7 +615,7 @@ unsigned find_closest_intersection(LatLon my_position){
 
 /* find_street_ids_from_partial_street_name function
  * - converts street_prefix string to lower case
- * - attempts to find match to street_prefix within the streetNameIndexMap
+ * - attempts to find match to street_prefix within the partialStreetNameMap
  *     - if fails to find match, error message is printed
  * 
  * @param street_prefix <string> - portion of street name to be searched
@@ -656,7 +628,7 @@ std::vector<unsigned> find_street_ids_from_partial_street_name(std::string stree
     std::transform(street_prefix.begin(), street_prefix.end(), street_prefix.begin(), ::tolower);
     
     try {
-        matchIDs = streetNameIndexMap.at(street_prefix);
+        matchIDs = partialStreetNameMap.at(street_prefix);
     } catch(std::exception& e) {
         std::cout << "Match not found!" << std::endl;
     }
