@@ -49,6 +49,13 @@ std::map<std::string, std::vector<unsigned>> partialStreetNameMap;
 
 //vector of vectors of intersections on a street 
 std::vector<std::vector<unsigned>> streetIntersectionsVector; 
+<<<<<<< HEAD
+=======
+//contains street segment ID indexed on intersection ID
+std::vector<std::vector<unsigned>> streetSegIDVector;
+//contains street segment names indexed on intersection ID
+std::vector<std::vector<std::string>> streetSegNameVector;
+>>>>>>> I haven't changed anything but I need to pull
 
 //vector of street segment ID indexed on intersection ID
 std::vector<std::vector<unsigned>> intersectionSegIDVector;
