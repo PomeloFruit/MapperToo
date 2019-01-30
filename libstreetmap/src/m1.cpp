@@ -24,7 +24,7 @@
 #include <map>
 #include <unordered_map>
 #include <math.h>
-#include <algorithm> //what does algorithm do????????
+#include <algorithm>
 #include <string>
 #include <iostream>
 
@@ -61,13 +61,6 @@ std::vector<double> segTravelTime;
 
 
 //========================= Function Implementations =========================
-
-
-
-
-///////////////////////
-// do not put variable declarations in for loops!!!!!!!
-//////////////////////
 bool load_map(std::string path/*map_path*/) {
     bool load_successful = false; 
     
@@ -123,15 +116,18 @@ bool load_map(std::string path/*map_path*/) {
         ///////////////////////////////////////////////////////////////////////////////////////////
         
         std::string currentStreetName;
+        IDVector allSegments; 
         IDVector::iterator intersectionIt;
-        IDVector toBeInserted; //needs to be renamed!!!!!!!!!!!!!!!!!!!!!
+        IDVector intersectionIDs;
         unsigned intersectionID1,intersectionID2;
+        int numSegments;
         
         for(unsigned i=0; i<unsigned(getNumStreets()); i++){
-            IDVector allSegments = find_street_street_segments(i); 
+            allSegments = find_street_street_segments(i); 
+            numSegments = allSegments.size(); 
+            intersectionIDs.clear();
             currentStreetName = getStreetName(i);
-            toBeInserted.clear();
-            
+
             std::transform(currentStreetName.begin(), currentStreetName.end(), 
                                         currentStreetName.begin(), ::tolower);
             
@@ -145,34 +141,37 @@ bool load_map(std::string path/*map_path*/) {
                 streetNameIndexMap[temp].push_back(i); 
             }
             
-            
             streetLength.push_back(find_street_length_preload(i));
-            
-            int numSegments = allSegments.size(); 
             
             
             for(int j = 0; j < numSegments; j++){
                 intersectionID1 = getInfoStreetSegment(allSegments[j]).from;
                 intersectionID2 = getInfoStreetSegment(allSegments[j]).to; 
                 
-                intersectionIt = std::find(toBeInserted.begin(), toBeInserted.end(), 
+                intersectionIt = std::find(intersectionIDs.begin(), intersectionIDs.end(), 
                                                         intersectionID1); 
-                if(intersectionIt == toBeInserted.end()){
-                    toBeInserted.push_back(intersectionID1); 
+                if(intersectionIt == intersectionIDs.end()){
+                    intersectionIDs.push_back(intersectionID1); 
                 }
                 
-                intersectionIt = std::find(toBeInserted.begin(), toBeInserted.end(),
+                intersectionIt = std::find(intersectionIDs.begin(), intersectionIDs.end(),
                                                         intersectionID2); 
-                if(intersectionIt == toBeInserted.end()){
-                    toBeInserted.push_back(intersectionID2); 
+                if(intersectionIt == intersectionIDs.end()){
+                    intersectionIDs.push_back(intersectionID2); 
                 }
                 
             }
-            streetIntersections.push_back(toBeInserted); 
+            streetIntersections.push_back(intersectionIDs); 
         }
         
         
-        
+        ///////////////////////////////////////////////////////////////////////////////////////////
+        ///////////////////////////////////////////////////////////////////////////////////////////
+        ///////////////////////////////////////////////////////////////////////////////////////////
+        ///////////////////////////////////////////////////////////////////////////////////////////
+        ///////////////////////////////////////////////////////////////////////////////////////////
+        ///////////////////////////////////////////////////////////////////////////////////////////
+        ///////////////////////////////////////////////////////////////////////////////////////////
         
         
         int numOfSegs;
@@ -330,6 +329,14 @@ std::vector<unsigned> find_adjacent_intersections(unsigned intersection_id){
     return connectedIntersections;
 }
 
+
+/*find_street_street_segments function
+ * -returns a vector of street segments for the given street_id
+ * 
+ * @param street_id <unsigned> - the street index number of the desired street
+ * @return segIDs<ID> - a vector of street segments with the same street ID as street_id
+ */
+
 std::vector<unsigned> find_street_street_segments(unsigned street_id){
     IDVector segIDs;
     segIDs.clear();
@@ -343,6 +350,13 @@ std::vector<unsigned> find_street_street_segments(unsigned street_id){
     return segIDs;
 }
 
+/*find_all_street_intersections function
+ * -return a vector of intersections for the given street_id
+ * 
+ * @param street_id <unsigned> - the street index number of the desired street
+ * @return intersections<IDVector> - a vector of intersections that are on the specified street 
+ */
+
 std::vector<unsigned> find_all_street_intersections(unsigned street_id){ 
     IDVector intersections;
     intersections.clear();
@@ -355,6 +369,8 @@ std::vector<unsigned> find_all_street_intersections(unsigned street_id){
     
     return intersections;
 }
+
+
 
 //=======================comment this===============================
 std::vector<unsigned> find_intersection_ids_from_street_ids(unsigned street_id1,unsigned street_id2){
@@ -378,12 +394,6 @@ std::vector<unsigned> find_intersection_ids_from_street_ids(unsigned street_id1,
     return intersectingIDs;
 }
 
-
-//DONE commenting between aaaaaaa and bbbbbbbbbb
-//aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-//aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-//aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-//aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 
 /* find_distance_between_two_points function
  *  - calculates the distance between point1 and point2
@@ -570,32 +580,22 @@ double find_street_segment_travel_time(unsigned street_segment_id){
     return time;
 }
 
-//bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
-//bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
-//bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
-//bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
 
-
-//COMMMMMENNNTTTTT this not line by line sir!!!!!
-//=======================================================================================================
-//=======================================================================================================
-//=======================================================================================================
-//=======================================================================================================
-
-
-///change the min values to something less random, use earth radius if unsure.....
+/*find_closest_POI function 
+ * -increments through all POIs and calculates the distance between my_position and the POI
+ * -stores the index of the minimum distance 
+ * 
+ * @param my_position <LatLon> - latitude and longitude coordinates of the desired position 
+ * @return nearestPointIndex<unsigned> - the index of the nearest POI
+ */
 
 unsigned find_closest_point_of_interest(LatLon my_position){
-    double min = 9999999999;
-    //contains the index of the nearest point 
+    double min = EARTH_RADIUS_IN_METERS;
     int nearestPointIndex = 0; 
     
-    //iterating through all points of interest on the map
-    for (int i = 0; i < getNumPointsOfInterest(); i++){      
-        //finding distance between a point of interest and current position                                         
+    for (int i = 0; i < getNumPointsOfInterest(); i++){                                           
         double temp = find_distance_between_two_points(my_position, getPointOfInterestPosition(i));   
         if(temp <= min){
-            //storing the index of the point of interest if it is the min
             min = temp; 
             nearestPointIndex = i;                                                                      
         }
@@ -604,18 +604,21 @@ unsigned find_closest_point_of_interest(LatLon my_position){
     return unsigned(nearestPointIndex); 
 }
 
-///change the min values to something less random, use earth radius if unsure.....
+/*find_closest_intersection function 
+ * -increments through all intersections and calculates the distance between my_position and the intersection
+ * -stores the index of the minimum distance 
+ * 
+ * @param my_position <LatLon> - latitude and longitude coordinates of the desired position 
+ * @return nearestIntIndex<unsigned> - the index of the nearest intersection
+ */
+
 unsigned find_closest_intersection(LatLon my_position){
-    double min = 9999999999;   
-    //contains the index of the nearest point                                                                          
+    double min = EARTH_RADIUS_IN_METERS;                                                                           
     int nearestIntIndex = 0;                                                                            
     
-    //iterating through all intersections on the map
     for (int i = 0; i < getNumIntersections(); i++){          
-        //finding distance between an intersection and current position
         double temp = find_distance_between_two_points(my_position, getIntersectionPosition(i));                       
         if(temp <= min){
-            //storing the index of the intersection if it is the min
             min = temp; 
             nearestIntIndex = i;                                                                        
         }
@@ -623,17 +626,7 @@ unsigned find_closest_intersection(LatLon my_position){
     return unsigned(nearestIntIndex);   
 
 }
-//=======================================================================================================
-//=======================================================================================================
-//=======================================================================================================
-//=======================================================================================================
-//=======================================================================================================
 
-
-//aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-//aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-//aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-//aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 
 /* find_street_ids_from_partial_street_name function
  * - converts street_prefix string to lower case
@@ -657,6 +650,3 @@ std::vector<unsigned> find_street_ids_from_partial_street_name(std::string stree
     
     return matchIDs;
 }
-
-//bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
-//bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
