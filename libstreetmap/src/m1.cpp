@@ -206,6 +206,7 @@ bool load_map(std::string path/*map_path*/) {
     return load_successful;
 }
 
+
 /* close_map function
  * - clears all data in global data structures
  * - calls for API to close street database
@@ -213,6 +214,7 @@ bool load_map(std::string path/*map_path*/) {
  * @param none
  * @return void
  */
+
 void close_map() {
     streetNameMap.clear();
     streetMapFast.clear();
@@ -253,6 +255,7 @@ std::vector<std::string> find_intersection_street_names(unsigned intersection_id
     return streetNames;
 }
 
+
 /* are_directly_connected function
  * Checks both "to" and "from" of street segments connected to intersection_id1
  * if either of them are connected to intersection_id2 unless the road is one way
@@ -262,6 +265,7 @@ std::vector<std::string> find_intersection_street_names(unsigned intersection_id
  * @param intersection_id2 <unsigned> - id for destination intersection
  * @return <bool> - if they are directly connected it will return true otherwise false
  */
+
 bool are_directly_connected(unsigned intersection_id1, unsigned intersection_id2){
     IDVector segsInt1=find_intersection_street_segments(intersection_id1);
     if(intersection_id1==intersection_id2){
@@ -280,6 +284,7 @@ bool are_directly_connected(unsigned intersection_id1, unsigned intersection_id2
     return false;
 }
 
+
 /* find_adjacent_intersections function
  * checks "to" and "from" values of all connected street segments
  * it determines if each "to" and "from" values are valid
@@ -291,6 +296,7 @@ bool are_directly_connected(unsigned intersection_id1, unsigned intersection_id2
  * @param intersection_id <unsigned> - id for source intersection
  * @return connectedIntersections vector<unsigned> - contains id's of all connected intersections
  */
+
 std::vector<unsigned> find_adjacent_intersections(unsigned intersection_id){
     IDVector segsOrigin=find_intersection_street_segments(intersection_id);
     IDVector connectedIntersections;
@@ -349,6 +355,7 @@ std::vector<unsigned> find_street_street_segments(unsigned street_id){
     
     return segIDs;
 }
+
 
 /*find_all_street_intersections function
  * -return a vector of intersections for the given street_id
