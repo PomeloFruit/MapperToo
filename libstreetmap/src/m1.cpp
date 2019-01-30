@@ -74,6 +74,7 @@ bool load_map(std::string path/*map_path*/) {
         streetLengthVector.clear();
         segTravelTimeVector.clear();
         
+        //<=======================First Structure=============================>
         int segStreetID;
         
         for(unsigned i=0; i<unsigned(getNumStreetSegments()); i++){
@@ -94,23 +95,27 @@ bool load_map(std::string path/*map_path*/) {
             segTravelTimeVector.push_back(find_street_segment_travel_time_preload(i));
         }
         
-  
+        
+        //<=================Second and Third Structures========================>
         std::string currentStreetName;
         IDVector allSegments; 
         IDVector::iterator intersectionIt;
-        IDVector intersectionIDs;
+        IDVector intersectionOnStreet;
         unsigned intersectionID1,intersectionID2;
         int numSegments;
-        
+
         for(unsigned i=0; i<unsigned(getNumStreets()); i++){
             allSegments = find_street_street_segments(i); 
             numSegments = allSegments.size(); 
-            intersectionIDs.clear();
+            intersectionOnStreet.clear();
             currentStreetName = getStreetName(i);
 
             std::transform(currentStreetName.begin(), currentStreetName.end(), 
                                         currentStreetName.begin(), ::tolower);
             
+            
+            //Creates the partialStreetNameMap and inserts all street segments that contain
+            //the same partial street name 
             for(int j = 1; j <= int(currentStreetName.length()); j++){
                 std::string temp = currentStreetName.substr(0, j); 
                 
@@ -124,27 +129,31 @@ bool load_map(std::string path/*map_path*/) {
             streetLengthVector.push_back(find_street_length_preload(i));
             
             
+            //Creates the streetIntersectionsVector 
+            //Inserts intersectionOnStreet, a vector of intersections ids on a street,
+            //into streetIntersectionsVector
             for(int j = 0; j < numSegments; j++){
                 intersectionID1 = getInfoStreetSegment(allSegments[j]).from;
                 intersectionID2 = getInfoStreetSegment(allSegments[j]).to; 
                 
-                intersectionIt = std::find(intersectionIDs.begin(), intersectionIDs.end(), 
+                intersectionIt = std::find(intersectionOnStreet.begin(), intersectionOnStreet.end(), 
                                                         intersectionID1); 
-                if(intersectionIt == intersectionIDs.end()){
-                    intersectionIDs.push_back(intersectionID1); 
+                if(intersectionIt == intersectionOnStreet.end()){
+                    intersectionOnStreet.push_back(intersectionID1); 
                 }
                 
-                intersectionIt = std::find(intersectionIDs.begin(), intersectionIDs.end(),
+                intersectionIt = std::find(intersectionOnStreet.begin(), intersectionOnStreet.end(),
                                                         intersectionID2); 
-                if(intersectionIt == intersectionIDs.end()){
-                    intersectionIDs.push_back(intersectionID2); 
+                if(intersectionIt == intersectionOnStreet.end()){
+                    intersectionOnStreet.push_back(intersectionID2); 
                 }
                 
             }
-            streetIntersectionsVector.push_back(intersectionIDs); 
+            streetIntersectionsVector.push_back(intersectionOnStreet); 
         }
         
-                
+        
+        //<=================Fourth and Fifth Structure=========================>
         int numOfSegs;
         IDVector intersectionIds;
         std::vector<std::string> segNames;
