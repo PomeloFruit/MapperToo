@@ -184,10 +184,12 @@ void close_map() {
     closeStreetDatabase();
 }
 
+
 /* find_intersection_street_segments function
  * @param intersection_id2 <unsigned> - id for source intersection
  * @return streetSegs vector<unsigned> - returns previously indexed vector of street segment ids connected to intersection_id
  */
+
 std::vector<unsigned> find_intersection_street_segments(unsigned intersection_id){
     IDVector streetSegs;
     streetSegs.clear();
@@ -200,6 +202,7 @@ std::vector<unsigned> find_intersection_street_segments(unsigned intersection_id
     
     return streetSegs;  
 }
+
 
 /* find_intersection_street_names function
  * - attempts to return street names connected to intersection_id
