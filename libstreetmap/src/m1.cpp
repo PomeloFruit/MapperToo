@@ -46,8 +46,11 @@ std::map<std::string, std::vector<unsigned>> partialStreetNameMap;
 
 //vector of vectors of intersections on a street 
 std::vector<std::vector<unsigned>> streetIntersectionsVector; 
+//contains street segment ID indexed on intersection ID
 std::vector<std::vector<unsigned>> streetSegIDVector;
+//contains street segment names indexed on intersection Id
 std::vector<std::vector<std::string>> streetSegNameVector;
+
 std::vector<double> segLengthVector;
 std::vector<double> streetLengthVector;
 std::vector<double> segTravelTimeVector;
@@ -186,6 +189,7 @@ void close_map() {
 
 
 /* find_intersection_street_segments function
+ * attempts to return all street segment id's connected to intersection_id
  * @param intersection_id2 <unsigned> - id for source intersection
  * @return streetSegs vector<unsigned> - returns previously indexed vector of street segment ids connected to intersection_id
  */
