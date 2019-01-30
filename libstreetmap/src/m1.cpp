@@ -254,7 +254,15 @@ std::vector<std::string> find_intersection_street_names(unsigned intersection_id
     return streetNames;
 }
 
-//=======================comment this===============================
+/* are_directly_connected function
+ * Checks both "to" and "from" of street segments connected to intersection_id1
+ * if either of them are connected to intersection_id2 unless the road is one way
+ * then it checks if intersection_id1 is "to" if it is it will return false
+ * otherwise it will return true (if intersection_id2 is found) 
+ * @param intersection_id1 <unsigned> - id for source intersection
+ * @param intersection_id2 <unsigned> - id for destination intersection
+ * @return <bool> - if they are directly connected it will return true otherwise false
+ */
 bool are_directly_connected(unsigned intersection_id1, unsigned intersection_id2){
     IDVector segsInt1=find_intersection_street_segments(intersection_id1);
     if(intersection_id1==intersection_id2){
@@ -273,35 +281,48 @@ bool are_directly_connected(unsigned intersection_id1, unsigned intersection_id2
     return false;
 }
 
-//=======================comment this===============================
+/* find_adjacent_intersections function
+ * checks "to" and "from" values of all connected street segments
+ * it determines if each "to" and "from" values are valid
+ * validity is based upon if intersection_id is "to" or "from"
+ * and if the intersection that is currently being indexed is intersection_id
+ * it then determines if it should insert into the list or not
+ * if intersection_id is "to" and the segment is one way it should not insert
+ * it then inserts into the list based on isInvalidTo and isInvalidFrom
+ * @param intersection_id <unsigned> - id for source intersection
+ * @return connectedIntersections vector<unsigned> - contains id's of all connected intersections
+ */
 std::vector<unsigned> find_adjacent_intersections(unsigned intersection_id){
     IDVector segsOrigin=find_intersection_street_segments(intersection_id);
     IDVector connectedIntersections;
     bool insert;
-    bool invalidTo;
-    bool invalidFrom;
+    bool isInvalidTo;
+    bool isIvalidFrom;
     
     for(unsigned i=0;i<segsOrigin.size();i++){
         insert=true;
-        invalidTo=false;
-        invalidFrom=false;
+        isInvalidTo=false;
+        isIvalidFrom=false;
         for(unsigned c=0;c<connectedIntersections.size();c++){
-            if((connectedIntersections[c]==unsigned(getInfoStreetSegment(segsOrigin[i]).to)||(unsigned(getInfoStreetSegment(segsOrigin[i]).to)==intersection_id))){
-                invalidTo=true;
+            if((connectedIntersections[c]==unsigned(getInfoStreetSegment(segsOrigin[i]).to)
+                    ||(unsigned(getInfoStreetSegment(segsOrigin[i]).to)==intersection_id))){
+                isInvalidTo=true;
             }
-            if((connectedIntersections[c]==unsigned(getInfoStreetSegment(segsOrigin[i]).from))||(unsigned(getInfoStreetSegment(segsOrigin[i]).from)==intersection_id)){
-                invalidFrom=true;
+            if((connectedIntersections[c]==unsigned(getInfoStreetSegment(segsOrigin[i]).from))
+                    ||(unsigned(getInfoStreetSegment(segsOrigin[i]).from)==intersection_id)){
+                isIvalidFrom=true;
             }
         }
 
-        if((getInfoStreetSegment(segsOrigin[i]).oneWay)&&(unsigned(getInfoStreetSegment(segsOrigin[i]).to)==intersection_id)){
+        if((getInfoStreetSegment(segsOrigin[i]).oneWay)
+                &&(unsigned(getInfoStreetSegment(segsOrigin[i]).to)==intersection_id)){
             insert=false;
         }
         if(insert){
-            if((unsigned(getInfoStreetSegment(segsOrigin[i]).to)!=intersection_id)&&!invalidTo){
+            if((unsigned(getInfoStreetSegment(segsOrigin[i]).to)!=intersection_id)&&!isInvalidTo){
                 connectedIntersections.push_back(getInfoStreetSegment(segsOrigin[i]).to);
             }
-            else if(!invalidFrom){
+            else if(!isIvalidFrom){
                 connectedIntersections.push_back(getInfoStreetSegment(segsOrigin[i]).from);
             }
         }
