@@ -49,13 +49,6 @@ std::map<std::string, std::vector<unsigned>> partialStreetNameMap;
 
 //vector of vectors of intersections on a street 
 std::vector<std::vector<unsigned>> streetIntersectionsVector; 
-<<<<<<< HEAD
-=======
-//contains street segment ID indexed on intersection ID
-std::vector<std::vector<unsigned>> streetSegIDVector;
-//contains street segment names indexed on intersection ID
-std::vector<std::vector<std::string>> streetSegNameVector;
->>>>>>> I haven't changed anything but I need to pull
 
 //vector of street segment ID indexed on intersection ID
 std::vector<std::vector<unsigned>> intersectionSegIDVector;
@@ -74,6 +67,13 @@ std::vector<double> segTravelTimeVector;
 
 //========================= Function Implementations =========================
 
+/* load_map function
+ * - populates all appropriate data in global data structures
+ * - calls for API to load street database
+ * 
+ * @param path <string> - file path for map
+ * @return load_successful<boolean> - whether the map has loaded successfully
+ */
 bool load_map(std::string path/*map_path*/) {
     bool load_successful = false; 
     
@@ -91,7 +91,7 @@ bool load_map(std::string path/*map_path*/) {
         streetLengthVector.clear();
         segTravelTimeVector.clear();
         
-        //<=======================First Structure=============================>
+        //==== streetIDMap & segLengthVector & segTravelTimeVector ====
         int segStreetID;
         
         for(unsigned i=0; i<unsigned(getNumStreetSegments()); i++){
@@ -113,7 +113,7 @@ bool load_map(std::string path/*map_path*/) {
         }
         
         
-        //<=================Second and Third Structures========================>
+        //==== partialStreetNameMap & streetLengthVector & streetIntersectionsVector ====
         std::string currentStreetName;
         IDVector allSegments; 
         IDVector::iterator intersectionIt;
@@ -127,12 +127,13 @@ bool load_map(std::string path/*map_path*/) {
             intersectionOnStreet.clear();
             currentStreetName = getStreetName(i);
 
+            //converts street name to lower case
             std::transform(currentStreetName.begin(), currentStreetName.end(), 
                                         currentStreetName.begin(), ::tolower);
             
             
-            //Creates the partialStreetNameMap and inserts all street segments that contain
-            //the same partial street name 
+            //Creates the partialStreetNameMap and inserts all street segments 
+            //that contain the same partial street name 
             for(int j = 1; j <= int(currentStreetName.length()); j++){
                 std::string temp = currentStreetName.substr(0, j); 
                 
@@ -147,20 +148,20 @@ bool load_map(std::string path/*map_path*/) {
             
             
             //Creates the streetIntersectionsVector 
-            //Inserts intersectionOnStreet, a vector of intersections ids on a street,
-            //into streetIntersectionsVector
+            //Inserts intersectionOnStreet, a vector of intersections ids on a 
+            //street into streetIntersectionsVector
             for(int j = 0; j < numSegments; j++){
                 intersectionID1 = getInfoStreetSegment(allSegments[j]).from;
                 intersectionID2 = getInfoStreetSegment(allSegments[j]).to; 
                 
-                intersectionIt = std::find(intersectionOnStreet.begin(), intersectionOnStreet.end(), 
-                                                        intersectionID1); 
+                intersectionIt = std::find(intersectionOnStreet.begin(), 
+                            intersectionOnStreet.end(), intersectionID1); 
                 if(intersectionIt == intersectionOnStreet.end()){
                     intersectionOnStreet.push_back(intersectionID1); 
                 }
                 
-                intersectionIt = std::find(intersectionOnStreet.begin(), intersectionOnStreet.end(),
-                                                        intersectionID2); 
+                intersectionIt = std::find(intersectionOnStreet.begin(), 
+                            intersectionOnStreet.end(), intersectionID2); 
                 if(intersectionIt == intersectionOnStreet.end()){
                     intersectionOnStreet.push_back(intersectionID2); 
                 }
@@ -170,7 +171,13 @@ bool load_map(std::string path/*map_path*/) {
         }
         
         
-        //<=================Fourth and Fifth Structure=========================>
+        //====intersectionSegNameVector & intersectionSegIDVector====
+        /* Here 2 vectors are created one to populate with street segment ID's 
+         * and the other with street names both of those vectors are populated 
+         * in the for loop and are then pushed into the larger global variables
+         * the value at which the global variables (intersectionSegNameVector 
+         * & intersectionSegIDVector) are indexed corresponding to the intersectionID
+         */
         int numOfSegs;
         IDVector intersectionIds;
         std::vector<std::string> segNames;
@@ -188,8 +195,8 @@ bool load_map(std::string path/*map_path*/) {
             intersectionSegNameVector.push_back(segNames);
             intersectionSegIDVector.push_back(intersectionIds);
         }
-
     }    
+    
     return load_successful;
 }
 
@@ -218,7 +225,7 @@ void close_map() {
  * - attempts to return all street segment id's connected to intersection_id
  * 
  * @param intersection_id2 <unsigned> - id for source intersection
- * @return streetSegs vector<unsigned> - returns previously indexed vector of street segment ids connected to intersection_id
+ * @return streetSegs vector<unsigned> - street segment ids connected to intersection_id
  */
 
 std::vector<unsigned> find_intersection_street_segments(unsigned intersection_id){
@@ -239,7 +246,7 @@ std::vector<unsigned> find_intersection_street_segments(unsigned intersection_id
  * - attempts to return street names connected to intersection_id
  * 
  * @param intersection_id2 <unsigned> - id for source intersection
- * @return streetNames vector<std::string>- returns previously indexed vector of street segment names connected to intersection_id
+ * @return streetNames vector<std::string>- street segment names connected to intersection_id
  */
 
 std::vector<std::string> find_intersection_street_names(unsigned intersection_id){
@@ -276,7 +283,8 @@ bool are_directly_connected(unsigned intersection_id1, unsigned intersection_id2
         if((unsigned(getInfoStreetSegment(segsInt1[i]).to)==intersection_id2)){
             return true;
         }
-        else if((unsigned(getInfoStreetSegment(segsInt1[i]).to)==intersection_id1)&&(unsigned(getInfoStreetSegment(segsInt1[i]).from)==intersection_id2)){
+        else if((unsigned(getInfoStreetSegment(segsInt1[i]).to)==intersection_id1)
+                    && (unsigned(getInfoStreetSegment(segsInt1[i]).from)==intersection_id2)){
             if(!getInfoStreetSegment(segsInt1[i]).oneWay){
                 return true;
             }
@@ -302,14 +310,20 @@ bool are_directly_connected(unsigned intersection_id1, unsigned intersection_id2
 std::vector<unsigned> find_adjacent_intersections(unsigned intersection_id){
     IDVector segsOrigin=find_intersection_street_segments(intersection_id);
     IDVector connectedIntersections;
-    bool insert;
-    bool isInvalidTo;
-    bool isIvalidFrom;
+    bool insert;        //true if the destination intersection is reachable from the intersection_id
+    bool isInvalidTo;   //is true if not unique or is intersection_id (for streetSeg.to)
+    bool isIvalidFrom;  //is true if not unique or is intersection_id (for streetSeg.from)
     
+    /* The outer for loop goes through all the street segments that are connected to intersection_id
+     * it also sets all the boolean values for each insert
+     */
     for(unsigned i=0;i<segsOrigin.size();i++){
         insert=true;
         isInvalidTo=false;
         isIvalidFrom=false;
+        
+        // The inner for loop checks if the intersection that is connected by the current street segment
+        // is not intersection_id and that it is not already in the list
         for(unsigned c=0;c<connectedIntersections.size();c++){
             if((connectedIntersections[c]==unsigned(getInfoStreetSegment(segsOrigin[i]).to)
                     ||(unsigned(getInfoStreetSegment(segsOrigin[i]).to)==intersection_id))){
