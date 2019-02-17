@@ -310,14 +310,15 @@ bool are_directly_connected(unsigned intersection_id1, unsigned intersection_id2
 std::vector<unsigned> find_adjacent_intersections(unsigned intersection_id){
     IDVector segsOrigin=find_intersection_street_segments(intersection_id);
     IDVector connectedIntersections;
-    bool insert;        //true if the destination intersection is reachable from the intersection_id
-    bool isInvalidTo;   //is true if not unique or is intersection_id (for streetSeg.to)
-    bool isIvalidFrom;  //is true if not unique or is intersection_id (for streetSeg.from)
+    bool insert=false;        //true if the destination intersection is reachable from the intersection_id
+    unsigned intersection2;
+    //bool isInvalidTo;   //is true if not unique or is intersection_id (for streetSeg.to)
+    //bool isIvalidFrom;  //is true if not unique or is intersection_id (for streetSeg.from)
     
     /* The outer for loop goes through all the street segments that are connected to intersection_id
      * it also sets all the boolean values for each insert
      */
-    for(unsigned i=0;i<segsOrigin.size();i++){
+    /*for(unsigned i=0;i<segsOrigin.size();i++){
         insert=true;
         isInvalidTo=false;
         isIvalidFrom=false;
@@ -348,6 +349,40 @@ std::vector<unsigned> find_adjacent_intersections(unsigned intersection_id){
             }
         }
     }
+     * all I have to do it determine what the intersection is and then call directly connected ROFL LMAOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOKMS
+    return connectedIntersections;*/
+    for(int c=0;unsigned(c)<segsOrigin.size();c++){
+        insert=true;
+        
+        if(unsigned(getInfoStreetSegment(segsOrigin[c]).to)==intersection_id){
+            intersection2=unsigned(getInfoStreetSegment(segsOrigin[c]).from);
+            //I still need to find duplicates 
+        }
+        else{
+            intersection2=unsigned(getInfoStreetSegment(segsOrigin[c]).to);
+
+        }
+//        insert=false;
+//        insertTo=true;
+//        insertFrom=true;
+//        if(((getInfoStreetSegment(segsOrigin[c]).from==intersection_id)&&(getInfoStreetSegment(segsOrigin[c]).oneWay))||(!getInfoStreetSegment(segsOrigin[c]).oneWay)){
+//            insert=true;
+//        }
+        if(are_directly_connected(intersection_id, intersection2)){
+            for(int i=0;unsigned(i)<connectedIntersections.size();i++){
+                if(intersection2==connectedIntersections[i]){
+                    insert=false;
+                }
+            }
+        }
+        else{
+            insert=false;
+        }
+        if(insert){
+            connectedIntersections.push_back(intersection2);
+        }
+    }
+    
     return connectedIntersections;
 }
 
@@ -678,7 +713,7 @@ std::vector<unsigned> find_street_ids_from_partial_street_name(std::string stree
     try {
         matchIDs = partialStreetNameMap.at(street_prefix);
     } catch(std::exception& e) {
-        std::cout << "Match not found!" << std::endl;
+        //std::cout << "Match not found!" << std::endl;
     }
     
     return matchIDs;
