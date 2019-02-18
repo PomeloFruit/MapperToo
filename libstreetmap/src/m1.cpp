@@ -20,7 +20,7 @@
  */
 #include "m1.h"
 #include "StreetsDatabaseAPI.h"
-#include "globals.h"
+//#include "globals.h"
 
 #include <map>
 #include <unordered_map>
@@ -352,7 +352,7 @@ std::vector<unsigned> find_adjacent_intersections(unsigned intersection_id){
     }
      * all I have to do it determine what the intersection is and then call directly connected ROFL LMAOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOKMS
     return connectedIntersections;*/
-    for(int c=0;c<segsOrigin.size();c++){
+    for(int c=0;unsigned(c)<segsOrigin.size();c++){
         insert=true;
         
         if(unsigned(getInfoStreetSegment(segsOrigin[c]).to)==intersection_id){
