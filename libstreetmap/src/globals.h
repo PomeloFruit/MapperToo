@@ -16,6 +16,9 @@
 //unordered map of <street ids, street segments with the same street ids>
 #include <vector>
 #include <string>
+#include <map>
+#include <unordered_map>
+
 extern std::unordered_map<int, std::vector<unsigned>> streetIDMap; 
 
 //map of <partial street name, street ids with the same partial street name>
