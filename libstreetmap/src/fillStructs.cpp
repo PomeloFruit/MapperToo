@@ -50,7 +50,11 @@ void populateData::populateOSMWayInfo(infoStrucs info){
 //}
 
 int populateData::getRoadType(const OSMWay* wayPtr){
-    for(unsigned i=0 ; i<getTagCount(wayPtr) ; i++){
+    if(wayPtr == NULL){
+        return SERVICE;
+    }
+    
+    for(unsigned i=0 ; i < getTagCount(wayPtr) ; i++){
         std::string key,value;
         std::tie(key,value) = getTagPair(wayPtr,i);
         std::transform(key.begin(), key.end(), key.begin(), ::tolower);

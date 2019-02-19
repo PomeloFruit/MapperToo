@@ -27,6 +27,8 @@ populateData pop;
 featureDrawing ft;
 roadDrawing rd;
 
+void draw_main_canvas(ezgl::renderer &g);
+
 void draw_map(){
     ezgl::application::settings settings;
     settings.main_ui_resource = "libstreetmap/resources/main.ui";
@@ -38,11 +40,10 @@ void draw_map(){
     xy.setAverageLat(); 
     pop.initialize(info, xy);   
     
+    pop.populatePOIInfo(info);
     pop.populateOSMWayInfo(info);
     pop.populateStreetSegInfo(info);
     pop.populateIntersectionInfo(info);
-
-    pop.populatePOIInfo(info);
      
     double xMax, xMin, yMax, yMin; 
     xMax = xy.xFromLon(xy.maxLon);

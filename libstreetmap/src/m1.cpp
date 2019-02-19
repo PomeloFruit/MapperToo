@@ -674,28 +674,28 @@ unsigned find_closest_point_of_interest(LatLon my_position){
     return unsigned(nearestPointIndex); 
 }
 
-std::vector<std::vector<unsigned>> streetGrid(100);
-
-void populateGrid(){
-    double dLat = (coordinates.maxLat-coordinates.minLat)/100.0; 
-    int index;
-    double latPOI;
-    double latInt;
-    
-    for(int i = 0; i < getNumPointsOfInterest(); i++){
-        latPOI = getPointOfInterestPosition(i).lat(); 
-        
-        index = int((latPOI - coordinates.minLat)/dLat);
-        streetGrid[index].push_back(getPointOfInterestPosition(i)); 
-    }
-    
-    for(int i = 0; i < getNumIntersections(); i++){
-        latInt = getIntersectionPosition(i).lat();
-        
-        index = int((latInt - coordinates.minLat)/dLat);
-        streetGrid[index].push_back(getIntersectionPosition(i));
-    }
-}
+//std::vector<std::vector<unsigned>> streetGrid(100);
+//
+//void populateGrid(){
+//    double dLat = (coordinates.maxLat-coordinates.minLat)/100.0; 
+//    int index;
+//    double latPOI;
+//    double latInt;
+//    
+//    for(int i = 0; i < getNumPointsOfInterest(); i++){
+//        latPOI = getPointOfInterestPosition(i).lat(); 
+//        
+//        index = int((latPOI - coordinates.minLat)/dLat);
+//        streetGrid[index].push_back(getPointOfInterestPosition(i)); 
+//    }
+//    
+//    for(int i = 0; i < getNumIntersections(); i++){
+//        latInt = getIntersectionPosition(i).lat();
+//        
+//        index = int((latInt - coordinates.minLat)/dLat);
+//        streetGrid[index].push_back(getIntersectionPosition(i));
+//    }
+//}
 
 
 /*find_closest_intersection function 
