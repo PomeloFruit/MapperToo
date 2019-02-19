@@ -199,6 +199,7 @@ void populateFeatureInfo(){
             
             FeaturePointVec[i].push_back(ezgl::point2d(xNew,yNew));
         }
+        std::cout << "n - " << FeatureInfo[i].name << " t - " << FeatureInfo[i].featureType << std::endl;
     }
 }
 
@@ -213,7 +214,7 @@ void populatePOIInfo(){
         POIInfo[i].name = getPointOfInterestName(i);
         POIInfo[i].type = getPointOfInterestType(i);
         
-        std::cout << "n - " << POIInfo[i].name << " t - " << POIInfo[i].type << std::endl;
+      //  std::cout << "n - " << POIInfo[i].name << " t - " << POIInfo[i].type << std::endl;
     }
 }
 
@@ -230,6 +231,7 @@ void drawPOI(int numPOI, ezgl::renderer &g);
 /////////////================================================================================
 
 void setFeatureColour(int type, ezgl::renderer &g){
+    std::cout << "hi\n";
     switch(type){
         case 0: // unknown = dark gray
             g.set_color(152,151,150,255);
@@ -296,7 +298,7 @@ void setRoadColourSize(int type, ezgl::renderer &g){
 void drawFeatures(int numFeatures, ezgl::renderer &g){
     for(int i=0 ; i<numFeatures ; i++){
         setFeatureColour(FeatureInfo[i].featureType, g);
-        
+          std::cout << "hi2\n";
         if(FeaturePointVec[i].size()>1){
             g.fill_poly(FeaturePointVec[i]);
         } else {
@@ -377,7 +379,7 @@ void draw_map(){
     populateOSMWayInfo();
     populateStreetSegInfo();
     populateIntersectionInfo();
-    populateFeatureInfo();
+
     populatePOIInfo();
      
     coordinates.initialize();
@@ -387,9 +389,9 @@ void draw_map(){
     xMin = coordinates.xFromLon(coordinates.minLon);
     yMax = coordinates.yFromLat(coordinates.maxLat);
     yMin = coordinates.yFromLat(coordinates.minLat); 
-
-    //std::cout << xMax << " " << xMin << " " << yMax << " " << yMin << std::endl;
     
+        populateFeatureInfo();
+        
     ezgl::rectangle initial_world({xMin,yMin},{xMax,yMax});
     application.add_canvas("MainCanvas",draw_main_canvas,initial_world);
     
