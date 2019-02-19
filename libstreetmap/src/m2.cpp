@@ -11,6 +11,7 @@
 #include "latLonToXY.h"
 //#include "globals.h" //I think this can be removed
 #include "StreetsDatabaseAPI.h"
+#include "OSMDatabaseAPI.h"
 #include <math.h>
 #include <algorithm>
 #include <string>
@@ -20,7 +21,7 @@
 #include "ezgl/graphics.hpp"
 #include "ezgl/point.hpp"
 
-
+const int ROADWIDTH = 3;
 ///////////================================================================================
 
 double averageLatInRad;
@@ -98,13 +99,13 @@ struct streetSegData{
 
 struct featureData{
     int featureType;
-    int numPoints;
     std::string name;
 };
 
 std::vector<intersectionData> IntersectionInfo;
 std::vector<streetSegData> StreetSegInfo;
 std::vector<featureData> FeatureInfo;
+std::vector<std::vector<ezgl::point2d>> FeaturePointVec;
 
 void populateStreetSegInfo();
 void populateIntersectionInfo();
@@ -135,12 +136,28 @@ void populateIntersectionInfo(){
 
 void populateFeatureInfo(){
     int numFeatures = getNumFeatures();
+    int numPoints;
+    LatLon newPoint;
+    double xNew, yNew;
     FeatureInfo.resize(numFeatures);
+    FeaturePointVec.resize(numFeatures);
     
     for(int i=0;i<numFeatures;i++){
         FeatureInfo[i].name = getFeatureName(i);
         FeatureInfo[i].featureType = getFeatureType(i);
-        FeatureInfo[i].numPoints = getFeaturePointCount(i);
+        
+        numPoints = getFeaturePointCount(i);
+        FeaturePointVec[i].clear();
+        
+        std::cout << "feature # " << i << " num points: " << numPoints << " type: " << FeatureInfo[i].featureType << std::endl;
+        for(int p=0 ; p<numPoints; p++){
+            newPoint = getFeaturePoint(p, i);
+            
+            xNew = xFromLon(newPoint.lon());
+            yNew = yFromLat(newPoint.lat());
+            
+            FeaturePointVec[i].push_back(ezgl::point2d(xNew,yNew));
+        }
     }
 }
 
@@ -153,39 +170,55 @@ void drawStraightStreet(LatLon pt1, LatLon pt2, ezgl::renderer &g);
 void drawIntersections(int numInter, ezgl::renderer &g);
 
 /////////////================================================================================
-//void setFeatureColour(int type, ezgl::renderer &g){
-//    
-//    g.set_color(100,100,100,255);
-//}
+
+void setFeatureColour(int type, ezgl::renderer &g){
+    switch(type){
+        case 0: // unknown = dark gray
+            g.set_color(152,151,150,255);
+            break;
+        case 1: // park = darkish green
+            g.set_color(92,201,103,255);
+            break;
+        case 2: // beach = peach
+            g.set_color(235,210,111,255);
+            break;
+        case 3: // lake = blue 
+            g.set_color(16,184,225,255);
+            break;
+        case 4: // river = dark blue 
+            g.set_color(0,120,149,255);
+            break;
+        case 5: // island = dark green
+            g.set_color(53,92,17,255);
+            break;
+        case 6: // building = darkish gray
+            g.set_color(127,129,125,255);
+            break;
+        case 7: // green space = light green 
+            g.set_color(95,218,24,255);
+            break;
+        case 8: // golf course = putting green
+            g.set_color(161,23,115,225);
+            break;
+        case 9: // stream = light blue
+            g.set_color(115,226,234,255);
+            break;
+        default:
+            g.set_color(152,151,150,255);
+            break;
+    }
+}
         
 
 
 void drawFeatures(int numFeatures, ezgl::renderer &g){
-    int numPoints;
-    LatLon newPoint;
-    double xNew, yNew;
-    std::vector<ezgl::point2d> points;
-    
     for(int i=0 ; i<numFeatures ; i++){
-        numPoints = FeatureInfo[i].numPoints;
-        std::cout << "feature # " << i << " num points: " << numPoints << " type: " << FeatureInfo[i].featureType << std::endl;
-        points.clear();
-        for(int p=0 ; p<numPoints; p++){
-            newPoint = getFeaturePoint(p, i);
-            
-            xNew = xFromLon(newPoint.lon());
-            yNew = yFromLat(newPoint.lat());
-            
-            points.push_back(ezgl::point2d(xNew,yNew));
-        }
+        setFeatureColour(FeatureInfo[i].featureType, g);
         
-       // setFeatureColour(int type, ezgl::renderer &g);
-        g.set_color(100,100,100,255);
-        
-        if(points.size()>1){
-            g.fill_poly(points);
+        if(FeaturePointVec[i].size()>1){
+            g.fill_poly(FeaturePointVec[i]);
         } else {
-            g.fill_rectangle(points[0],0.0001,0.0001);
+            g.fill_rectangle(FeaturePointVec[i][0],0.0001,0.0001);
         }
     }
 }
@@ -216,20 +249,11 @@ void drawStraightStreet(LatLon pt1, LatLon pt2, ezgl::renderer &g){
     xFinal=xFromLon(pt2.lon());
     yFinal=yFromLat(pt2.lat());
     
-    double width = 0.0001;
-    
-//    std::vector<ezgl::point2d> coords;
-//    coords.push_back(ezgl::point2d(xInitial-width,yInitial-width));
-//    coords.push_back(ezgl::point2d(xInitial+width,yInitial+width));
-//    coords.push_back(ezgl::point2d(xFinal+width,yFinal+width));
-//    coords.push_back(ezgl::point2d(xFinal-width,yFinal-width));
-    g.set_line_width(3);
+    g.set_line_width(ROADWIDTH);
     g.set_color(0,0,0,255);
     
     
     g.draw_line({xInitial, yInitial},{xFinal, yFinal});
-    
-    //g.fill_poly(coords);
 }
 
 void drawIntersections(int numInter, ezgl::renderer &g){
@@ -237,7 +261,7 @@ void drawIntersections(int numInter, ezgl::renderer &g){
         float x = xFromLon(IntersectionInfo[i].position.lon());
         float y = yFromLat(IntersectionInfo[i].position.lat());
         
-        float width=0.0001; ///no magic numbers!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        float width=0.0001; ///no magic numbers!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         //float width=10;
         float height=width;
         g.fill_rectangle({x, y},{x+width, y+height});

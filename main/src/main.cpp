@@ -23,6 +23,7 @@
 
 #include "m1.h"
 #include "m2.h"
+#include "OSMDatabaseAPI.h"
 //Program exit codes
 constexpr int SUCCESS_EXIT_CODE = 0;        //Everyting went OK
 constexpr int ERROR_EXIT_CODE = 1;          //An error occured
@@ -32,7 +33,7 @@ constexpr int BAD_ARGUMENTS_EXIT_CODE = 2;  //Invalid command-line usage
 std::string default_map_path = "/cad2/ece297s/public/maps/toronto_canada.streets.bin";
 
 int main(int argc, char** argv) {
-
+    
     std::string map_path;
     if(argc == 1) {
         //Use a default map
@@ -47,6 +48,10 @@ int main(int argc, char** argv) {
         return BAD_ARGUMENTS_EXIT_CODE;
     }
 
+    
+    loadOSMDatabaseBIN(map_path);
+    
+    
     //Load the map and related data structures
     bool load_success = load_map(map_path);
     if(!load_success) {
