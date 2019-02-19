@@ -8,11 +8,12 @@
 #include "m2.h"
 //#include "drawRoads.h"
 //#include "drawFeatures.h"
-//#include "latLonToXY.h"
+#include "latLonToXY.h"
 //#include "globals.h"
 #include "StreetsDatabaseAPI.h"
 #include "OSMDatabaseAPI.h"
 #include "OSMID.h"
+
 #include <math.h>
 #include <algorithm>
 #include <string>
@@ -35,68 +36,7 @@ const int SECONDARY = 2;
 const int RESIDENTIAL = 3;
 const int SERVICE = 4;
 
-double averageLatInRad;
-double maxLat, maxLon, minLat, minLon;
-
-//==================================================================================
-
-
-// finds the average latitude within the map bounds and stores in averageLatInRad
-void averageLat();
-
-//returns the y coordinate corresponding the latitude
-float yFromLat(float lat);
-
-//returns the x coordinate corresponding the longitude
-float xFromLon(float lon);
-
-///////////================================================================================
-
-void averageLat(){
-    
-    maxLat = getIntersectionPosition(0).lat();
-    minLat = maxLat;
-    maxLon = getIntersectionPosition(0).lon();
-    minLon = maxLon;
-    
-    int numOfIntersections = getNumIntersections();
-    
-    //find min and max lat/lon points
-    for(int i=0;i<numOfIntersections;i++){
-        if(getIntersectionPosition(i).lat()>maxLat){
-            maxLat = getIntersectionPosition(i).lat();
-        }
-        if(getIntersectionPosition(i).lat()<minLat){
-            minLat = getIntersectionPosition(i).lat();
-        }
-        if(getIntersectionPosition(i).lon()>maxLon){
-            maxLon = getIntersectionPosition(i).lon();
-        }
-        if(getIntersectionPosition(i).lon()<minLon){
-            minLon = getIntersectionPosition(i).lon();
-        }
-    }
-    
-    averageLatInRad = DEG_TO_RAD*(maxLat+minLat)/2;
-}
-
-
-float xFromLon(float lon){
-    float projectionFactor,x;
-    
-    projectionFactor = cos(averageLatInRad);
-    x = lon*projectionFactor;
-    
-    return x;
-}
-
-
-float yFromLat(float lat){
-    return lat;
-}
-
-///////////================================================================================
-
+mapBoundary coordinates;
 
 struct intersectionData {
     LatLon position;
@@ -254,8 +194,8 @@ void populateFeatureInfo(){
         for(int p=0 ; p<numPoints; p++){
             newPoint = getFeaturePoint(p, i);
             
-            xNew = xFromLon(newPoint.lon());
-            yNew = yFromLat(newPoint.lat());
+            xNew = coordinates.xFromLon(newPoint.lon());
+            yNew = coordinates.yFromLat(newPoint.lat());
             
             FeaturePointVec[i].push_back(ezgl::point2d(xNew,yNew));
         }
@@ -387,18 +327,18 @@ void drawStreetRoads(int numSegs, ezgl::renderer &g){
 void drawStraightStreet(LatLon pt1, LatLon pt2, ezgl::renderer &g){
     float xInitial, yInitial, xFinal, yFinal;
     
-    xInitial=xFromLon(pt1.lon());
-    yInitial=yFromLat(pt1.lat());
-    xFinal=xFromLon(pt2.lon());
-    yFinal=yFromLat(pt2.lat());
+    xInitial = coordinates.xFromLon(pt1.lon());
+    yInitial = coordinates.yFromLat(pt1.lat());
+    xFinal = coordinates.xFromLon(pt2.lon());
+    yFinal = coordinates.yFromLat(pt2.lat());
    
     g.draw_line({xInitial, yInitial},{xFinal, yFinal});
 }
 
 void drawIntersections(int numInter, ezgl::renderer &g){
-     for(int i=0 ; i<numInter ; i++){
-        float x = xFromLon(IntersectionInfo[i].position.lon());
-        float y = yFromLat(IntersectionInfo[i].position.lat());
+     for(int i = 0 ; i < numInter ; i++){
+        float x = coordinates.xFromLon(IntersectionInfo[i].position.lon());
+        float y = coordinates.yFromLat(IntersectionInfo[i].position.lat());
         
         float width=0.00003; ///no magic numbers!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         //float width=10;
@@ -415,8 +355,8 @@ void drawPOI(int numPOI, ezgl::renderer &g){
      for(int i=0 ; i<numPOI ; i++){
         newPoint = getPointOfInterestPosition(i);
             
-        xNew = xFromLon(newPoint.lon());
-        yNew = yFromLat(newPoint.lat());
+        xNew = coordinates.xFromLon(newPoint.lon());
+        yNew = coordinates.yFromLat(newPoint.lat());
         
         g.set_color(255,0,0,255);
         g.fill_elliptic_arc(ezgl::point2d(xNew,yNew),radius,radius,0,360);
@@ -434,14 +374,23 @@ void draw_map(){
     settings.canvas_identifier="MainCanvas";
     ezgl::application application(settings);
     
-    averageLat();//to make sure that we have the max stuff/min stuff so we can set bounds later
     populateOSMWayInfo();
     populateStreetSegInfo();
     populateIntersectionInfo();
     populateFeatureInfo();
     populatePOIInfo();
+     
+    coordinates.initialize();
     
-    ezgl::rectangle initial_world({xFromLon(minLon),yFromLat(minLat)},{xFromLon(maxLon),yFromLat(maxLat)});
+    double xMax, xMin, yMax, yMin; 
+    xMax = coordinates.xFromLon(coordinates.maxLon);
+    xMin = coordinates.xFromLon(coordinates.minLon);
+    yMax = coordinates.yFromLat(coordinates.maxLat);
+    yMin = coordinates.yFromLat(coordinates.minLat); 
+
+    //std::cout << xMax << " " << xMin << " " << yMax << " " << yMin << std::endl;
+    
+    ezgl::rectangle initial_world({xMin,yMin},{xMax,yMax});
     application.add_canvas("MainCanvas",draw_main_canvas,initial_world);
     
     application.run(NULL,NULL,NULL,NULL);
