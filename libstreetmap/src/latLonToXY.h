@@ -2,15 +2,13 @@
 
 class mapBoundary {
 public: 
-    double maxLat;
+    int numOfIntersections;
     
-    double minLat;
+    double maxLat, minLat, maxLon, minLon;
+        
+    double averageLat;
     
-    double maxLon;
-    
-    double minLon;
-    
-    double averageLat; 
+    double xMax, xMin, yMax, yMin; 
     
     void initialize(); 
     

@@ -1,18 +1,19 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
-/* 
- * File:   drawRoads.h
- * Author: lauand16
- *
- * Created on February 18, 2019, 2:20 PM
- */
-
 #pragma once
 
+#include "globals.h"
+#include "latLonToXY.h"
+#include "LatLon.h"
+#include "ezgl/graphics.hpp"
 
+class roadDrawing {
 
+public: 
+    void setRoadColourSize(int type, ezgl::renderer &g);
+    
+    void drawStreetRoads(int numSegs, mapBoundary xy, infoStrucs info, ezgl::renderer &g);
+    
+    void drawStraightStreet(LatLon pt1, LatLon pt2, mapBoundary xy, ezgl::renderer &g);
+    
+    void drawIntersections(int numInter, mapBoundary xy, infoStrucs info, ezgl::renderer &g);
+};
 

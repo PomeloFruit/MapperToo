@@ -4,16 +4,22 @@
 #include "latLonToXY.h"
 
 void mapBoundary::initialize(){
+    numOfIntersections = getNumIntersections();
     maxLat = getMaxLat();
     minLat = getMinLat();
     maxLon = getMaxLon();
     minLon = getMinLon(); 
     averageLat = getAverageLat();
+    xMax = xFromLon(maxLon);
+    xMin = xFromLon(minLon);
+    yMax = yFromLat(maxLat);
+    yMin = yFromLat(minLat); 
 }
 
 double mapBoundary::getMaxLat(){
-    double max = getIntersectionPosition(0).lat(); 
-    int numOfIntersections = getNumIntersections();
+    double max;
+    
+    max = getIntersectionPosition(0).lat(); 
     
     for(int i = 0; i < numOfIntersections; i++){
         if(getIntersectionPosition(i).lat() > max){
@@ -25,9 +31,10 @@ double mapBoundary::getMaxLat(){
 }
 
 double mapBoundary::getMinLat(){
-    double min = getIntersectionPosition(0).lat(); 
-    int numOfIntersections = getNumIntersections();
+    double min;
     
+    min = getIntersectionPosition(0).lat(); 
+
     for(int i = 0; i < numOfIntersections; i++){
         if(getIntersectionPosition(i).lat() < min){
             min = getIntersectionPosition(i).lat(); 
@@ -38,8 +45,9 @@ double mapBoundary::getMinLat(){
 }
 
 double mapBoundary::getMaxLon(){
-    double max = getIntersectionPosition(0).lon(); 
-    int numOfIntersections = getNumIntersections();
+    double max;
+    
+    max = getIntersectionPosition(0).lon(); 
     
     for(int i = 0; i < numOfIntersections; i++){
         if(getIntersectionPosition(i).lon() > max){
@@ -51,9 +59,10 @@ double mapBoundary::getMaxLon(){
 }
 
 double mapBoundary::getMinLon(){
-    double min = getIntersectionPosition(0).lon(); 
-    int numOfIntersections = getNumIntersections();
+    double min;
     
+    min = getIntersectionPosition(0).lon(); 
+
     for(int i = 0; i < numOfIntersections; i++){
         if(getIntersectionPosition(i).lon() < min){
             min = getIntersectionPosition(i).lon(); 
@@ -64,7 +73,9 @@ double mapBoundary::getMinLon(){
 }
 
 double mapBoundary::getAverageLat(){
-    double averageLatInRad = DEG_TO_RAD*(maxLat+minLat)/2;
+    double averageLatInRad;
+    
+    averageLatInRad = DEG_TO_RAD*(maxLat+minLat)/2;
     
     return averageLatInRad; 
 }
