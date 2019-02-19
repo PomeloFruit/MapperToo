@@ -27,8 +27,6 @@ populateData pop;
 featureDrawing ft;
 roadDrawing rd;
 
-void draw_main_canvas(ezgl::renderer &g);
-
 void draw_map(){
     ezgl::application::settings settings;
     settings.main_ui_resource = "libstreetmap/resources/main.ui";
@@ -71,6 +69,3 @@ void draw_main_canvas(ezgl::renderer &g){
     ft.drawPOI(getNumPointsOfInterest(), xy, g);
 }
     
-
-
-
