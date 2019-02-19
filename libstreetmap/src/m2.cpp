@@ -35,11 +35,26 @@ void draw_map(){
     settings.window_identifier = "MainWindow";
     settings.canvas_identifier = "MainCanvas";
     ezgl::application application(settings);
-    
+
     xy.initialize();
+    xy.setAverageLat(); 
     pop.initialize(info, xy);   
-        
-    ezgl::rectangle initial_world({xy.xMin,xy.yMin},{xy.xMax,xy.yMax});
+    
+    pop.populateOSMWayInfo(info);
+    pop.populateStreetSegInfo(info);
+    pop.populateIntersectionInfo(info);
+
+    pop.populatePOIInfo(info);
+     
+    double xMax, xMin, yMax, yMin; 
+    xMax = xy.xFromLon(xy.maxLon);
+    xMin = xy.xFromLon(xy.minLon);
+    yMax = xy.yFromLat(xy.maxLat);
+    yMin = xy.yFromLat(xy.minLat); 
+    
+    pop.populateFeatureInfo(info, xy);
+
+    ezgl::rectangle initial_world({xMin,yMin},{xMax,yMax});
     application.add_canvas("MainCanvas",draw_main_canvas,initial_world);
     
     application.run(NULL,NULL,NULL,NULL);

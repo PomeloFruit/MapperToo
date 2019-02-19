@@ -9,11 +9,10 @@ void mapBoundary::initialize(){
     minLat = getMinLat();
     maxLon = getMaxLon();
     minLon = getMinLon(); 
-    averageLat = getAverageLat();
-    xMax = xFromLon(maxLon);
-    xMin = xFromLon(minLon);
-    yMax = yFromLat(maxLat);
-    yMin = yFromLat(minLat); 
+}
+
+void mapBoundary::setAverageLat(){
+    averageLat = getAverageLat(); 
 }
 
 double mapBoundary::getMaxLat(){
@@ -73,11 +72,7 @@ double mapBoundary::getMinLon(){
 }
 
 double mapBoundary::getAverageLat(){
-    double averageLatInRad;
-    
-    averageLatInRad = DEG_TO_RAD*(maxLat+minLat)/2;
-    
-    return averageLatInRad; 
+    return DEG_TO_RAD*(maxLat+minLat)/2;
 }
 
 

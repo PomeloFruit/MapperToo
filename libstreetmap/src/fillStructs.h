@@ -5,7 +5,6 @@
 
 #include "OSMID.h"
 
-
 class populateData{
 public:
     void initialize(infoStrucs info, mapBoundary xy);
