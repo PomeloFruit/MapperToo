@@ -45,7 +45,7 @@ void featureDrawing::setFeatureColour(int type, ezgl::renderer &g){
 }
         
 
-void featureDrawing::drawFeatures(int numFeatures, infoStrucs info, ezgl::renderer &g){
+void featureDrawing::drawFeatures(int numFeatures, infoStrucs &info, ezgl::renderer &g){
     for(int i=0 ; i<numFeatures ; i++){
         setFeatureColour(info.FeatureInfo[i].featureType, g);
         if(info.FeaturePointVec[i].size()>1){
@@ -58,7 +58,7 @@ void featureDrawing::drawFeatures(int numFeatures, infoStrucs info, ezgl::render
 
 
 
-void featureDrawing::drawPOI(int numPOI, mapBoundary xy, ezgl::renderer &g){
+void featureDrawing::drawPOI(int numPOI, mapBoundary &xy, ezgl::renderer &g){
     LatLon newPoint;
     double xNew, yNew;
     

@@ -11,7 +11,7 @@
 #include "ezgl/graphics.hpp"
 #include "ezgl/point.hpp"
 
-void populateData::initialize(infoStrucs info, mapBoundary xy){
+void populateData::initialize(infoStrucs &info, mapBoundary &xy){
     populateOSMWayInfo(info);
     populateStreetSegInfo(info);
     populateIntersectionInfo(info);
@@ -20,7 +20,7 @@ void populateData::initialize(infoStrucs info, mapBoundary xy){
 }
 
 
-void populateData::populateOSMWayInfo(infoStrucs info){
+void populateData::populateOSMWayInfo(infoStrucs &info){
     info.WayMap.clear();
     const OSMWay* currentWayPtr;
     OSMID currentID;
@@ -77,7 +77,7 @@ int populateData::getRoadType(const OSMWay* wayPtr){
     return SERVICE;
 }
 
-void populateData::populateStreetSegInfo(infoStrucs info){
+void populateData::populateStreetSegInfo(infoStrucs &info){
     int numStreetSegments = getNumStreetSegments();
     info.StreetSegInfo.resize(numStreetSegments);
     
@@ -91,7 +91,7 @@ void populateData::populateStreetSegInfo(infoStrucs info){
     }
 }
 
-void populateData::populateIntersectionInfo(infoStrucs info){
+void populateData::populateIntersectionInfo(infoStrucs &info){
     int numOfIntersections = getNumIntersections();
     info.IntersectionInfo.resize(numOfIntersections);
     
@@ -101,7 +101,7 @@ void populateData::populateIntersectionInfo(infoStrucs info){
     }
 }
 
-void populateData::populateFeatureInfo(infoStrucs info, mapBoundary xy){
+void populateData::populateFeatureInfo(infoStrucs &info, mapBoundary &xy){
     int numFeatures = getNumFeatures();
     int numPoints;
     LatLon newPoint;
@@ -128,7 +128,7 @@ void populateData::populateFeatureInfo(infoStrucs info, mapBoundary xy){
     }
 }
 
-void populateData::populatePOIInfo(infoStrucs info){
+void populateData::populatePOIInfo(infoStrucs &info){
     int numPOI = getNumPointsOfInterest();
    
     info.POIInfo.resize(numPOI);

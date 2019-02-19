@@ -33,7 +33,7 @@
     }
 }
 
- void roadDrawing::drawStreetRoads(int numSegs, mapBoundary xy, infoStrucs info, ezgl::renderer &g){
+ void roadDrawing::drawStreetRoads(int numSegs, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g){
     LatLon from, to;
     
     for(int i=0 ; i<numSegs ; i++){
@@ -52,7 +52,7 @@
     }
 }
 
-void roadDrawing::drawStraightStreet(LatLon pt1, LatLon pt2, mapBoundary xy, ezgl::renderer &g){
+void roadDrawing::drawStraightStreet(LatLon &pt1, LatLon &pt2, mapBoundary &xy, ezgl::renderer &g){
     float xInitial, yInitial, xFinal, yFinal;
     
     xInitial = xy.xFromLon(pt1.lon());
@@ -63,7 +63,7 @@ void roadDrawing::drawStraightStreet(LatLon pt1, LatLon pt2, mapBoundary xy, ezg
     g.draw_line({xInitial, yInitial},{xFinal, yFinal});
 }
 
-void roadDrawing::drawIntersections(int numInter, mapBoundary xy, infoStrucs info, ezgl::renderer &g){
+void roadDrawing::drawIntersections(int numInter, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g){
      for(int i = 0 ; i < numInter ; i++){
         float x = xy.xFromLon(info.IntersectionInfo[i].position.lon());
         float y = xy.yFromLat(info.IntersectionInfo[i].position.lat());
