@@ -6,10 +6,10 @@
 
 #include "m1.h"
 #include "m2.h"
-#include "drawRoads.h"
-#include "drawFeatures.h"
-#include "latLonToXY.h"
-//#include "globals.h" //I think this can be removed
+//#include "drawRoads.h"
+//#include "drawFeatures.h"
+//#include "latLonToXY.h"
+//#include "globals.h"
 #include "StreetsDatabaseAPI.h"
 #include "OSMDatabaseAPI.h"
 #include "OSMID.h"
@@ -23,6 +23,8 @@
 #include "ezgl/graphics.hpp"
 #include "ezgl/point.hpp"
 
+//==================================================================================
+
 const int ROADWIDTH = 3;
 const int PRIMWIDTH = 4;
 const int HIGHWAYWIDTH = 5;
@@ -33,10 +35,11 @@ const int SECONDARY = 2;
 const int RESIDENTIAL = 3;
 const int SERVICE = 4;
 
-///////////================================================================================
-
 double averageLatInRad;
 double maxLat, maxLon, minLat, minLon;
+
+//==================================================================================
+
 
 // finds the average latitude within the map bounds and stores in averageLatInRad
 void averageLat();
@@ -123,7 +126,16 @@ struct POIData {
     OSMID id;
 };
 
+struct subwayData {
+    std::string name;
+    LatLon point;
+    
+    const OSMNode* nodePtr; 
+};
+
 std::map<OSMID, const OSMWay*> WayMap;
+
+std::vector<subwayData> SubwayInfo;
 
 std::vector<intersectionData> IntersectionInfo;
 
@@ -135,13 +147,17 @@ std::vector<std::vector<ezgl::point2d>> FeaturePointVec;
 std::vector<POIData> POIInfo;
 
 void populateOSMWayInfo();
+void populateOSMSubwayInfo();
 int getRoadType(const OSMWay* wayPtr);
+std::string getOSMSubwayName(const OSMNode* currentPtr);
 void populateStreetSegInfo();
 void populateIntersectionInfo();
 void populateFeatureInfo();
 void populatePOIInfo();
 
 /////////////================================================================================
+
+
 
 void populateOSMWayInfo(){
     WayMap.clear();
@@ -154,6 +170,23 @@ void populateOSMWayInfo(){
         WayMap.insert({currentID,currentWayPtr});
     }
 }
+
+//void populateOSMSubwayInfo(){
+//    SubwayInfo.clear();
+//    subwayData newStop;
+//    bool isSubway = false;
+//    const OSMWay* currentPtr;
+//
+//    for(unsigned i=0 ; i< getNumberOfNodes(); i++){
+//        currentPtr = getNodeByIndex(i);
+//        isSubway = checkIfSubway(currentPtr);
+//        
+//        if(isSubway){
+//            newStop.name = getOSMSubwayName(currentPtr);
+//            SubwayInfo.insert(newStop);
+//        }
+//    }
+//}
 
 int getRoadType(const OSMWay* wayPtr){
     for(unsigned i=0 ; i<getTagCount(wayPtr) ; i++){
@@ -176,6 +209,7 @@ int getRoadType(const OSMWay* wayPtr){
             }
         }
     }
+    return SERVICE;
 }
 
 void populateStreetSegInfo(){
@@ -246,7 +280,7 @@ void populatePOIInfo(){
 ///////////================================================================================
 
 void setFeatureColour(int type, ezgl::renderer &g);
-void setRoadColour(int type, ezgl::renderer &g);
+void setRoadColourSize(int type, ezgl::renderer &g);
 void drawFeatures(int numFeatures, ezgl::renderer &g);
 void drawStreetRoads(int numSegs, ezgl::renderer &g);
 void drawStraightStreet(LatLon pt1, LatLon pt2, ezgl::renderer &g);
@@ -293,7 +327,7 @@ void setFeatureColour(int type, ezgl::renderer &g){
     }
 }
         
-void setRoadColour(int type, ezgl::renderer &g){
+void setRoadColourSize(int type, ezgl::renderer &g){
     g.set_line_width(ROADWIDTH);
     switch(type){
         case HIGHWAY: // yellowish
@@ -345,7 +379,7 @@ void drawStreetRoads(int numSegs, ezgl::renderer &g){
         }
         to = IntersectionInfo[StreetSegInfo[i].toIntersection].position;
         
-        setRoadColour(StreetSegInfo[i].type, g);
+        setRoadColourSize(StreetSegInfo[i].type, g);
         drawStraightStreet(from, to, g);
     }
 }
@@ -377,7 +411,7 @@ void drawPOI(int numPOI, ezgl::renderer &g){
     LatLon newPoint;
     double xNew, yNew;
     
-    double radius = 0.00005;
+    double radius = 0.00025;
      for(int i=0 ; i<numPOI ; i++){
         newPoint = getPointOfInterestPosition(i);
             
@@ -385,7 +419,7 @@ void drawPOI(int numPOI, ezgl::renderer &g){
         yNew = yFromLat(newPoint.lat());
         
         g.set_color(255,0,0,255);
-        g.draw_elliptic_arc(ezgl::point2d(xNew,yNew),radius,radius,0,360);
+        g.fill_elliptic_arc(ezgl::point2d(xNew,yNew),radius,radius,0,360);
     }
 }
 
@@ -405,6 +439,7 @@ void draw_map(){
     populateStreetSegInfo();
     populateIntersectionInfo();
     populateFeatureInfo();
+    populatePOIInfo();
     
     ezgl::rectangle initial_world({xFromLon(minLon),yFromLat(minLat)},{xFromLon(maxLon),yFromLat(maxLat)});
     application.add_canvas("MainCanvas",draw_main_canvas,initial_world);
@@ -413,20 +448,8 @@ void draw_map(){
     
 }
 
-
-//
-////doesn't really need to exist but like hey maybe it'll be useful one day
-//std::pair<double, double> Lat_Lon_To_X_Y(LatLon point){ //call average lat before using this 
-//    double projectionFactor = cos(averageLatInRad);
-//    double x = point.lon()*projectionFactor;
-//    double y = point.lat();
-//    return std::make_pair(x,y);
-//}
-
-
 void draw_main_canvas(ezgl::renderer &g){
-    //g.draw_rectangle({xFromLon(minLon),yFromLat(minLat)},{xFromLon(maxLon),yFromLat(maxLat)});//questionable?
-    g.set_color(219,219,219,255);
+    g.set_color(219,219,219,255); //light gray for background
     g.fill_rectangle(g.get_visible_world());
     
     drawFeatures(getNumFeatures(),g);

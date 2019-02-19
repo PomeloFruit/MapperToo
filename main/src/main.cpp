@@ -24,6 +24,7 @@
 #include "m1.h"
 #include "m2.h"
 #include "OSMDatabaseAPI.h"
+
 //Program exit codes
 constexpr int SUCCESS_EXIT_CODE = 0;        //Everyting went OK
 constexpr int ERROR_EXIT_CODE = 1;          //An error occured

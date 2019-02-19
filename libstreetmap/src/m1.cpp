@@ -20,7 +20,7 @@
  */
 #include "m1.h"
 #include "StreetsDatabaseAPI.h"
-//#include "globals.h"
+#include "globals.h"
 
 #include <map>
 #include <unordered_map>
