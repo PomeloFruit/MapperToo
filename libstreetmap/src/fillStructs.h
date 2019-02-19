@@ -2,6 +2,7 @@
 
 #include "globals.h"
 #include "latLonToXY.h"
+#include "LatLon.h"
 
 #include "OSMID.h"
 
@@ -11,6 +12,7 @@ public:
     void populateOSMWayInfo(infoStrucs &info);
     void populateOSMSubwayInfo(infoStrucs &info);
     int getRoadType(const OSMWay* wayPtr);
+    bool isFeatureOpen(LatLon pt1, LatLon pt2);
     std::string getOSMSubwayName(const OSMNode* currentPtr);
     void populateStreetSegInfo(infoStrucs &info);
     void populateIntersectionInfo(infoStrucs &info);

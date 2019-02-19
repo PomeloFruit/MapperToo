@@ -37,27 +37,12 @@ void draw_map(){
     ezgl::application application(settings);
 
     xy.initialize();
-    xy.setAverageLat(); 
-    pop.initialize(info, xy);   
+    pop.initialize(info, xy); 
     
-    pop.populatePOIInfo(info);
-    pop.populateOSMWayInfo(info);
-    pop.populateStreetSegInfo(info);
-    pop.populateIntersectionInfo(info);
-     
-    double xMax, xMin, yMax, yMin; 
-    xMax = xy.xFromLon(xy.maxLon);
-    xMin = xy.xFromLon(xy.minLon);
-    yMax = xy.yFromLat(xy.maxLat);
-    yMin = xy.yFromLat(xy.minLat); 
-    
-    pop.populateFeatureInfo(info, xy);
-
-    ezgl::rectangle initial_world({xMin,yMin},{xMax,yMax});
+    ezgl::rectangle initial_world({xy.xMin,xy.yMin},{xy.xMax,xy.yMax});
     application.add_canvas("MainCanvas",draw_main_canvas,initial_world);
     
     application.run(NULL,NULL,NULL,NULL);
-    
 }
 
 void draw_main_canvas(ezgl::renderer &g){

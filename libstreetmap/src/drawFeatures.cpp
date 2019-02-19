@@ -49,9 +49,16 @@ void featureDrawing::drawFeatures(int numFeatures, infoStrucs &info, ezgl::rende
     for(int i=0 ; i<numFeatures ; i++){
         setFeatureColour(info.FeatureInfo[i].featureType, g);
         if(info.FeaturePointVec[i].size()>1){
-            g.fill_poly(info.FeaturePointVec[i]);
-        } else {
-            g.fill_rectangle(info.FeaturePointVec[i][0],0.0001,0.0001);
+            if(info.FeatureInfo[i].isOpen){
+                for(int p=1; p<info.FeaturePointVec[i].size(); p++){
+                    g.set_line_width(3); ///////////////////////////////////////////////////////magic  number???????
+                    g.draw_line(info.FeaturePointVec[i][p-1], info.FeaturePointVec[i][p]);
+                }
+            } else { //closed feature
+                g.fill_poly(info.FeaturePointVec[i]);
+            }
+        } else { // feature is node
+            g.fill_rectangle(info.FeaturePointVec[i][0],0.0001,0.0001);///////////////////////////////////////////////////////magic  number???????
         }
     }
 }

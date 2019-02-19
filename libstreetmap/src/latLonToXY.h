@@ -8,9 +8,9 @@ public:
         
     double averageLat;
     
-    void initialize(); 
+    double xMax, xMin, yMax, yMin; 
     
-    void setAverageLat(); 
+    void initialize(); 
     
     double getMaxLat();
     

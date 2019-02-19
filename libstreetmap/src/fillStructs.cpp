@@ -2,6 +2,7 @@
 
 #include "globals.h"
 #include "latLonToXY.h"
+#include "LatLon.h"
 
 #include "StreetsDatabaseAPI.h"
 #include "OSMDatabaseAPI.h"
@@ -18,7 +19,6 @@ void populateData::initialize(infoStrucs &info, mapBoundary &xy){
     populateFeatureInfo(info, xy);
     populatePOIInfo(info);
 }
-
 
 void populateData::populateOSMWayInfo(infoStrucs &info){
     info.WayMap.clear();
@@ -77,6 +77,14 @@ int populateData::getRoadType(const OSMWay* wayPtr){
     return SERVICE;
 }
 
+bool populateData::isFeatureOpen(LatLon pt1, LatLon pt2){
+    if((pt1.lat() == pt2.lat()) && (pt1.lon() == pt2.lon())){
+        return false;
+    } else {
+        return true;
+    }
+}
+
 void populateData::populateStreetSegInfo(infoStrucs &info){
     int numStreetSegments = getNumStreetSegments();
     info.StreetSegInfo.resize(numStreetSegments);
@@ -104,17 +112,23 @@ void populateData::populateIntersectionInfo(infoStrucs &info){
 void populateData::populateFeatureInfo(infoStrucs &info, mapBoundary &xy){
     int numFeatures = getNumFeatures();
     int numPoints;
-    LatLon newPoint;
+    LatLon newPoint, pt1, pt2;
     double xNew, yNew;
+    
     info.FeatureInfo.resize(numFeatures);
     info.FeaturePointVec.resize(numFeatures);
     
     for(int i=0;i<numFeatures;i++){
         info.FeatureInfo[i].name = getFeatureName(i);
         info.FeatureInfo[i].featureType = getFeatureType(i);
+        info.FeatureInfo[i].id = getFeatureOSMID(i);
         
         numPoints = getFeaturePointCount(i);
         info.FeaturePointVec[i].clear();
+        
+        pt1 = getFeaturePoint(0, i);
+        pt2 = getFeaturePoint(numPoints-1, i);
+        info.FeatureInfo[i].isOpen = isFeatureOpen(pt1,pt2);
         
         for(int p=0 ; p<numPoints; p++){
             newPoint = getFeaturePoint(p, i);

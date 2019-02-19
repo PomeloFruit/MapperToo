@@ -5,14 +5,17 @@
 
 void mapBoundary::initialize(){
     numOfIntersections = getNumIntersections();
+    
     maxLat = getMaxLat();
     minLat = getMinLat();
     maxLon = getMaxLon();
-    minLon = getMinLon(); 
-}
-
-void mapBoundary::setAverageLat(){
+    minLon = getMinLon();
     averageLat = getAverageLat(); 
+    
+    xMax = xFromLon(maxLon);
+    xMin = xFromLon(minLon);
+    yMax = yFromLat(maxLat);
+    yMin = yFromLat(minLat);  
 }
 
 double mapBoundary::getMaxLat(){

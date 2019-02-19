@@ -39,6 +39,9 @@ struct streetSegData {
 struct featureData {
     int featureType;
     std::string name;
+    
+    OSMID id;
+    bool isOpen;
 };
 
 struct POIData {
@@ -67,7 +70,7 @@ public:
 
     std::vector<featureData> FeatureInfo;
 
-    std::vector<std::vector<ezgl::point2d>> FeaturePointVec;
+    std::vector< std::vector<ezgl::point2d> > FeaturePointVec;
 
     std::vector<POIData> POIInfo;
 };
