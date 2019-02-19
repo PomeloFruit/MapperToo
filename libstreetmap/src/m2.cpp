@@ -12,16 +12,27 @@
 //#include "globals.h" //I think this can be removed
 #include "StreetsDatabaseAPI.h"
 #include "OSMDatabaseAPI.h"
+#include "OSMID.h"
 #include <math.h>
 #include <algorithm>
 #include <string>
 #include <iostream>
+#include <map>
 
 #include "ezgl/application.hpp"
 #include "ezgl/graphics.hpp"
 #include "ezgl/point.hpp"
 
 const int ROADWIDTH = 3;
+const int PRIMWIDTH = 4;
+const int HIGHWAYWIDTH = 5;
+
+const int HIGHWAY = 0;
+const int PRIMARY = 1;
+const int SECONDARY = 2;
+const int RESIDENTIAL = 3;
+const int SERVICE = 4;
+
 ///////////================================================================================
 
 double averageLatInRad;
@@ -84,34 +95,88 @@ float yFromLat(float lat){
 ///////////================================================================================
 
 
-struct intersectionData{
+struct intersectionData {
     LatLon position;
     std::string name;
 };
 
-//will likely need to add more things later
-struct streetSegData{
+struct streetSegData {
     unsigned fromIntersection;
     unsigned toIntersection;
     int numCurvePoints;
     std::string name;
+    
+    OSMID id;
+    const OSMWay* wayPtr;
+    int type;
 };
 
-struct featureData{
+struct featureData {
     int featureType;
     std::string name;
 };
 
+struct POIData {
+    std::string name;
+    std::string type;
+    
+    OSMID id;
+};
+
+std::map<OSMID, const OSMWay*> WayMap;
+
 std::vector<intersectionData> IntersectionInfo;
+
 std::vector<streetSegData> StreetSegInfo;
+
 std::vector<featureData> FeatureInfo;
 std::vector<std::vector<ezgl::point2d>> FeaturePointVec;
 
+std::vector<POIData> POIInfo;
+
+void populateOSMWayInfo();
+int getRoadType(const OSMWay* wayPtr);
 void populateStreetSegInfo();
 void populateIntersectionInfo();
 void populateFeatureInfo();
+void populatePOIInfo();
 
-///////////================================================================================
+/////////////================================================================================
+
+void populateOSMWayInfo(){
+    WayMap.clear();
+    const OSMWay* currentWayPtr;
+    OSMID currentID;
+    
+    for(unsigned i=0 ; i<getNumberOfWays() ; i++){
+        currentWayPtr = getWayByIndex(i);
+        currentID = currentWayPtr->id();
+        WayMap.insert({currentID,currentWayPtr});
+    }
+}
+
+int getRoadType(const OSMWay* wayPtr){
+    for(unsigned i=0 ; i<getTagCount(wayPtr) ; i++){
+        std::string key,value;
+        std::tie(key,value) = getTagPair(wayPtr,i);
+        std::transform(key.begin(), key.end(), key.begin(), ::tolower);
+        std::transform(value.begin(), value.end(), value.begin(), ::tolower);
+        
+        if(key == "highway"){
+            if(value == "motorway" || value == "motorway_link"){
+                return HIGHWAY;
+            } else if (value == "trunk" || value == "trunk_link" || value == "primary"){
+                return PRIMARY;
+            } else if (value == "secondary" || value == "tertiary"){
+                return SECONDARY;
+            } else if (value == "residential"){
+                return RESIDENTIAL;
+            } else {
+                return SERVICE;
+            }
+        }
+    }
+}
 
 void populateStreetSegInfo(){
     int numStreetSegments = getNumStreetSegments();
@@ -121,6 +186,9 @@ void populateStreetSegInfo(){
         StreetSegInfo[i].fromIntersection = getInfoStreetSegment(i).from;
         StreetSegInfo[i].toIntersection = getInfoStreetSegment(i).to;
         StreetSegInfo[i].numCurvePoints = getInfoStreetSegment(i).curvePointCount;
+        StreetSegInfo[i].id = getInfoStreetSegment(i).wayOSMID;
+        StreetSegInfo[i].wayPtr = WayMap[StreetSegInfo[i].id];
+        StreetSegInfo[i].type = getRoadType(StreetSegInfo[i].wayPtr);
     }
 }
 
@@ -149,7 +217,6 @@ void populateFeatureInfo(){
         numPoints = getFeaturePointCount(i);
         FeaturePointVec[i].clear();
         
-        std::cout << "feature # " << i << " num points: " << numPoints << " type: " << FeatureInfo[i].featureType << std::endl;
         for(int p=0 ; p<numPoints; p++){
             newPoint = getFeaturePoint(p, i);
             
@@ -161,13 +228,30 @@ void populateFeatureInfo(){
     }
 }
 
+void populatePOIInfo(){
+    int numPOI = getNumPointsOfInterest();
+   
+    POIInfo.resize(numPOI);
+        
+    for(int i=0 ; i<numPOI ; i++){
+        
+        
+        POIInfo[i].name = getPointOfInterestName(i);
+        POIInfo[i].type = getPointOfInterestType(i);
+        
+        std::cout << "n - " << POIInfo[i].name << " t - " << POIInfo[i].type << std::endl;
+    }
+}
+
 ///////////================================================================================
 
 void setFeatureColour(int type, ezgl::renderer &g);
+void setRoadColour(int type, ezgl::renderer &g);
 void drawFeatures(int numFeatures, ezgl::renderer &g);
 void drawStreetRoads(int numSegs, ezgl::renderer &g);
 void drawStraightStreet(LatLon pt1, LatLon pt2, ezgl::renderer &g);
 void drawIntersections(int numInter, ezgl::renderer &g);
+void drawPOI(int numPOI, ezgl::renderer &g);
 
 /////////////================================================================================
 
@@ -209,7 +293,31 @@ void setFeatureColour(int type, ezgl::renderer &g){
     }
 }
         
-
+void setRoadColour(int type, ezgl::renderer &g){
+    g.set_line_width(ROADWIDTH);
+    switch(type){
+        case HIGHWAY: // yellowish
+            g.set_line_width(HIGHWAYWIDTH);
+            g.set_color(247,247,62,255);
+            break;
+        case PRIMARY: // white and thick
+            g.set_line_width(PRIMWIDTH);
+            g.set_color(255,255,255,255);
+            break;
+        case SECONDARY: //
+            g.set_color(255,255,255,255);
+            break;
+        case RESIDENTIAL: //
+            g.set_color(255,255,255,255);
+            break;
+        case SERVICE: // light gray
+            g.set_color(244,244,244,255);
+            break;
+        default:
+            g.set_color(255,255,255,255);
+            break;
+    }
+}
 
 void drawFeatures(int numFeatures, ezgl::renderer &g){
     for(int i=0 ; i<numFeatures ; i++){
@@ -231,12 +339,13 @@ void drawStreetRoads(int numSegs, ezgl::renderer &g){
         from = IntersectionInfo[StreetSegInfo[i].fromIntersection].position;
 
         for(int c=0;c<StreetSegInfo[i].numCurvePoints;c++){
-                
             to = getStreetSegmentCurvePoint(c,i);
             drawStraightStreet(from, to, g);
             from = to;
         }
         to = IntersectionInfo[StreetSegInfo[i].toIntersection].position;
+        
+        setRoadColour(StreetSegInfo[i].type, g);
         drawStraightStreet(from, to, g);
     }
 }
@@ -248,11 +357,7 @@ void drawStraightStreet(LatLon pt1, LatLon pt2, ezgl::renderer &g){
     yInitial=yFromLat(pt1.lat());
     xFinal=xFromLon(pt2.lon());
     yFinal=yFromLat(pt2.lat());
-    
-    g.set_line_width(ROADWIDTH);
-    g.set_color(0,0,0,255);
-    
-    
+   
     g.draw_line({xInitial, yInitial},{xFinal, yFinal});
 }
 
@@ -261,10 +366,26 @@ void drawIntersections(int numInter, ezgl::renderer &g){
         float x = xFromLon(IntersectionInfo[i].position.lon());
         float y = yFromLat(IntersectionInfo[i].position.lat());
         
-        float width=0.0001; ///no magic numbers!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        float width=0.00003; ///no magic numbers!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         //float width=10;
         float height=width;
-        g.fill_rectangle({x, y},{x+width, y+height});
+        g.fill_rectangle({x-width, y-height},{x+width, y+height});
+    }
+}
+
+void drawPOI(int numPOI, ezgl::renderer &g){
+    LatLon newPoint;
+    double xNew, yNew;
+    
+    double radius = 0.00005;
+     for(int i=0 ; i<numPOI ; i++){
+        newPoint = getPointOfInterestPosition(i);
+            
+        xNew = xFromLon(newPoint.lon());
+        yNew = yFromLat(newPoint.lat());
+        
+        g.set_color(255,0,0,255);
+        g.draw_elliptic_arc(ezgl::point2d(xNew,yNew),radius,radius,0,360);
     }
 }
 
@@ -280,6 +401,7 @@ void draw_map(){
     ezgl::application application(settings);
     
     averageLat();//to make sure that we have the max stuff/min stuff so we can set bounds later
+    populateOSMWayInfo();
     populateStreetSegInfo();
     populateIntersectionInfo();
     populateFeatureInfo();
@@ -303,11 +425,14 @@ void draw_map(){
 
 
 void draw_main_canvas(ezgl::renderer &g){
-    g.draw_rectangle({xFromLon(minLon),yFromLat(minLat)},{xFromLon(maxLon),yFromLat(maxLat)});//questionable?
+    //g.draw_rectangle({xFromLon(minLon),yFromLat(minLat)},{xFromLon(maxLon),yFromLat(maxLat)});//questionable?
+    g.set_color(219,219,219,255);
+    g.fill_rectangle(g.get_visible_world());
     
     drawFeatures(getNumFeatures(),g);
     drawStreetRoads(getNumStreetSegments(), g);
     drawIntersections(getNumIntersections(), g);
+    drawPOI(getNumPointsOfInterest(), g);
 }
     
 
