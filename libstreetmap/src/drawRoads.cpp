@@ -7,11 +7,17 @@
 #include "ezgl/graphics.hpp"
 #include "ezgl/point.hpp"
 
+<<<<<<< HEAD
 void roadDrawing::setRoadColourSize(int type, bool highlight, ezgl::renderer &g){
     const int HIGHLIGHTFACT = 5;
     int width = ROADWIDTH;
     g.set_color(255,255,255,255); //Ddefault white colour
     
+=======
+void roadDrawing::setRoadColourSize(int type, ezgl::renderer &g){
+    g.set_line_width(ROADWIDTH);
+//    double adujstmentFactor=;
+>>>>>>> Comminting to help Andrew get up o date
     switch(type){
         case HIGHWAY: // yellowish
             width =HIGHWAYWIDTH;

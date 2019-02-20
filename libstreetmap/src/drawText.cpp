@@ -124,7 +124,7 @@ void drawText::createText(int numStreetSegs, int numStreets, mapBoundary &xy, in
                         double xPlace=xy.xFromLon(initialPosition.lon())+((xy.xFromLon((finalPosition.lon()))-xy.xFromLon(initialPosition.lon()))/2);
                         double yPlace=xy.yFromLat(initialPosition.lat()+((finalPosition.lat()-initialPosition.lat())/2));
                         //g.set_font_size(16);
-                        g.format_font("serif", ezgl::font_slant::italic, ezgl::font_weight::bold, 6);//I'm just gonna use serif for now but I know it's supposed to be sans serif was 4->I gotta make the thing bigger
+                        g.format_font("sans serif", ezgl::font_slant::normal, ezgl::font_weight::normal, 6);//I'm just gonna use serif for now but I know it's supposed to be sans serif was 4->I gotta make the thing bigger
                         g.set_text_rotation(angleToUse);
                         //g.draw_text({xPlace, yPlace}, info.StreetSegInfo[i].name, xy.xFromLon(finalPosition.lon()-initialPosition.lon()), xy.yFromLat(finalPosition.lat()-initialPosition.lat()));
                         g.draw_text({xPlace, yPlace}, info.StreetSegInfo[i].name);
