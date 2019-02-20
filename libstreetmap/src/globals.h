@@ -36,7 +36,11 @@ struct streetSegData {
     OSMID id;
     const OSMWay* wayPtr;
     int type;
+<<<<<<< HEAD
     bool clicked;
+=======
+    unsigned streetID;
+>>>>>>> Commiting before pulling new changes to merge
 };
 
 struct featureData {

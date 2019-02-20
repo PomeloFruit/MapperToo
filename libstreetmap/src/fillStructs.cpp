@@ -96,9 +96,11 @@ void populateData::populateStreetSegInfo(infoStrucs &info){
         info.StreetSegInfo[i].fromIntersection = getInfoStreetSegment(i).from;
         info.StreetSegInfo[i].toIntersection = getInfoStreetSegment(i).to;
         info.StreetSegInfo[i].numCurvePoints = getInfoStreetSegment(i).curvePointCount;
-        info.StreetSegInfo[i].id = getInfoStreetSegment(i).wayOSMID;
+        info.StreetSegInfo[i].id = getInfoStreetSegment(i).wayOSMID;//is the OSMID unique?
         info.StreetSegInfo[i].wayPtr = info.WayMap[info.StreetSegInfo[i].id];
         info.StreetSegInfo[i].type = getRoadType(info.StreetSegInfo[i].wayPtr);
+        info.StreetSegInfo[i].name = getStreetName((getInfoStreetSegment(i).streetID));//gives the name of the street segment (for use in putting the names))
+        info.StreetSegInfo[i].streetID=getInfoStreetSegment(i).streetID;
     }
 }
 
