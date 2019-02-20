@@ -99,12 +99,15 @@ void act_on_mouse_press(ezgl::application *application, GdkEventButton *event, d
 
 std::string clickedOnPOI(double x, double y){
     LatLon clickPos;
-    unsigned clickedID;
+    unsigned clickedID, nearestIntID;
     std::string displayName = "Point of Interest Clicked: ";
     
     clickPos = xy.LatLonFromXY(x,y);
     clickedID = find_closest_point_of_interest(clickPos);
     displayName += info.POIInfo[clickedID].name;
+    
+    nearestIntID = find_closest_intersection(clickPos);
+    displayName += " | Nearest Intersection: " + info.IntersectionInfo[nearestIntID].name;
     
     info.IntersectionInfo[info.lastIntersection].clicked = false;
     info.POIInfo[info.lastPOI].clicked = false;

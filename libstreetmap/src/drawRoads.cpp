@@ -73,6 +73,7 @@ void roadDrawing::drawIntersections(int numInter, mapBoundary &xy, infoStrucs &i
 void roadDrawing::drawOneIntersection(int id, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g){
     const float RADIUS = 0.0005;
     const float WIDTH = 0.00003;
+    const float HIGHWIDTH = 0.00008;
     float x, y;
        
     x = xy.xFromLon(info.IntersectionInfo[id].position.lon());
@@ -80,7 +81,7 @@ void roadDrawing::drawOneIntersection(int id, mapBoundary &xy, infoStrucs &info,
 
     if(info.IntersectionInfo[id].clicked) {
         g.set_color(0,255,174,255);
-        g.fill_rectangle({x-WIDTH, y-WIDTH},{x+WIDTH, y+WIDTH});
+        g.fill_rectangle({x-HIGHWIDTH, y-HIGHWIDTH},{x+HIGHWIDTH, y+HIGHWIDTH});
         g.set_color(255,33,137,100);
         g.fill_elliptic_arc(ezgl::point2d(x,y),RADIUS,RADIUS,0,360);        
     } else {
