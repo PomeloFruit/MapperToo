@@ -35,6 +35,7 @@ struct streetSegData {
     OSMID id;
     const OSMWay* wayPtr;
     int type;
+    bool clicked;
 };
 
 struct featureData {
@@ -43,6 +44,7 @@ struct featureData {
     
     OSMID id;
     bool isOpen;
+    bool clicked;
 };
 
 struct POIData {
@@ -56,6 +58,7 @@ struct POIData {
 struct subwayData {
     std::string name;
     LatLon point;
+    bool clicked;
     
     const OSMNode* nodePtr; 
 };

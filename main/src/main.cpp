@@ -1,4 +1,4 @@
-/* 
+ /* 
  * Copyright 2018 University of Toronto
  *
  * Permission is hereby granted, to use this software and associated 

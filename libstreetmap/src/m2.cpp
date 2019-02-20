@@ -33,31 +33,18 @@ featureDrawing ft;
 roadDrawing rd;
 clickActions ck;
 
-
-void press_find(GtkWidget *widget, ezgl::application *application){
-    const char *name1;
-    const char *name2;
-    application->get_input_text(name1, name2);
-    
-    info.textInput1 = name1;
-    info.textInput2 = name2;
-    
-    std::cout << info.textInput1 << " .... " << info.textInput2 << std::endl;
-    
-    application->refresh_drawing();
-}
-
 //=========================== Function Prototypes ===========================
 
 void draw_main_canvas(ezgl::renderer &g);
+void initial_setup(ezgl::application *application);
+void act_on_mouse_press(ezgl::application *application, GdkEventButton *event, double x, double y);
+void pressFind(GtkWidget *widget, ezgl::application *application);
 
 // Callback functions for event handling
-void act_on_mouse_press(ezgl::application *application, GdkEventButton *event, double x, double y);
-void act_on_mouse_move(ezgl::application *application, GdkEventButton *event, double x, double y);
-void act_on_key_press(ezgl::application *application, GdkEventKey *event, char *key_name);
-void initial_setup(ezgl::application *application);
-void find_button(GtkWidget *widget, ezgl::application *application);
-///////
+
+//void act_on_mouse_move(ezgl::application *application, GdkEventButton *event, double x, double y);
+//void act_on_key_press(ezgl::application *application, GdkEventKey *event, char *key_name);
+
 
 //=========================== Function Definitions ===========================
 
@@ -86,6 +73,12 @@ void draw_main_canvas(ezgl::renderer &g){
     rd.drawStreetRoads(getNumStreetSegments(), xy, info, g);
     rd.drawIntersections(getNumIntersections(), xy, info, g);
     ft.drawPOI(getNumPointsOfInterest(), xy, info, g);
+    rd.drawOneIntersection(info.lastIntersection, xy, info, g);
+}
+
+void initial_setup(ezgl::application *application){
+    application->update_message("Left-click for Points of Interest | Right-click for Intersections");
+    application->connect_feature(pressFind);
 }
 
 // left click for POI, right click for intersection
@@ -111,10 +104,19 @@ void act_on_mouse_press(ezgl::application *application, GdkEventButton *event, d
     application->refresh_drawing();
 }
 
-void initial_setup(ezgl::application *application){
-  application->update_message("Left-click for Points of Interest | "
-                                "Right-click for Intersections");
-  application->connect_feature(press_find);//, info.txtInput1, info.txtInput2);
+void pressFind(GtkWidget *widget, ezgl::application *application){
+    const char *name1;
+    const char *name2;
+    std::string message;
+    
+    application->get_input_text(name1, name2);
+    
+    info.textInput1 = name1;
+    info.textInput2 = name2;
+    /////////////
+    //application->update_message(info.textInput1 + "...." + info.textInput2);
+    /////////////
+    message = ck.searchOnMap(info);
+    application->update_message(message);
+    application->refresh_drawing();
 }
-
-
