@@ -87,11 +87,11 @@ void act_on_mouse_press(ezgl::application *application, GdkEventButton *event, d
 std::string clickedOnIntersection(double x, double y){
     LatLon clickPos;
     unsigned clickedID;
-    std::string displayName = "Clicked on: ";
+    std::string displayName = "Intersection Clicked: ";
     
     clickPos = xy.LatLonFromXY(x,y);
     clickedID = find_closest_intersection(clickPos);
-    displayName = info.IntersectionInfo[clickedID].name;
+    displayName += info.IntersectionInfo[clickedID].name;
     
     info.IntersectionInfo[info.lastIntersection].clicked = false;
     info.IntersectionInfo[clickedID].clicked = true;
