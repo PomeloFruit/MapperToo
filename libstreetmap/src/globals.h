@@ -79,5 +79,7 @@ public:
     unsigned lastIntersection;
     
     unsigned lastPOI;
+    
+    std::string textInput1, textInput2;
 };
 

@@ -237,6 +237,20 @@ void application::update_message(std::string const &message)
   gtk_statusbar_push(status_bar, 0, message.c_str());
 }
 
+void application::connect_feature(button_callback_fn press_find){
+    // Connect press_zoom_out function to the Zoom-out button
+    GtkWidget *find_button = (GtkWidget *) this->get_object("FindButton");
+    g_signal_connect(G_OBJECT(find_button), "clicked", G_CALLBACK(press_find), this);
+}
+
+void application::get_input_text(const char *&street1, const char *&street2){
+    GtkEntry *street_entry1 = (GtkEntry *) this->get_object("FindStreet1");
+    street1 = gtk_entry_get_text(street_entry1);
+    GtkEntry *street_entry2 = (GtkEntry *) this->get_object("FindStreet2");
+    street2 = gtk_entry_get_text(street_entry2);
+  //  this->update_message(street1);
+}
+
 void application::create_button(const char *button_text,
     int left,
     int top,
@@ -260,13 +274,6 @@ void application::create_button(const char *button_text,
 
   // show the button
   gtk_widget_show(new_button);
-}
-
-void application::connect_feature(button_callback_fn press_find)
-{
-// Connect press_zoom_out function to the Zoom-out button
-  GObject *find_button = this->get_object("FindButton");
-  g_signal_connect(find_button, "clicked", G_CALLBACK(press_find), this);   
 }
 
 void application::create_button(const char *button_text,

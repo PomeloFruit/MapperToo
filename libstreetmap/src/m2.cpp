@@ -34,10 +34,17 @@ roadDrawing rd;
 clickActions ck;
 
 
-void press_find(GtkWidget *widget, ezgl::application *application)
-{
-  application->update_message("Test Button Pressed");
-  application->refresh_drawing();
+void press_find(GtkWidget *widget, ezgl::application *application){
+    const char *name1;
+    const char *name2;
+    application->get_input_text(name1, name2);
+    
+    info.textInput1 = name1;
+    info.textInput2 = name2;
+    
+    std::cout << info.textInput1 << " .... " << info.textInput2 << std::endl;
+    
+    application->refresh_drawing();
 }
 
 //=========================== Function Prototypes ===========================
@@ -85,8 +92,6 @@ void draw_main_canvas(ezgl::renderer &g){
 void act_on_mouse_press(ezgl::application *application, GdkEventButton *event, double x, double y){
     std::string message;
 
-   // g_signal_connect(find_button, "clicked", G_CALLBACK(press_find), application);
-    
     if (event->button == 1) { //left click
         message = ck.clickedOnPOI(x, y, xy, info);
     } else if (event->button == 3) { //right click
@@ -109,9 +114,7 @@ void act_on_mouse_press(ezgl::application *application, GdkEventButton *event, d
 void initial_setup(ezgl::application *application){
   application->update_message("Left-click for Points of Interest | "
                                 "Right-click for Intersections");
-  application->connect_feature(press_find);
-//  application->create_button("Find", 9, find_button);
-//  application->create_button("I", 10, _button);
+  application->connect_feature(press_find);//, info.txtInput1, info.txtInput2);
 }
 
 

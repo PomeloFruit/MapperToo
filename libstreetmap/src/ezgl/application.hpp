@@ -113,6 +113,9 @@ public:
   
   //connect features that were created not default
   void connect_feature(button_callback_fn press_find);
+  
+  //retrieve input text from text fields
+  void get_input_text(const char *&street1, const char *&street2);
 
   /**
    * Add a button
