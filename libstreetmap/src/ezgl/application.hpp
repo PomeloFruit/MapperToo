@@ -109,6 +109,10 @@ public:
   canvas *add_canvas(std::string const &canvas_id,
       draw_canvas_fn draw_callback,
       rectangle coordinate_system);
+  
+  
+  //connect features that were created not default
+  void connect_feature(button_callback_fn press_find);
 
   /**
    * Add a button

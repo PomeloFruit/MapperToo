@@ -190,7 +190,7 @@ void application::register_default_events_callbacks(ezgl::application *applicati
 }
 
 void application::register_default_buttons_callbacks(ezgl::application *application)
-{
+{  
   // Connect press_zoom_fit function to the Zoom-fit button
   GObject *zoom_fit_button = application->get_object("ZoomFitButton");
   g_signal_connect(zoom_fit_button, "clicked", G_CALLBACK(press_zoom_fit), application);
@@ -222,6 +222,7 @@ void application::register_default_buttons_callbacks(ezgl::application *applicat
   // Connect press_proceed function to the Proceed button
   GObject *proceed_button = application->get_object("ProceedButton");
   g_signal_connect(proceed_button, "clicked", G_CALLBACK(press_proceed), application);
+  
 }
 
 void application::update_message(std::string const &message)
@@ -259,6 +260,13 @@ void application::create_button(const char *button_text,
 
   // show the button
   gtk_widget_show(new_button);
+}
+
+void application::connect_feature(button_callback_fn press_find)
+{
+// Connect press_zoom_out function to the Zoom-out button
+  GObject *find_button = this->get_object("FindButton");
+  g_signal_connect(find_button, "clicked", G_CALLBACK(press_find), this);   
 }
 
 void application::create_button(const char *button_text,

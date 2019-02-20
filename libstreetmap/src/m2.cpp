@@ -7,6 +7,7 @@
 #include "fillStructs.h"
 #include "drawFeatures.h"
 #include "drawRoads.h"
+#include "clickActions.h"
 
 #include "StreetsDatabaseAPI.h"
 #include "OSMDatabaseAPI.h"
@@ -23,26 +24,32 @@
 #include "ezgl/graphics.hpp"
 #include "ezgl/point.hpp"
 
-//============================ Class Declarations ============================
+//============================ Class Objects ============================
 
 infoStrucs info;
 mapBoundary xy;
 populateData pop;
 featureDrawing ft;
 roadDrawing rd;
+clickActions ck;
+
+
+void press_find(GtkWidget *widget, ezgl::application *application)
+{
+  application->update_message("Test Button Pressed");
+  application->refresh_drawing();
+}
 
 //=========================== Function Prototypes ===========================
 
 void draw_main_canvas(ezgl::renderer &g);
-std::string clickedOnIntersection(double x, double y);
-std::string clickedOnPOI(double x, double y);
 
 // Callback functions for event handling
 void act_on_mouse_press(ezgl::application *application, GdkEventButton *event, double x, double y);
 void act_on_mouse_move(ezgl::application *application, GdkEventButton *event, double x, double y);
 void act_on_key_press(ezgl::application *application, GdkEventKey *event, char *key_name);
 void initial_setup(ezgl::application *application);
-void test_button(GtkWidget *widget, ezgl::application *application);
+void find_button(GtkWidget *widget, ezgl::application *application);
 ///////
 
 //=========================== Function Definitions ===========================
@@ -60,7 +67,7 @@ void draw_map(){
     ezgl::rectangle initial_world({xy.xMin,xy.yMin},{xy.xMax,xy.yMax});
     application.add_canvas("MainCanvas",draw_main_canvas,initial_world);
 
-    application.run(NULL, act_on_mouse_press, NULL, NULL);
+    application.run(initial_setup, act_on_mouse_press, NULL, NULL);
     //application.run(initial_setup, act_on_mouse_press, act_on_mouse_move, act_on_key_press);
 }
 
@@ -78,10 +85,12 @@ void draw_main_canvas(ezgl::renderer &g){
 void act_on_mouse_press(ezgl::application *application, GdkEventButton *event, double x, double y){
     std::string message;
 
+   // g_signal_connect(find_button, "clicked", G_CALLBACK(press_find), application);
+    
     if (event->button == 1) { //left click
-        message = clickedOnPOI(x, y);
+        message = ck.clickedOnPOI(x, y, xy, info);
     } else if (event->button == 3) { //right click
-        message = clickedOnIntersection(x, y);
+        message = ck.clickedOnIntersection(x, y, xy, info);
     }
         
 
@@ -97,40 +106,12 @@ void act_on_mouse_press(ezgl::application *application, GdkEventButton *event, d
     application->refresh_drawing();
 }
 
-std::string clickedOnPOI(double x, double y){
-    LatLon clickPos;
-    unsigned clickedID, nearestIntID;
-    std::string displayName = "Point of Interest Clicked: ";
-    
-    clickPos = xy.LatLonFromXY(x,y);
-    clickedID = find_closest_point_of_interest(clickPos);
-    displayName += info.POIInfo[clickedID].name;
-    
-    nearestIntID = find_closest_intersection(clickPos);
-    displayName += " | Nearest Intersection: " + info.IntersectionInfo[nearestIntID].name;
-    
-    info.IntersectionInfo[info.lastIntersection].clicked = false;
-    info.POIInfo[info.lastPOI].clicked = false;
-    info.POIInfo[clickedID].clicked = true;
-    info.lastPOI = clickedID;
-    
-    return displayName;
+void initial_setup(ezgl::application *application){
+  application->update_message("Left-click for Points of Interest | "
+                                "Right-click for Intersections");
+  application->connect_feature(press_find);
+//  application->create_button("Find", 9, find_button);
+//  application->create_button("I", 10, _button);
 }
 
 
-std::string clickedOnIntersection(double x, double y){
-    LatLon clickPos;
-    unsigned clickedID;
-    std::string displayName = "Intersection Clicked: ";
-    
-    clickPos = xy.LatLonFromXY(x,y);
-    clickedID = find_closest_intersection(clickPos);
-    displayName += info.IntersectionInfo[clickedID].name;
-    
-    info.POIInfo[info.lastPOI].clicked = false;
-    info.IntersectionInfo[info.lastIntersection].clicked = false;
-    info.IntersectionInfo[clickedID].clicked = true;
-    info.lastIntersection = clickedID;
-    
-    return displayName;
-}

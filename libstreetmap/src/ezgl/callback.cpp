@@ -1,4 +1,5 @@
 #include "ezgl/callback.hpp"
+#include <iostream>
 
 namespace ezgl {
 
