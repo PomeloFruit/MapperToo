@@ -35,9 +35,6 @@ roadDrawing rd;
 clickActions ck;
 drawText dt;
 
-//=========================== Function Prototypes ===========================
-
-void draw_main_canvas(ezgl::renderer &g);
 
 //=========================== Function Prototypes ===========================
 
@@ -90,17 +87,9 @@ void draw_main_canvas(ezgl::renderer &g){
     rd.drawStreetRoads(getNumStreetSegments(), xy, info, g);
     rd.drawIntersections(getNumIntersections(), xy, info, g);
     ft.drawPOI(getNumPointsOfInterest(), xy, info, g);
-<<<<<<< HEAD
-<<<<<<< HEAD
-    rd.drawSpecialIntersections(xy, info, g);
-=======
-<<<<<<< HEAD
-    rd.drawOneIntersection(info.lastIntersection, xy, info, g);
->>>>>>> Commiting before pulling new changes to merge
-=======
-    rd.drawOneIntersection(info.lastIntersection, xy, info, g);
-    dt.drawText(getNumStreetSegments(), getNumStreets(), xy, info, g);
->>>>>>> Merged files, text will now draw on everyones map
+
+    //rd.drawOneIntersection(info.lastIntersection, xy, info, g);//void roadDrawing::drawOneIntersection(int id, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g)
+    dt.createText(getNumStreetSegments(), getNumStreets(), xy, info, g);
 }
 
 void initial_setup(ezgl::application *application){
