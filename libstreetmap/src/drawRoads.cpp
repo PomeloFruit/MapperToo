@@ -67,7 +67,13 @@ void roadDrawing::drawIntersections(int numInter, mapBoundary &xy, infoStrucs &i
     for(int i = 0 ; i < numInter ; i++){
         drawOneIntersection(i, xy, info, g);
     }
-    drawOneIntersection(info.lastIntersection, xy, info, g);
+    drawSpecialIntersections(xy, info, g);
+}
+
+void roadDrawing::drawSpecialIntersections(mapBoundary &xy, infoStrucs &info, ezgl::renderer &g){
+    for(unsigned i = 0 ; i < info.lastIntersection.size() ; i++){
+        drawOneIntersection(info.lastIntersection[i], xy, info, g);
+    }
 }
 
 void roadDrawing::drawOneIntersection(int id, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g){

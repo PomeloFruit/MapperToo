@@ -79,9 +79,9 @@ public:
 
     std::vector<POIData> POIInfo;
     
-    unsigned lastIntersection;
+    std::vector<unsigned> lastIntersection;
     
-    unsigned lastPOI;
+    std::vector<unsigned> lastPOI;
     
     std::string textInput1, textInput2;
 };

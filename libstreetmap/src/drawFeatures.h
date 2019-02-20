@@ -12,5 +12,7 @@ public:
 
     void drawPOI(int numPOI, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g);
     
+    void drawClickedPOI(mapBoundary &xy, infoStrucs &info, ezgl::renderer &g);
+    
     void drawOnePOI(int i, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g);
 };

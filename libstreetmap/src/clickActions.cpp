@@ -6,7 +6,6 @@
 #include "globals.h"
 #include "latLonToXY.h"
 #include <string>
-#include <iostream>
 
 std::string clickActions::clickedOnPOI(double x, double y, mapBoundary &xy, infoStrucs &info){
     LatLon clickPos;
@@ -18,9 +17,10 @@ std::string clickActions::clickedOnPOI(double x, double y, mapBoundary &xy, info
     displayName += info.POIInfo[clickedID].name;
     
     nearestIntID = find_closest_intersection(clickPos);
-    displayName += " | Nearest Intersection: " + info.IntersectionInfo[nearestIntID].name;
+    displayName += " | Nearest Intersection: ";
+    displayName += info.IntersectionInfo[nearestIntID].name;
     
-    highlightOnePOI(info, clickedID);
+    highlightPOI(info, clickedID);
     
     return displayName;
 }
@@ -28,14 +28,14 @@ std::string clickActions::clickedOnPOI(double x, double y, mapBoundary &xy, info
 
 std::string clickActions::clickedOnIntersection(double x, double y, mapBoundary &xy, infoStrucs &info){
     LatLon clickPos;
-    unsigned clickedID;
+    unsigned clickedID = 0;
     std::string displayName = "Intersection Clicked: ";
     
     clickPos = xy.LatLonFromXY(x,y);
     clickedID = find_closest_intersection(clickPos);
     displayName += info.IntersectionInfo[clickedID].name;
     
-    highlightOneIntersection(info, clickedID);
+    highlightIntersection(info, clickedID);
     
     return displayName;
 }
@@ -48,14 +48,14 @@ std::string clickActions::searchOnMap(infoStrucs &info){
     street1ID.clear();
     street2ID.clear();
     
-    match1 = findMatches(info, street1ID, info.textInput1);
-    match2 = findMatches(info, street2ID, info.textInput2);
+    match1 = findMatches(street1ID, info.textInput1);
+    match2 = findMatches(street2ID, info.textInput2);
 
     displayMessage = getMessagesFromMatches(match1, match2);
     
     if((match1 == 1) && (match2 == 1)){
         resultID = find_intersection_ids_from_street_ids(street1ID[0], street2ID[0]);
-        highlightOneIntersection(info, resultID[0]);
+        highlightIntersection(info, resultID[0]);
         displayMessage = "Intersection(s) Found: ";
         displayMessage += getIntersectionName(resultID[0]);
     } else if(match1 == 1) {
@@ -69,24 +69,56 @@ std::string clickActions::searchOnMap(infoStrucs &info){
 }
 
 
+void clickActions::highlightPOI(infoStrucs &info, unsigned highID){
+    std::vector<unsigned> highIDinVec;
+    highIDinVec.clear();
+    highIDinVec.push_back(highID);
+    highlightPOI(info, highIDinVec);
+}
+
+void clickActions::highlightPOI(infoStrucs &info, std::vector<unsigned> &highID){
+    clearPreviousHighlights(info);
     
-    
-void clickActions::highlightOnePOI(infoStrucs &info, unsigned highID){
-    info.IntersectionInfo[info.lastIntersection].clicked = false;
-    info.POIInfo[info.lastPOI].clicked = false;
-    info.POIInfo[highID].clicked = true;
+    for(unsigned i=0 ; i<highID.size() ; i++){
+        info.POIInfo[highID[i]].clicked = true;
+    }
     info.lastPOI = highID;
 }
 
-void clickActions::highlightOneIntersection(infoStrucs &info, unsigned highID){
-    info.POIInfo[info.lastPOI].clicked = false;
-    info.IntersectionInfo[info.lastIntersection].clicked = false;
-    info.IntersectionInfo[highID].clicked = true;
+void clickActions::highlightIntersection(infoStrucs &info, unsigned highID){
+    std::vector<unsigned> highIDinVec;
+    highIDinVec.clear();
+    highIDinVec.push_back(highID);
+    highlightIntersection(info, highIDinVec);
+}
+
+void clickActions::highlightIntersection(infoStrucs &info, std::vector<unsigned> &highID){
+    clearPreviousHighlights(info);
+    
+    for(unsigned i=0 ; i<highID.size() ; i++){
+        info.IntersectionInfo[highID[i]].clicked = true;
+    }
     info.lastIntersection = highID;
 }
 
+void clickActions::clearPreviousHighlights(infoStrucs &info){
+    unsigned currentIndex;
+    
+    for(unsigned i=0 ; i<info.lastPOI.size() ; i++){
+        currentIndex = info.lastPOI[i];
+        info.POIInfo[currentIndex].clicked = false;
+    }
+    info.lastPOI.clear();
+    
+    for(unsigned i=0 ; i<info.lastIntersection.size() ; i++){
+        currentIndex = info.lastIntersection[i];
+        info.IntersectionInfo[currentIndex].clicked = false;
+    }
+    info.lastIntersection.clear();
+}
+
 // -1 for no input, 0 for no match, 1 for match street, 2 for not unique enough
-int clickActions::findMatches(infoStrucs &info, std::vector<unsigned> &streetID, std::string userInput){
+int clickActions::findMatches(std::vector<unsigned> &streetID, std::string userInput){
     int match = -1, numMatches = 0;
     
     if(userInput != ""){

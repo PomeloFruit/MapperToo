@@ -11,10 +11,13 @@ public:
     std::string clickedOnPOI(double x, double y, mapBoundary &xy, infoStrucs &info);
 
     std::string searchOnMap(infoStrucs &info);
-    int findMatches(infoStrucs &info, std::vector<unsigned> &streetID, std::string userInput);
+    int findMatches(std::vector<unsigned> &streetID, std::string userInput);
     std::string getMessagesFromMatches(int match1, int match2);
     
-    void highlightOnePOI(infoStrucs &info, unsigned highID);
-    void highlightOneIntersection(infoStrucs &info, unsigned highID);
+    void highlightPOI(infoStrucs &info, unsigned highID);
+    void highlightPOI(infoStrucs &info, std::vector<unsigned> &highID);
+    void highlightIntersection(infoStrucs &info, unsigned highID);
+    void highlightIntersection(infoStrucs &info, std::vector<unsigned> &highID);
+    void clearPreviousHighlights(infoStrucs &info);
 };
 

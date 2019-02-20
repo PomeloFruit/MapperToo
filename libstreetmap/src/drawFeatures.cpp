@@ -64,12 +64,20 @@ void featureDrawing::drawFeatures(int numFeatures, infoStrucs &info, ezgl::rende
 }
 
 
-// draw all, then make sure last clicked is on top of others
+// draw all
 void featureDrawing::drawPOI(int numPOI, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g){
     for(int i=0 ; i<numPOI ; i++){
         drawOnePOI(i, xy, info, g);
     }
-    drawOnePOI(info.lastPOI, xy, info, g);
+    drawClickedPOI(xy, info, g);
+}
+
+// make sure last clicked is on top of others
+void featureDrawing::drawClickedPOI(mapBoundary &xy, infoStrucs &info, ezgl::renderer &g){
+    for(unsigned i=0 ; i<info.lastPOI.size() ; i++){
+        drawOnePOI(info.lastPOI[i], xy, info, g);
+    }
+    
 }
 
 void featureDrawing::drawOnePOI(int i, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g){

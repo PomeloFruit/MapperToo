@@ -16,6 +16,8 @@ public:
     
     void drawIntersections(int numInter, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g);
     
+    void drawSpecialIntersections(mapBoundary &xy, infoStrucs &info, ezgl::renderer &g);
+    
     void drawOneIntersection(int i, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g);
 };
 

@@ -12,14 +12,15 @@
 #include "ezgl/graphics.hpp"
 #include "ezgl/point.hpp"
 
+
 void populateData::initialize(infoStrucs &info, mapBoundary &xy){
     populateOSMWayInfo(info);
     populateStreetSegInfo(info);
     populateIntersectionInfo(info);
     populateFeatureInfo(info, xy);
     populatePOIInfo(info);
-    info.lastIntersection = 0;
-    info.lastPOI = 0;
+    info.lastIntersection.clear();
+    info.lastPOI.clear();
 }
 
 void populateData::populateOSMWayInfo(infoStrucs &info){
