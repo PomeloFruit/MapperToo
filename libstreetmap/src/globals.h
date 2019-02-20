@@ -43,6 +43,7 @@ struct streetSegData {
 struct featureData {
     int featureType;
     std::string name;
+    int priorityNum; 
     
     OSMID id;
     bool isOpen;

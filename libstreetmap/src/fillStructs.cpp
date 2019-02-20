@@ -130,6 +130,17 @@ void populateData::populateFeatureInfo(infoStrucs &info, mapBoundary &xy){
         info.FeatureInfo[i].id = getFeatureOSMID(i);
         
         numPoints = getFeaturePointCount(i);
+        
+        if(info.FeatureInfo[i].isOpen){
+            info.FeatureInfo[i].priorityNum = 4;
+        }else if(numPoints < 5){
+            info.FeatureInfo[i].priorityNum = 3; 
+        }else if (numPoints < 15){
+            info.FeatureInfo[i].priorityNum = 2;
+        }else{
+            info.FeatureInfo[i].priorityNum = 1;
+        }
+
         info.FeaturePointVec[i].clear();
         
         pt1 = getFeaturePoint(0, i);

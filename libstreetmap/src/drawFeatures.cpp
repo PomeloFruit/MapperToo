@@ -18,7 +18,7 @@ std::vector<std::string> shops {"department_store", "general", "kiosk", "mall", 
     , "tattoo", "electrical", "florist", "antiques", "candles", "interior_decoration", "computer", "robot", "electronics", "mobile_phone", "radiotechnics" 
     , "fishing", "fuel", "outdoor", "scuba_diving", "ski", "sports", "swimming_pool", "art", "collector", "craft", "games", "model", "music", "musical_instrument"
     , "photo", "camera", "video", "video_games", "anime", "books", "gift", "stationery", "ticket", "cannabis", "e-cigarette", "tobacco", "toys", "travel_agency"};
-
+        
 void featureDrawing::setFeatureColour(int type, ezgl::renderer &g){
     switch(type){
         case 0: // unknown = dark gray
@@ -89,19 +89,23 @@ void featureDrawing::setPOIColour(int type, ezgl::renderer& g){
 
 
 void featureDrawing::drawFeatures(int numFeatures, infoStrucs &info, ezgl::renderer &g){
-    for(int i=0 ; i<numFeatures ; i++){
-        setFeatureColour(info.FeatureInfo[i].featureType, g);
-        if(info.FeaturePointVec[i].size()>1){
-            if(info.FeatureInfo[i].isOpen){
-                for(int p=1; p< static_cast<int>(info.FeaturePointVec[i].size()); p++){
-                    g.set_line_width(3); ///////////////////////////////////////////////////////magic  number???????
-                    g.draw_line(info.FeaturePointVec[i][p-1], info.FeaturePointVec[i][p]);
+    for(int s = 1; s <= 4; s++){        //drawing by priority number where 1 is the highest and 4 is the lowest (all open features are 4 automatically)
+        for(int i = 0; i < numFeatures; i++){
+            if(info.FeatureInfo[i].priorityNum == s){
+                setFeatureColour(info.FeatureInfo[i].featureType, g);
+                if(info.FeaturePointVec[i].size()>1){
+                    if(info.FeatureInfo[i].isOpen){
+                        for(int p=1; p< static_cast<int>(info.FeaturePointVec[i].size()); p++){
+                            g.set_line_width(3); ///////////////////////////////////////////////////////magic  number???????
+                            g.draw_line(info.FeaturePointVec[i][p-1], info.FeaturePointVec[i][p]);
+                        }
+                    } else { //closed feature
+                        g.fill_poly(info.FeaturePointVec[i]);
+                    }
+                } else { // feature is node
+                    g.fill_rectangle(info.FeaturePointVec[i][0],0.0001,0.0001);///////////////////////////////////////////////////////magic  number???????
                 }
-            } else { //closed feature
-                g.fill_poly(info.FeaturePointVec[i]);
             }
-        } else { // feature is node
-            g.fill_rectangle(info.FeaturePointVec[i][0],0.0001,0.0001);///////////////////////////////////////////////////////magic  number???????
         }
     }
 }
@@ -120,7 +124,6 @@ void featureDrawing::drawClickedPOI(mapBoundary &xy, infoStrucs &info, ezgl::ren
     for(unsigned i=0 ; i<info.lastPOI.size() ; i++){
         drawOnePOI(info.lastPOI[i], xy, info, g);
     }
-    
 }
 
 void featureDrawing::drawOnePOI(int i, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g){
