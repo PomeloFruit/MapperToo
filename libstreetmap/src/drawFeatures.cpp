@@ -64,18 +64,34 @@ void featureDrawing::drawFeatures(int numFeatures, infoStrucs &info, ezgl::rende
 }
 
 
+// draw all, then make sure last clicked is on top of others
+void featureDrawing::drawPOI(int numPOI, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g){
+    for(int i=0 ; i<numPOI ; i++){
+        drawOnePOI(i, xy, info, g);
+    }
+    drawOnePOI(info.lastPOI, xy, info, g);
+}
 
-void featureDrawing::drawPOI(int numPOI, mapBoundary &xy, ezgl::renderer &g){
-    LatLon newPoint;
-    double xNew, yNew;
+void featureDrawing::drawOnePOI(int i, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g){
+    const double HIGHLIGHTRAD = 0.0005;
+    const double NORMALRAD = 0.00015;
     
-    double radius = 0.00025; ///no magic numbers!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-     for(int i=0 ; i<numPOI ; i++){
-        newPoint = getPointOfInterestPosition(i);
-            
-        xNew = xy.xFromLon(newPoint.lon());
-        yNew = xy.yFromLat(newPoint.lat());
-        
+    LatLon newPoint;
+    double xNew, yNew, radius; 
+    
+    newPoint = getPointOfInterestPosition(i);       
+    xNew = xy.xFromLon(newPoint.lon());
+    yNew = xy.yFromLat(newPoint.lat());
+    
+    if (info.POIInfo[i].clicked) {
+        radius = NORMALRAD;
+        g.set_color(0,255,174,255);
+        g.fill_elliptic_arc(ezgl::point2d(xNew,yNew),radius,radius,0,360);
+        radius = HIGHLIGHTRAD;
+        g.set_color(214,115,246,100);
+        g.fill_elliptic_arc(ezgl::point2d(xNew,yNew),radius,radius,0,360);
+    } else {
+        radius = NORMALRAD;
         g.set_color(255,0,0,255);
         g.fill_elliptic_arc(ezgl::point2d(xNew,yNew),radius,radius,0,360);
     }

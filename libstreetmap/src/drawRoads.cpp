@@ -67,6 +67,7 @@ void roadDrawing::drawIntersections(int numInter, mapBoundary &xy, infoStrucs &i
     for(int i = 0 ; i < numInter ; i++){
         drawOneIntersection(i, xy, info, g);
     }
+    drawOneIntersection(info.lastIntersection, xy, info, g);
 }
 
 void roadDrawing::drawOneIntersection(int id, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g){
@@ -76,10 +77,12 @@ void roadDrawing::drawOneIntersection(int id, mapBoundary &xy, infoStrucs &info,
        
     x = xy.xFromLon(info.IntersectionInfo[id].position.lon());
     y = xy.yFromLat(info.IntersectionInfo[id].position.lat());
-    
+
     if(info.IntersectionInfo[id].clicked) {
-        g.set_color(255,236,50,255);
-        g.fill_elliptic_arc(ezgl::point2d(x,y),RADIUS,RADIUS,0,360);
+        g.set_color(0,255,174,255);
+        g.fill_rectangle({x-WIDTH, y-WIDTH},{x+WIDTH, y+WIDTH});
+        g.set_color(255,33,137,100);
+        g.fill_elliptic_arc(ezgl::point2d(x,y),RADIUS,RADIUS,0,360);        
     } else {
         g.set_color(255,255,255,255);
         g.fill_rectangle({x-WIDTH, y-WIDTH},{x+WIDTH, y+WIDTH});

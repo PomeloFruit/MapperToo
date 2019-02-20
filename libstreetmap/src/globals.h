@@ -48,6 +48,7 @@ struct featureData {
 struct POIData {
     std::string name;
     std::string type;
+    bool clicked;
     
     OSMID id;
 };
@@ -76,5 +77,7 @@ public:
     std::vector<POIData> POIInfo;
     
     unsigned lastIntersection;
+    
+    unsigned lastPOI;
 };
 

@@ -10,5 +10,7 @@ public:
 
     void drawFeatures(int numFeatures, infoStrucs &info, ezgl::renderer &g);
 
-    void drawPOI(int numPOI, mapBoundary &xy, ezgl::renderer &g);
+    void drawPOI(int numPOI, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g);
+    
+    void drawOnePOI(int i, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g);
 };

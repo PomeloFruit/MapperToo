@@ -35,6 +35,7 @@ roadDrawing rd;
 
 void draw_main_canvas(ezgl::renderer &g);
 std::string clickedOnIntersection(double x, double y);
+std::string clickedOnPOI(double x, double y);
 
 // Callback functions for event handling
 void act_on_mouse_press(ezgl::application *application, GdkEventButton *event, double x, double y);
@@ -70,19 +71,49 @@ void draw_main_canvas(ezgl::renderer &g){
     ft.drawFeatures(getNumFeatures(), info, g);
     rd.drawStreetRoads(getNumStreetSegments(), xy, info, g);
     rd.drawIntersections(getNumIntersections(), xy, info, g);
-    ft.drawPOI(getNumPointsOfInterest(), xy, g);
+    ft.drawPOI(getNumPointsOfInterest(), xy, info, g);
 }
 
-// button 1=left, 2 = middle, 3 = right; (event->state & GDK_SHIFT_MASK), (event->state & GDK_CONTROL_MASK) for shift and ctrl keys
-// ^^may be useful later
+// left click for POI, right click for intersection
 void act_on_mouse_press(ezgl::application *application, GdkEventButton *event, double x, double y){
     std::string message;
+
+    if (event->button == 1) { //left click
+        message = clickedOnPOI(x, y);
+    } else if (event->button == 3) { //right click
+        message = clickedOnIntersection(x, y);
+    }
+        
+
+//    if ((event->state & GDK_CONTROL_MASK) && (event->state & GDK_SHIFT_MASK))
+//    std::cout << "with control and shift pressed ";
+//    else if (event->state & GDK_CONTROL_MASK)
+//    std::cout << "with control pressed ";
+//    else if (event->state & GDK_SHIFT_MASK)
+//    std::cout << "with shift pressed ";
     
-    message = clickedOnIntersection(x, y);
     
     application->update_message(message);
     application->refresh_drawing();
 }
+
+std::string clickedOnPOI(double x, double y){
+    LatLon clickPos;
+    unsigned clickedID;
+    std::string displayName = "Point of Interest Clicked: ";
+    
+    clickPos = xy.LatLonFromXY(x,y);
+    clickedID = find_closest_point_of_interest(clickPos);
+    displayName += info.POIInfo[clickedID].name;
+    
+    info.IntersectionInfo[info.lastIntersection].clicked = false;
+    info.POIInfo[info.lastPOI].clicked = false;
+    info.POIInfo[clickedID].clicked = true;
+    info.lastPOI = clickedID;
+    
+    return displayName;
+}
+
 
 std::string clickedOnIntersection(double x, double y){
     LatLon clickPos;
@@ -93,6 +124,7 @@ std::string clickedOnIntersection(double x, double y){
     clickedID = find_closest_intersection(clickPos);
     displayName += info.IntersectionInfo[clickedID].name;
     
+    info.POIInfo[info.lastPOI].clicked = false;
     info.IntersectionInfo[info.lastIntersection].clicked = false;
     info.IntersectionInfo[clickedID].clicked = true;
     info.lastIntersection = clickedID;

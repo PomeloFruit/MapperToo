@@ -19,6 +19,7 @@ void populateData::initialize(infoStrucs &info, mapBoundary &xy){
     populateFeatureInfo(info, xy);
     populatePOIInfo(info);
     info.lastIntersection = 0;
+    info.lastPOI = 0;
 }
 
 void populateData::populateOSMWayInfo(infoStrucs &info){
@@ -140,7 +141,6 @@ void populateData::populateFeatureInfo(infoStrucs &info, mapBoundary &xy){
             
             info.FeaturePointVec[i].push_back(ezgl::point2d(xNew,yNew));
         }
-        //std::cout << "n - " << info.FeatureInfo[i].name << " t - " << info.FeatureInfo[i].featureType << std::endl;
     }
 }
 
@@ -150,11 +150,8 @@ void populateData::populatePOIInfo(infoStrucs &info){
     info.POIInfo.resize(numPOI);
         
     for(int i=0 ; i<numPOI ; i++){
-        
-        
         info.POIInfo[i].name = getPointOfInterestName(i);
         info.POIInfo[i].type = getPointOfInterestType(i);
-        
-      //  std::cout << "n - " << POIInfo[i].name << " t - " << POIInfo[i].type << std::endl;
+        info.POIInfo[i].clicked = false;
     }
 }
