@@ -63,8 +63,7 @@ std::string clickActions::searchOnMap(infoStrucs &info){
     } else if(match2 == 1) {
         resultID = street2ID;
     }
-    
-        
+
     return displayMessage;
 }
 
