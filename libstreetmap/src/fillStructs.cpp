@@ -18,6 +18,7 @@ void populateData::initialize(infoStrucs &info, mapBoundary &xy){
     populateIntersectionInfo(info);
     populateFeatureInfo(info, xy);
     populatePOIInfo(info);
+    info.lastIntersection = 0;
 }
 
 void populateData::populateOSMWayInfo(infoStrucs &info){
@@ -106,6 +107,7 @@ void populateData::populateIntersectionInfo(infoStrucs &info){
     for(int i=0;i<numOfIntersections;++i){
         info.IntersectionInfo[i].position = getIntersectionPosition(i);
         info.IntersectionInfo[i].name = getIntersectionName(i);
+        info.IntersectionInfo[i].clicked = false;
     }
 }
 

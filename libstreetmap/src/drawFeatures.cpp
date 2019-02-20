@@ -50,7 +50,7 @@ void featureDrawing::drawFeatures(int numFeatures, infoStrucs &info, ezgl::rende
         setFeatureColour(info.FeatureInfo[i].featureType, g);
         if(info.FeaturePointVec[i].size()>1){
             if(info.FeatureInfo[i].isOpen){
-                for(int p=1; p<info.FeaturePointVec[i].size(); p++){
+                for(int p=1; p< static_cast<int>(info.FeaturePointVec[i].size()); p++){
                     g.set_line_width(3); ///////////////////////////////////////////////////////magic  number???????
                     g.draw_line(info.FeaturePointVec[i][p-1], info.FeaturePointVec[i][p]);
                 }

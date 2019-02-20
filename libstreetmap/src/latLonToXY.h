@@ -1,5 +1,7 @@
 #pragma once
 
+#include "LatLon.h"
+
 class mapBoundary {
 public: 
     int numOfIntersections;
@@ -24,5 +26,7 @@ public:
     
     float xFromLon(float lon); 
     
-    float yFromLat(float lat); 
+    float yFromLat(float lat);
+    
+    LatLon LatLonFromXY(double x, double y);
 };

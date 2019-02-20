@@ -15,5 +15,7 @@ public:
     void drawStraightStreet(LatLon &pt1, LatLon &pt2, mapBoundary &xy, ezgl::renderer &g);
     
     void drawIntersections(int numInter, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g);
+    
+    void drawOneIntersection(int i, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g);
 };
 

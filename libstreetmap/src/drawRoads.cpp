@@ -7,7 +7,7 @@
 #include "ezgl/graphics.hpp"
 #include "ezgl/point.hpp"
 
- void roadDrawing::setRoadColourSize(int type, ezgl::renderer &g){
+void roadDrawing::setRoadColourSize(int type, ezgl::renderer &g){
     g.set_line_width(ROADWIDTH);
     switch(type){
         case HIGHWAY: // yellowish
@@ -64,13 +64,25 @@ void roadDrawing::drawStraightStreet(LatLon &pt1, LatLon &pt2, mapBoundary &xy, 
 }
 
 void roadDrawing::drawIntersections(int numInter, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g){
-     for(int i = 0 ; i < numInter ; i++){
-        float x = xy.xFromLon(info.IntersectionInfo[i].position.lon());
-        float y = xy.yFromLat(info.IntersectionInfo[i].position.lat());
-        
-        float width=0.00003; ///no magic numbers!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        float height=width;
-        g.fill_rectangle({x-width, y-height},{x+width, y+height});
+    for(int i = 0 ; i < numInter ; i++){
+        drawOneIntersection(i, xy, info, g);
+    }
+}
+
+void roadDrawing::drawOneIntersection(int id, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g){
+    const float RADIUS = 0.0005;
+    const float WIDTH = 0.00003;
+    float x, y;
+       
+    x = xy.xFromLon(info.IntersectionInfo[id].position.lon());
+    y = xy.yFromLat(info.IntersectionInfo[id].position.lat());
+    
+    if(info.IntersectionInfo[id].clicked) {
+        g.set_color(255,236,50,255);
+        g.fill_elliptic_arc(ezgl::point2d(x,y),RADIUS,RADIUS,0,360);
+    } else {
+        g.set_color(255,255,255,255);
+        g.fill_rectangle({x-WIDTH, y-WIDTH},{x+WIDTH, y+WIDTH});
     }
 }
 

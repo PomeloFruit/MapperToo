@@ -1,7 +1,8 @@
+#include "latLonToXY.h"
+#include "LatLon.h"
 #include "m1.h"
 #include "StreetsDatabaseAPI.h"
 #include <math.h>
-#include "latLonToXY.h"
 
 void mapBoundary::initialize(){
     numOfIntersections = getNumIntersections();
@@ -78,17 +79,24 @@ double mapBoundary::getAverageLat(){
     return DEG_TO_RAD*(maxLat+minLat)/2;
 }
 
-
+// projection factor is cos(averageLat))
 float mapBoundary::xFromLon(float lon){
-    float projectionFactor,x;
-    
-    projectionFactor = cos(averageLat);
-    x = lon*projectionFactor;
-    
-    return x;
+    return lon * cos(averageLat);
 }
 
 
 float mapBoundary::yFromLat(float lat){
     return lat;
 }
+
+LatLon mapBoundary::LatLonFromXY(double x, double y){
+    float lat, lon;
+    
+    lat = y;
+    lon = x / cos(averageLat);
+    
+    LatLon convCoord(lat,lon);
+    
+    return convCoord;
+}
+

@@ -23,6 +23,7 @@
 struct intersectionData {
     LatLon position;
     std::string name;
+    bool clicked;
 };
 
 struct streetSegData {
@@ -73,5 +74,7 @@ public:
     std::vector< std::vector<ezgl::point2d> > FeaturePointVec;
 
     std::vector<POIData> POIInfo;
+    
+    unsigned lastIntersection;
 };
 
