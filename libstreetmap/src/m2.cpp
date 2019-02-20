@@ -7,11 +7,8 @@
 #include "fillStructs.h"
 #include "drawFeatures.h"
 #include "drawRoads.h"
-<<<<<<< HEAD
 #include "clickActions.h"
-=======
 #include "drawText.h"
->>>>>>> Commiting before pulling new changes to merge
 
 #include "StreetsDatabaseAPI.h"
 #include "OSMDatabaseAPI.h"
@@ -35,15 +32,12 @@ mapBoundary xy;
 populateData pop;
 featureDrawing ft;
 roadDrawing rd;
-<<<<<<< HEAD
 clickActions ck;
-=======
 drawText dt;
 
 //=========================== Function Prototypes ===========================
 
 void draw_main_canvas(ezgl::renderer &g);
->>>>>>> Commiting before pulling new changes to merge
 
 //=========================== Function Prototypes ===========================
 
@@ -53,10 +47,20 @@ void act_on_mouse_press(ezgl::application *application, GdkEventButton *event, d
 void pressFind(GtkWidget *widget, ezgl::application *application);
 
 // Callback functions for event handling
+<<<<<<< HEAD
 
 //void act_on_mouse_move(ezgl::application *application, GdkEventButton *event, double x, double y);
 //void act_on_key_press(ezgl::application *application, GdkEventKey *event, char *key_name);
 
+=======
+void act_on_mouse_press(ezgl::application *application, GdkEventButton *event, double x, double y);
+void act_on_mouse_move(ezgl::application *application, GdkEventButton *event, double x, double y);
+void act_on_key_press(ezgl::application *application, GdkEventKey *event, char *key_name);
+void initial_setup(ezgl::application *application);
+void find_button(GtkWidget *widget, ezgl::application *application);
+void test_button(GtkWidget *widget, ezgl::application *application);
+///////
+>>>>>>> Names on roads nearly complete
 
 //=========================== Function Definitions ===========================
 
@@ -168,6 +172,7 @@ void act_on_mouse_press(ezgl::application *application, GdkEventButton *event, d
     application->update_message(message);
     application->refresh_drawing();
 }
+<<<<<<< HEAD
 
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -191,32 +196,38 @@ void pressFind(GtkWidget *widget, ezgl::application *application){
 <<<<<<< HEAD
 =======
 >>>>>>> Commiting before pulling new changes to merge
+=======
+/*
+>>>>>>> Names on roads nearly complete
 void initial_setup(ezgl::application *application){
   application->update_message("Left-click for Points of Interest | "
                                 "Right-click for Intersections");
   application->connect_feature(press_find);
 //  application->create_button("Find", 9, find_button);
 //  application->create_button("I", 10, _button);
-
+}
+ * */
 /**
  * Function to handle mouse move event
  * The current mouse position in the main canvas' world coordinate system is returned
  * A pointer to the application and the entire GDK event are also returned
  */
+/*
 void act_on_mouse_move(ezgl::application *application, GdkEventButton *event, double x, double y){
   std::cout << "Mouse move at coordinates (" << x << "," << y << ") "<< std::endl;
 }
+*/
 
-
-<<<<<<< HEAD
-=======
 /**
- * A callback function to test the Test button
+ * A ca
+ * callback function to test the Test button
  */
+
 void test_button(GtkWidget *widget, ezgl::application *application){
   application->update_message("Test Button Pressed");
   application->refresh_drawing();
 }
+
     
 //For now I'm going to just draw everything I need to inside the draw_main_canvas function
 //but in the future sometime I plan on putting this stuff inside of seperate functions 
