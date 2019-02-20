@@ -49,14 +49,6 @@ void pressFind(GtkWidget *widget, ezgl::application *application);
 //void act_on_mouse_move(ezgl::application *application, GdkEventButton *event, double x, double y);
 //void act_on_key_press(ezgl::application *application, GdkEventKey *event, char *key_name);
 
-void act_on_mouse_press(ezgl::application *application, GdkEventButton *event, double x, double y);
-void act_on_mouse_move(ezgl::application *application, GdkEventButton *event, double x, double y);
-void act_on_key_press(ezgl::application *application, GdkEventKey *event, char *key_name);
-void initial_setup(ezgl::application *application);
-void find_button(GtkWidget *widget, ezgl::application *application);
-void test_button(GtkWidget *widget, ezgl::application *application);
-///////
-
 //=========================== Function Definitions ===========================
 
 void draw_map(){

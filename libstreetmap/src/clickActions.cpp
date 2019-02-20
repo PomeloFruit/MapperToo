@@ -55,18 +55,36 @@ std::string clickActions::searchOnMap(infoStrucs &info){
     
     if((match1 == 1) && (match2 == 1)){
         resultID = find_intersection_ids_from_street_ids(street1ID[0], street2ID[0]);
-        highlightIntersection(info, resultID[0]);
+        highlightIntersection(info, resultID);
         displayMessage = "Intersection(s) Found: ";
         displayMessage += getIntersectionName(resultID[0]);
     } else if(match1 == 1) {
         resultID = street1ID;
+        displayMessage = "Street Found: ";
+        displayMessage += getStreetName(resultID[0]);
+        highlightStreet(info, resultID[0]);
     } else if(match2 == 1) {
         resultID = street2ID;
+        displayMessage = "Street Found: ";
+        displayMessage += getStreetName(street2ID[0]);
+        highlightStreet(info, resultID[0]);
     }
 
     return displayMessage;
 }
 
+void clickActions::highlightStreet(infoStrucs &info, unsigned highID){
+    std::vector<unsigned> highSegs;
+    
+    clearPreviousHighlights(info);
+    
+    highSegs = find_street_street_segments(highID);
+
+    for(unsigned i=0 ; i<highSegs.size() ; i++){
+        info.StreetSegInfo[highSegs[i]].clicked = true;
+    }
+    info.lastSeg = highSegs;
+}
 
 void clickActions::highlightPOI(infoStrucs &info, unsigned highID){
     std::vector<unsigned> highIDinVec;
@@ -114,6 +132,12 @@ void clickActions::clearPreviousHighlights(infoStrucs &info){
         info.IntersectionInfo[currentIndex].clicked = false;
     }
     info.lastIntersection.clear();
+    
+    for(unsigned i=0 ; i<info.lastSeg.size() ; i++){
+        currentIndex = info.lastSeg[i];
+        info.StreetSegInfo[currentIndex].clicked = false;
+    }
+    info.lastSeg.clear();
 }
 
 // -1 for no input, 0 for no match, 1 for match street, 2 for not unique enough

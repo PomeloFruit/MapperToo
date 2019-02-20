@@ -86,6 +86,8 @@ public:
     
     std::vector<unsigned> lastPOI;
     
+    std::vector<unsigned> lastSeg;
+    
     std::string textInput1, textInput2;
 };
 
