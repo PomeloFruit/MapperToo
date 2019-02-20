@@ -12,7 +12,7 @@ void roadDrawing::setRoadColourSize(int type, ezgl::renderer &g){
     switch(type){
         case HIGHWAY: // yellowish
             g.set_line_width(HIGHWAYWIDTH);
-            g.set_color(247,247,62,255);
+            g.set_color(255,238,41,200);
             break;
         case PRIMARY: // white and thick
             g.set_line_width(PRIMWIDTH);
@@ -22,6 +22,7 @@ void roadDrawing::setRoadColourSize(int type, ezgl::renderer &g){
             g.set_color(255,255,255,255);
             break;
         case RESIDENTIAL: //
+            g.set_line_width(RESWIDTH); 
             g.set_color(255,255,255,255);
             break;
         case SERVICE: // light gray
@@ -86,11 +87,15 @@ void roadDrawing::drawOneIntersection(int id, mapBoundary &xy, infoStrucs &info,
     y = xy.yFromLat(info.IntersectionInfo[id].position.lat());
 
     if(info.IntersectionInfo[id].clicked) {
-        g.set_color(0,255,174,255);
-        g.fill_rectangle({x-HIGHWIDTH, y-HIGHWIDTH},{x+HIGHWIDTH, y+HIGHWIDTH});
-        g.set_color(255,33,137,100);
-        g.fill_elliptic_arc(ezgl::point2d(x,y),RADIUS,RADIUS,0,360);        
+        //outer circle (turquoise)
+        g.set_color(110,236,209,125);
+        g.fill_elliptic_arc(ezgl::point2d(x,y),RADIUS,RADIUS,0,360);
+        //inner circle (dark navy)
+        g.set_color(0,119,119,255);
+        g.fill_elliptic_arc(ezgl::point2d(x, y),RADIUS/5,RADIUS/5,0,360);
+        //g.fill_rectangle({x-HIGHWIDTH, y-HIGHWIDTH},{x+HIGHWIDTH, y+HIGHWIDTH});        
     } else {
+        //regular intersection (white)
         g.set_color(255,255,255,255);
         g.fill_rectangle({x-WIDTH, y-WIDTH},{x+WIDTH, y+WIDTH});
     }

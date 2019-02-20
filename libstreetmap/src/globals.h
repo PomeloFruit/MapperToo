@@ -10,6 +10,7 @@
 #include <iostream>
 #include <map>
 
+#define RESWIDTH 2
 #define ROADWIDTH 3
 #define PRIMWIDTH 4
 #define HIGHWAYWIDTH 5

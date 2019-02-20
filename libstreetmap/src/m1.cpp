@@ -22,6 +22,7 @@
 #include "StreetsDatabaseAPI.h"
 #include "globals.h"
 #include "latLonToXY.h"
+#include "grid.h"
 
 #include <map>
 #include <unordered_map>
@@ -67,6 +68,9 @@ std::vector<double> streetLengthVector;
 //vector of street segment travel times indexed on segment ID
 std::vector<double> segTravelTimeVector;
 
+//mapBoundary coordinates; 
+//streetGrid streetBlock; 
+
 //========================= Function Implementations =========================
 
 /* load_map function
@@ -92,6 +96,8 @@ bool load_map(std::string path/*map_path*/) {
         segLengthVector.clear();
         streetLengthVector.clear();
         segTravelTimeVector.clear();
+        //streetBlock.poiGrid.clear(); 
+        //streetBlock.intGrid.clear();
         
         //==== streetIDMap & segLengthVector & segTravelTimeVector ====
         int segStreetID;
@@ -197,6 +203,12 @@ bool load_map(std::string path/*map_path*/) {
             intersectionSegNameVector.push_back(segNames);
             intersectionSegIDVector.push_back(intersectionIds);
         }
+        
+        //coordinates.initialize();
+        //coordinates.setAverageLat(); 
+        //streetBlock.populateGrid(coordinates); 
+        
+        
     }    
     
     return load_successful;
@@ -219,6 +231,8 @@ void close_map() {
     segLengthVector.clear();
     streetLengthVector.clear();
     segTravelTimeVector.clear();
+    //streetBlock.poiGrid.clear(); 
+    //streetBlock.intGrid.clear();
     closeStreetDatabase();
 }
 
@@ -659,44 +673,22 @@ double find_street_segment_travel_time(unsigned street_segment_id){
  * @return nearestPointIndex<unsigned> - the index of the nearest POI
  */
 
+
 unsigned find_closest_point_of_interest(LatLon my_position){
     double min = EARTH_RADIUS_IN_METERS;
-    int nearestPointIndex = 0; 
-    
-    for (int i = 0; i < getNumPointsOfInterest(); i++){                                           
-        double temp = find_distance_between_two_points(my_position, getPointOfInterestPosition(i));   
+    int nearestPOIIndex = 0; 
+
+    for(unsigned i = 0; i < getNumPointsOfInterest(); i++){
+        double temp = find_distance_between_two_points(my_position, getPointOfInterestPosition(i));
         if(temp <= min){
-            min = temp; 
-            nearestPointIndex = i;                                                                      
+            min = temp;
+            nearestPOIIndex = i;
         }
     }
-    
-    return unsigned(nearestPointIndex); 
+    return unsigned(nearestPOIIndex); 
+//    std::cout << streetBlock.findNearestPOI(my_position, coordinates) <<std::endl; 
+//    return streetBlock.findNearestPOI(my_position, coordinates); 
 }
-
-//std::vector<std::vector<unsigned>> streetGrid(100);
-//
-//void populateGrid(){
-//    double dLat = (coordinates.maxLat-coordinates.minLat)/100.0; 
-//    int index;
-//    double latPOI;
-//    double latInt;
-//    
-//    for(int i = 0; i < getNumPointsOfInterest(); i++){
-//        latPOI = getPointOfInterestPosition(i).lat(); 
-//        
-//        index = int((latPOI - coordinates.minLat)/dLat);
-//        streetGrid[index].push_back(getPointOfInterestPosition(i)); 
-//    }
-//    
-//    for(int i = 0; i < getNumIntersections(); i++){
-//        latInt = getIntersectionPosition(i).lat();
-//        
-//        index = int((latInt - coordinates.minLat)/dLat);
-//        streetGrid[index].push_back(getIntersectionPosition(i));
-//    }
-//}
-
 
 /*find_closest_intersection function 
  * -increments through all intersections and calculates the distance between my_position and the intersection
@@ -707,20 +699,21 @@ unsigned find_closest_point_of_interest(LatLon my_position){
  */
 
 unsigned find_closest_intersection(LatLon my_position){
-    double min = EARTH_RADIUS_IN_METERS;                                                                           
-    int nearestIntIndex = 0;                                                                            
-    
-    for (int i = 0; i < getNumIntersections(); i++){          
-        double temp = find_distance_between_two_points(my_position, getIntersectionPosition(i));                       
+    double min = EARTH_RADIUS_IN_METERS;
+    int nearestIntIndex = 0; 
+
+    for(unsigned i = 0; i < getNumIntersections(); i++){
+        double temp = find_distance_between_two_points(my_position, getIntersectionPosition(i));
         if(temp <= min){
-            min = temp; 
-            nearestIntIndex = i;                                                                        
+            min = temp;
+            nearestIntIndex = i;
         }
     }
-    return unsigned(nearestIntIndex);   
-
+    return unsigned(nearestIntIndex); 
+//    std::cout << streetBlock.findNearestInt(my_position, coordinates) <<std::endl;
+//    return streetBlock.findNearestInt(my_position, coordinates);   
+//
 }
-
 
 /* find_street_ids_from_partial_street_name function
  * - converts street_prefix string to lower case
