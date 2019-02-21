@@ -87,5 +87,7 @@ public:
     std::vector<unsigned> lastSeg;
     
     std::string textInput1, textInput2;
+    
+    bool showSubway;
 };
 

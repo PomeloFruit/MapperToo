@@ -19,4 +19,8 @@ public:
     void drawClickedPOI(mapBoundary &xy, infoStrucs &info, ezgl::renderer &g);
     
     void drawOnePOI(int i, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g);
+    
+    void drawSubways(bool draw, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g);
+    
+    void drawOneSubway(unsigned i, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g);
 };

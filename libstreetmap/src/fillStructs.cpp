@@ -25,6 +25,7 @@ void populateData::initialize(infoStrucs &info, mapBoundary &xy){
     info.lastIntersection.clear();
     info.lastPOI.clear();
     info.lastSeg.clear();
+    info.showSubway = true;
 }
 
 void populateData::populateOSMWayInfo(infoStrucs &info){

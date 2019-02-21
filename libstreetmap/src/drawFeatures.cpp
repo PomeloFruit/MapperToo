@@ -144,6 +144,7 @@ void featureDrawing::drawOnePOI(int i, mapBoundary &xy, infoStrucs &info, ezgl::
         radius = HIGHLIGHTRAD;
         g.set_color(255,77,190,125);
         g.fill_elliptic_arc(ezgl::point2d(xNew,yNew),radius,radius,0,360);
+        
         //inner circle (dark purple)
         radius = NORMALRAD;
         g.set_color(79,0,79,255);
@@ -155,4 +156,26 @@ void featureDrawing::drawOnePOI(int i, mapBoundary &xy, infoStrucs &info, ezgl::
         setPOIColour(classifyPOI(info.POIInfo[i].type), g); 
         g.fill_elliptic_arc(ezgl::point2d(xNew,yNew),radius,radius,0,360);
     }
+}
+
+void featureDrawing::drawSubways(bool draw, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g){
+    if(draw){
+        for(unsigned i=0 ; i<info.SubwayInfo.size() ; i++){
+            drawOneSubway(i, xy, info, g);
+        }
+    }
+}
+
+void featureDrawing::drawOneSubway(unsigned i, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g){
+    const double SUBWAYRAD = 0.0005;
+    double xNew, yNew;
+    LatLon drawPoint;
+    
+    drawPoint = info.SubwayInfo[i].point;
+    
+    xNew = xy.xFromLon(drawPoint.lon());
+    yNew = xy.yFromLat(drawPoint.lat());
+    
+    g.set_color(79,0,79,255);
+    g.fill_elliptic_arc(ezgl::point2d(xNew,yNew),SUBWAYRAD,SUBWAYRAD,0,360);
 }
