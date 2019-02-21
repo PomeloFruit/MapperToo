@@ -12,6 +12,7 @@
 #include "ezgl/graphics.hpp"
 #include "ezgl/point.hpp"
 
+#include <iostream>
 
 void populateData::initialize(infoStrucs &info, mapBoundary &xy){
     populateOSMWayInfo(info);
@@ -19,6 +20,8 @@ void populateData::initialize(infoStrucs &info, mapBoundary &xy){
     populateIntersectionInfo(info);
     populateFeatureInfo(info, xy);
     populatePOIInfo(info);
+    populateOSMSubwayInfo(info);
+
     info.lastIntersection.clear();
     info.lastPOI.clear();
     info.lastSeg.clear();
@@ -35,23 +38,6 @@ void populateData::populateOSMWayInfo(infoStrucs &info){
         info.WayMap.insert({currentID,currentWayPtr});
     }
 }
-
-//void populateData::populateOSMSubwayInfo(infoStrucs info){
-//    SubwayInfo.clear();
-//    subwayData newStop;
-//    bool isSubway = false;
-//    const OSMWay* currentPtr;
-//
-//    for(unsigned i=0 ; i< getNumberOfNodes(); i++){
-//        currentPtr = getNodeByIndex(i);
-//        isSubway = checkIfSubway(currentPtr);
-//        
-//        if(isSubway){
-//            newStop.name = getOSMSubwayName(currentPtr);
-//            SubwayInfo.insert(newStop);
-//        }
-//    }
-//}
 
 int populateData::getRoadType(const OSMWay* wayPtr){
     if(wayPtr == NULL){
@@ -168,4 +154,57 @@ void populateData::populatePOIInfo(infoStrucs &info){
         info.POIInfo[i].type = getPointOfInterestType(i);
         info.POIInfo[i].clicked = false;
     }
+}
+
+void populateData::populateOSMSubwayInfo(infoStrucs &info){
+    bool isSubway = false;
+    const OSMNode* currentPtr;
+
+    info.SubwayInfo.clear();
+    for(unsigned i=0 ; i< getNumberOfNodes(); i++){
+        currentPtr = getNodeByIndex(i);
+        isSubway = checkIfSubway(currentPtr);
+        
+        if(isSubway){
+            subwayData newStop;
+            newStop.name = getOSMNodeName(currentPtr);
+            newStop.nodePtr = currentPtr;
+            newStop.clicked = false;
+            newStop.point = currentPtr->coords();
+            
+            info.SubwayInfo.push_back(newStop);
+        }
+    }
+}
+
+bool populateData::checkIfSubway(const OSMNode* nodePtr){
+    if(nodePtr == NULL){
+        return false;
+    }
+    
+    for(unsigned i=0 ; i < getTagCount(nodePtr) ; i++){
+        std::string key,value;
+        std::tie(key,value) = getTagPair(nodePtr,i);
+        
+        if(key == "railway" && value == "station"){
+            return true;
+        }
+    }
+    
+    return false;
+}
+
+std::string populateData::getOSMNodeName(const OSMNode* nodePtr){
+    std::string name = "";
+    
+    for(unsigned i=0 ; i < getTagCount(nodePtr) ; i++){
+        std::string key,value;
+        std::tie(key,value) = getTagPair(nodePtr,i);
+        
+        if(key == "name"){
+            name = value;
+        }
+    }
+    
+    return name;
 }

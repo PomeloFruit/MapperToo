@@ -123,9 +123,7 @@ void pressFind(GtkWidget *widget, ezgl::application *application){
     
     info.textInput1 = name1;
     info.textInput2 = name2;
-    /////////////
-    //application->update_message(info.textInput1 + "...." + info.textInput2);
-    /////////////
+
     message = ck.searchOnMap(info);
     application->update_message(message);
     application->refresh_drawing();
