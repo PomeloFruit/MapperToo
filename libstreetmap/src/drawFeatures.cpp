@@ -171,6 +171,8 @@ void featureDrawing::drawOnePOI(int i, mapBoundary &xy, infoStrucs &info, ezgl::
 
 void featureDrawing::drawSubways(bool draw, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g){
     if(draw){
+        drawSubwayRoute(draw, xy, info, g);
+        
         for(unsigned i=0 ; i<info.SubwayInfo.size() ; i++){
             drawOneSubway(i, xy, info, g);
         }
@@ -199,4 +201,55 @@ void featureDrawing::drawOneSubway(unsigned i, mapBoundary &xy, infoStrucs &info
     }
     
     g.fill_elliptic_arc(ezgl::point2d(xNew,yNew),SUBWAYRAD,SUBWAYRAD,0,360);
+}
+
+void featureDrawing::drawSubwayRoute(bool draw, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g){
+    if(draw){
+        for(unsigned i=0 ; i<info.SubwayRouteInfo.size() ; i++){
+            drawOneSubwayRoute(i, xy, info, g);
+        }
+    }
+}
+
+ void featureDrawing::drawOneSubwayRoute(unsigned r, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g){
+    LatLon from, to;
+    int start = 0;
+    subwayRouteData &temp = info.SubwayRouteInfo.at(r);
+    
+    for(unsigned i=0 ; i<temp.point.size() ; i++){
+        
+        from = temp.point[i][0];
+        // std::cout << srd.nodePoints.at(start). <<std::endl;
+        
+        for(unsigned j=0 ; j<temp.point[i].size() ; j++){
+       
+            to = temp.point[i][j];
+            //  std::cout << srd.nodePoints.at(c) << "---" << to << " and "<< from <<std::endl;
+            drawStraightSubwaySection(from, to, xy, g, temp.clicked);
+            from = to;
+        }
+    }
+}
+
+void featureDrawing::drawStraightSubwaySection(LatLon &pt1, LatLon &pt2, mapBoundary &xy, ezgl::renderer &g, bool high){
+    float xInitial, yInitial, xFinal, yFinal;
+    const int NORMTHICKROUTE = 5;
+    const int HIGHTHICKROUTE = 10;
+    
+    xInitial = xy.xFromLon(pt1.lon());
+    yInitial = xy.yFromLat(pt1.lat());
+    xFinal = xy.xFromLon(pt2.lon());
+    yFinal = xy.yFromLat(pt2.lat());
+    
+  //  std::cout << xInitial << "..." << yInitial << "..." << xFinal << "..." << yFinal << std::endl;
+    
+    g.set_color(255,153,0,255);
+    g.set_line_width(NORMTHICKROUTE);
+    g.draw_line({xInitial, yInitial},{xFinal, yFinal});
+    
+    if(high){
+        g.set_color(51,102,255,150);
+        g.set_line_width(HIGHTHICKROUTE);
+        g.draw_line({xInitial, yInitial},{xFinal, yFinal});
+    }
 }

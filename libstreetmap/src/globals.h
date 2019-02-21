@@ -59,11 +59,12 @@ struct POIData {
 
 struct subwayRouteData {
     std::string name;
-    std::vector< LatLon > point;
-    std::vector< OSMID > nodePoints;
+    std::string operatorName;
+    std::vector< std::vector< LatLon > > point;
+    std::vector< std::vector< OSMID > > nodePoints;
     bool clicked;
     
-    std::vector< const OSMWay* > wayPtr; 
+    std::vector< const OSMWay* > wayPtr; //////////////////////////////////is this really needed??????
 };
 
 struct subwayData {
@@ -71,7 +72,7 @@ struct subwayData {
     LatLon point;
     bool clicked;
     OSMID id;
-    subwayRouteData* srd;
+    std::vector< unsigned > routeNum;
     
     const OSMNode* nodePtr; 
 };

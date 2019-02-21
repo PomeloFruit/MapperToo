@@ -36,10 +36,13 @@ public:
     
     void getOSMSubwayRelations(infoStrucs &info);
     
-    bool checkIfSubwayRouteNode(OSMID id, infoStrucs &info);
+    std::vector< unsigned > checkIfSubwayRouteNode(const OSMNode*, infoStrucs &info);
     
     bool checkIfSubwayRoute(const OSMRelation* relPtr);
     
     bool checkOSMRelationTags(const OSMRelation* relPtr, std::string k, std::string v);
+    
+    std::string getOSMRelationInfo(const OSMRelation* relPtr, std::string k);
+
 };
 

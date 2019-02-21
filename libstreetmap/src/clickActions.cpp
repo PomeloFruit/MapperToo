@@ -49,6 +49,13 @@ std::string clickActions::clickedOnSubway(double x, double y, mapBoundary &xy, i
     clickedID = findNearestSubway(info, clickPos);
     displayName += info.SubwayInfo[clickedID].name;
     
+    for(unsigned i=0 ; i<info.SubwayInfo[clickedID].routeNum.size() ; i++){
+        displayName += " | Route Name: ";
+        displayName += info.SubwayRouteInfo[info.SubwayInfo[clickedID].routeNum[i]].name;
+        displayName += " by ";
+        displayName += info.SubwayRouteInfo[info.SubwayInfo[clickedID].routeNum[i]].operatorName;
+    }
+    
     highlightSubway(info, clickedID);
             
     return displayName;
@@ -261,6 +268,11 @@ void clickActions::highlightSubway(infoStrucs &info, std::vector<unsigned> &high
     
     for(unsigned i=0 ; i<highID.size() ; i++){
         info.SubwayInfo[highID[i]].clicked = true;
+        
+        for(unsigned j=0 ; j<info.SubwayInfo[highID[i]].routeNum.size() ; j++){
+     //       std::cout << info.SubwayInfo[highID[i]].routeNum << std::endl;
+            info.SubwayRouteInfo[info.SubwayInfo[highID[i]].routeNum[j]].clicked = true;
+        }
     }
     info.lastSubway = highID;
 }
@@ -305,6 +317,10 @@ void clickActions::clearPreviousHighlights(infoStrucs &info){
     for(unsigned i=0 ; i<info.lastSubway.size() ; i++){
         currentIndex = info.lastSubway[i];
         info.SubwayInfo[currentIndex].clicked = false;
+        
+        for(unsigned j=0 ; j<info.SubwayInfo[currentIndex].routeNum.size() ; j++){
+            info.SubwayRouteInfo[info.SubwayInfo[currentIndex].routeNum[j]].clicked = false;
+        }
     }
     info.lastSubway.clear();
     
