@@ -33,5 +33,12 @@ public:
     bool checkIfSubway(const OSMNode* nodePtr);
     
     std::string getOSMNodeName(const OSMNode* nodePtr);
+    
+    void getOSMSubwayRelations(infoStrucs &info);
+    
+    bool checkIfSubwayRoute(const OSMRelation* relPtr);
+    
+    void checkOSMRelationTags(const OSMRelation* relPtr, std::string k, std::string v);
+
 };
 

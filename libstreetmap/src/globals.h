@@ -60,15 +60,27 @@ struct subwayData {
     std::string name;
     LatLon point;
     bool clicked;
+    OSMID id;
     
     const OSMNode* nodePtr; 
 };
+
+//struct subwayRouteData {
+//    std::string name;
+//    std::vector< LatLon > point;
+//    std::vector< OSMID > nodePoints;
+//    bool clicked;
+//    
+//    std::vector< OSMWay* > wayPtr; 
+//};
 
 class infoStrucs {
 public:
     std::map<OSMID, const OSMWay*> WayMap;
 
     std::vector<subwayData> SubwayInfo;
+    
+   // std::vector<subwayRouteData> SubwayRouteInfo;
 
     std::vector<intersectionData> IntersectionInfo;
 

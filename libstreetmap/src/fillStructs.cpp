@@ -165,6 +165,7 @@ void populateData::populateOSMSubwayInfo(infoStrucs &info){
     const OSMNode* currentPtr;
 
     info.SubwayInfo.clear();
+    
     for(unsigned i=0 ; i< getNumberOfNodes(); i++){
         currentPtr = getNodeByIndex(i);
         isSubway = checkIfSubway(currentPtr);
@@ -175,10 +176,11 @@ void populateData::populateOSMSubwayInfo(infoStrucs &info){
             newStop.nodePtr = currentPtr;
             newStop.clicked = false;
             newStop.point = currentPtr->coords();
+            newStop.id = currentPtr->id();
             
             info.SubwayInfo.push_back(newStop);
         }
-    }
+    }    
 }
 
 bool populateData::checkIfSubway(const OSMNode* nodePtr){
@@ -212,3 +214,52 @@ std::string populateData::getOSMNodeName(const OSMNode* nodePtr){
     
     return name;
 }
+
+//void populateData::getOSMSubwayRelations(infoStrucs &info){
+//    bool isSubwayRoute = false;
+//    const OSMRelation* currentPtr;
+//    const OSMWay* wayPtr;
+//
+//    info.SubwayInfo.clear();
+//    for(unsigned i=0 ; i< getNumberOfRelations(); i++){
+//        currentPtr = getRelationByIndex(i);
+//        isSubwayRoute = checkIfSubwayRoute(currentPtr, info);
+//        
+//        if(isSubwayRoute){
+//            subwayRouteData newRoute;
+//            for(unsigned i=0 ; i < currentPtr->members().size() ; i++){ //many ways
+//                wayPtr = info.WayMap[OSMID(currentPtr->members().at(i).tid)];
+//                newRoute.wayPtr.push_back(wayPtr); 
+//                for(unsigned i=0 ; i<wayPtr->ndrefs().size() ; i++){ //many nodes
+//                    newRoute.nodePoints.push_back(wayPtr->ndrefs().at(i));
+//                }
+//            }
+//            info.SubwayRouteInfo.push_back(newRoute);
+//        }
+//    }
+//}
+//
+//bool populateData::checkIfSubwayRoute(const OSMRelation* relPtr){
+//    if(relPtr == NULL){
+//        return false;
+//    }
+//
+//    if(checkOSMRelationTags(relPtr,"type","route") && checkOSMRelationTags(relPtr,"route","subway")){
+//        return true;
+//    } else {
+//        return false;
+//    }
+//}
+//    
+//
+//void populateData::checkOSMRelationTags(const OSMRelation* relPtr, std::string k, std::string v){
+//    for(unsigned i=0 ; i < getTagCount(relPtr) ; i++){
+//        std::string key,value;
+//        std::tie(key,value) = getTagPair(relPtr,i);
+//        
+//        if(key == k && value == v){
+//            return true;
+//        }
+//    }
+//    return false;
+//}

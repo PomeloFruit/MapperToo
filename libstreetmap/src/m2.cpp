@@ -35,7 +35,9 @@ roadDrawing rd;
 clickActions ck;
 drawText dt;
 
-
+void relationshipsButton(GtkWidget *widget, ezgl::application *application){
+    std::cout << getNumberOfRelations() << std::endl;
+}
 //=========================== Function Prototypes ===========================
 
 void draw_main_canvas(ezgl::renderer &g);
@@ -93,19 +95,25 @@ void initial_setup(ezgl::application *application){
     application->connect_feature(pressFind);
     
     application->create_button("Show Subways",8,loadSubwayButton);
-}
+    application->create_button("Get Relationships",10,relationshipsButton);
 
+}
 
 // left click for POI, right click for intersection
 void act_on_mouse_press(ezgl::application *application, GdkEventButton *event, double x, double y){
     std::string message;
 
     if (event->button == 1) { //left click
-        if ((event->state & GDK_SHIFT_MASK) && info.showSubway) { //click with shift key
+        
+        if ((event->state & GDK_CONTROL_MASK) && info.showSubway) { //click with control key
+        
             message = ck.clickedOnSubway(x, y, xy, info);
+            
         } else { //without shift key
+            
             message = ck.clickedOnPOI(x, y, xy, info);
-        }
+            
+        }        
     } else if (event->button == 3) { //right click
         message = ck.clickedOnIntersection(x, y, xy, info);
     }        
@@ -144,6 +152,9 @@ void loadSubwayButton(GtkWidget *widget, ezgl::application *application){
     application->create_button("Hide Subways",8,hideSubwayButton);
     application->refresh_drawing();
 }
+
+
+
 
 void hideSubwayButton(GtkWidget *widget, ezgl::application *application){
     info.showSubway = false;
