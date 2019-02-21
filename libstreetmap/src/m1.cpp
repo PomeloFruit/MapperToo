@@ -69,8 +69,8 @@ std::vector<double> streetLengthVector;
 //vector of street segment travel times indexed on segment ID
 std::vector<double> segTravelTimeVector;
 
-//mapBoundary coordinates; 
-//streetGrid streetBlock; 
+mapBoundary coordinates; 
+streetGrid streetBlock; 
 
 //========================= Function Implementations =========================
 
@@ -105,8 +105,8 @@ bool load_map(std::string path/*map_path*/) {
         segLengthVector.clear();
         streetLengthVector.clear();
         segTravelTimeVector.clear();
-        //streetBlock.poiGrid.clear(); 
-        //streetBlock.intGrid.clear();
+        streetBlock.poiGrid.clear(); 
+        streetBlock.intGrid.clear();
         
         //==== streetIDMap & segLengthVector & segTravelTimeVector ====
         int segStreetID;
@@ -213,9 +213,8 @@ bool load_map(std::string path/*map_path*/) {
             intersectionSegIDVector.push_back(intersectionIds);
         }
         
-        //coordinates.initialize();
-        //coordinates.setAverageLat(); 
-        //streetBlock.populateGrid(coordinates); 
+        coordinates.initialize();
+        streetBlock.populateGrid(coordinates); 
         
         
     }    
@@ -240,8 +239,8 @@ void close_map() {
     segLengthVector.clear();
     streetLengthVector.clear();
     segTravelTimeVector.clear();
-    //streetBlock.poiGrid.clear(); 
-    //streetBlock.intGrid.clear();
+    streetBlock.poiGrid.clear(); 
+    streetBlock.intGrid.clear();
     closeStreetDatabase();
     closeOSMDatabase();
 }
@@ -338,45 +337,6 @@ std::vector<unsigned> find_adjacent_intersections(unsigned intersection_id){
     IDVector connectedIntersections;
     bool insert=false;        //true if the destination intersection is reachable from the intersection_id
     unsigned intersection2;
-    //bool isInvalidTo;   //is true if not unique or is intersection_id (for streetSeg.to)
-    //bool isIvalidFrom;  //is true if not unique or is intersection_id (for streetSeg.from)
-    
-    /* The outer for loop goes through all the street segments that are connected to intersection_id
-     * it also sets all the boolean values for each insert
-     */
-    /*for(unsigned i=0;i<segsOrigin.size();i++){
-        insert=true;
-        isInvalidTo=false;
-        isIvalidFrom=false;
-        
-        // The inner for loop checks if the intersection that is connected by the current street segment
-        // is not intersection_id and that it is not already in the list
-        for(unsigned c=0;c<connectedIntersections.size();c++){
-            if((connectedIntersections[c]==unsigned(getInfoStreetSegment(segsOrigin[i]).to)
-                    ||(unsigned(getInfoStreetSegment(segsOrigin[i]).to)==intersection_id))){
-                isInvalidTo=true;
-            }
-            if((connectedIntersections[c]==unsigned(getInfoStreetSegment(segsOrigin[i]).from))
-                    ||(unsigned(getInfoStreetSegment(segsOrigin[i]).from)==intersection_id)){
-                isIvalidFrom=true;
-            }
-        }
-
-        if((getInfoStreetSegment(segsOrigin[i]).oneWay)
-                &&(unsigned(getInfoStreetSegment(segsOrigin[i]).to)==intersection_id)){
-            insert=false;
-        }
-        if(insert){
-            if((unsigned(getInfoStreetSegment(segsOrigin[i]).to)!=intersection_id)&&!isInvalidTo){
-                connectedIntersections.push_back(getInfoStreetSegment(segsOrigin[i]).to);
-            }
-            else if(!isIvalidFrom){
-                connectedIntersections.push_back(getInfoStreetSegment(segsOrigin[i]).from);
-            }
-        }
-    }
-     * all I have to do it determine what the intersection is and then call directly connected ROFL LMAOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOKMS
-    return connectedIntersections;*/
     for(int c=0;unsigned(c)<segsOrigin.size();c++){
         insert=true;
         
@@ -388,12 +348,7 @@ std::vector<unsigned> find_adjacent_intersections(unsigned intersection_id){
             intersection2=unsigned(getInfoStreetSegment(segsOrigin[c]).to);
 
         }
-//        insert=false;
-//        insertTo=true;
-//        insertFrom=true;
-//        if(((getInfoStreetSegment(segsOrigin[c]).from==intersection_id)&&(getInfoStreetSegment(segsOrigin[c]).oneWay))||(!getInfoStreetSegment(segsOrigin[c]).oneWay)){
-//            insert=true;
-//        }
+        
         if(are_directly_connected(intersection_id, intersection2)){
             for(int i=0;unsigned(i)<connectedIntersections.size();i++){
                 if(intersection2==connectedIntersections[i]){
@@ -685,19 +640,20 @@ double find_street_segment_travel_time(unsigned street_segment_id){
 
 
 unsigned find_closest_point_of_interest(LatLon my_position){
-    double min = EARTH_RADIUS_IN_METERS;
-    int nearestPOIIndex = 0; 
-
-    for(int i = 0; i < getNumPointsOfInterest(); i++){
-        double temp = find_distance_between_two_points(my_position, getPointOfInterestPosition(i));
-        if(temp <= min){
-            min = temp;
-            nearestPOIIndex = i;
-        }
-    }
-    return unsigned(nearestPOIIndex); 
-//    std::cout << streetBlock.findNearestPOI(my_position, coordinates) <<std::endl; 
-//    return streetBlock.findNearestPOI(my_position, coordinates); 
+//    double min = EARTH_RADIUS_IN_METERS;
+//    int nearestPOIIndex = 0; 
+//
+//    for(int i = 0; i < getNumPointsOfInterest(); i++){
+//        double temp = find_distance_between_two_points(my_position, getPointOfInterestPosition(i));
+//        if(temp <= min){
+//            min = temp;
+//            nearestPOIIndex = i;
+//        }
+//    }
+//    std::cout<<"POI:" << nearestPOIIndex<<std::endl;
+//    return unsigned(nearestPOIIndex); 
+    int poi = streetBlock.findNearestPOI(my_position, coordinates);
+    return unsigned(poi); 
 }
 
 /*find_closest_intersection function 
@@ -709,20 +665,21 @@ unsigned find_closest_point_of_interest(LatLon my_position){
  */
 
 unsigned find_closest_intersection(LatLon my_position){
-    double min = EARTH_RADIUS_IN_METERS;
-    int nearestIntIndex = 0; 
-
-    for(int i = 0; i < getNumIntersections(); i++){
-        double temp = find_distance_between_two_points(my_position, getIntersectionPosition(i));
-        if(temp <= min){
-            min = temp;
-            nearestIntIndex = i;
-        }
-    }
-    return unsigned(nearestIntIndex); 
-//    std::cout << streetBlock.findNearestInt(my_position, coordinates) <<std::endl;
-//    return streetBlock.findNearestInt(my_position, coordinates);   
+//    double min = EARTH_RADIUS_IN_METERS;
+//    int nearestIntIndex = 0; 
 //
+//    for(int i = 0; i < getNumIntersections(); i++){
+//        double temp = find_distance_between_two_points(my_position, getIntersectionPosition(i));
+//        if(temp <= min){
+//            min = temp;
+//            nearestIntIndex = i;
+//        }
+//    }
+//    std::cout<<"INT:" << nearestIntIndex<<std::endl;
+//    return unsigned(nearestIntIndex); 
+    
+    int intersection = streetBlock.findNearestInt(my_position, coordinates);  
+    return unsigned(intersection); 
 }
 
 /* find_street_ids_from_partial_street_name function

@@ -8,12 +8,19 @@
 
 class streetGrid{
 public:
-    std::map<int, std::vector<unsigned> >poiGrid;
-    std::map<int, std::vector<unsigned> >intGrid; 
+    std::vector<std::vector<std::vector<unsigned>>> poiGrid; 
+    std::vector<std::vector<std::vector<unsigned>>> intGrid; 
+    std::vector<std::pair<int, int>> check;
+
     double dLat; 
     double dLon; 
+    bool isFullPOI = false;
+    bool isFullInt = false;
     
     void populateGrid(mapBoundary coordinates);
-    unsigned findNearestPOI(LatLon position, mapBoundary coordinates);
-    unsigned findNearestInt(LatLon position, mapBoundary coordinates); 
+    
+    void findMinimumPOI(LatLon position, int &POI, int xIndex, int yIndex);
+    void findMinimumInt(LatLon position, int &Int, int xIndex, int yIndex);
+    int findNearestPOI(LatLon position, mapBoundary coord);
+    int findNearestInt(LatLon position, mapBoundary coord); 
 };

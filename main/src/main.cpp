@@ -24,6 +24,7 @@
 #include "m1.h"
 #include "m2.h"
 #include "OSMDatabaseAPI.h"
+#include "StreetsDatabaseAPI.h"
 
 //Program exit codes
 constexpr int SUCCESS_EXIT_CODE = 0;        //Everyting went OK
@@ -58,7 +59,7 @@ int main(int argc, char** argv) {
     }
 
     std::cout << "Successfully loaded map '" << map_path << "'\n";
-
+            
     //You can now do something with the map data
     draw_map();//this is the something I want to do with this map
     
