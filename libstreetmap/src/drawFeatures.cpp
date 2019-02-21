@@ -60,17 +60,19 @@ void featureDrawing::setFeatureColour(int type, ezgl::renderer &g){
 }
  
 
-int featureDrawing::classifyPOI(std::string type, ezgl::renderer& g){
+int featureDrawing::classifyPOI(std::string type){
     int poiType = 0; 
+    
     if(std::find(tourist.begin(), tourist.end(), type) != tourist.end()){
         poiType = 1; 
-    }
-    if(std::find(foodDrink.begin(), foodDrink.end(), type) != foodDrink.end()){
+    } else if(std::find(foodDrink.begin(), foodDrink.end(), type) != foodDrink.end()){
         poiType = 2;
-    }
-    if(std::find(shops.begin(), shops.end(), type) != shops.end()){
+    } else if(std::find(shops.begin(), shops.end(), type) != shops.end()){
         poiType = 3; 
+    } else {
+        poiType = 0; 
     }
+    
     return poiType; 
 }
 
@@ -150,7 +152,7 @@ void featureDrawing::drawOnePOI(int i, mapBoundary &xy, infoStrucs &info, ezgl::
     } else {
         //regular POI (dark red)
         radius = NORMALRAD;
-        setPOIColour(classifyPOI(info.POIInfo[i].type, g), g); 
+        setPOIColour(classifyPOI(info.POIInfo[i].type), g); 
         g.fill_elliptic_arc(ezgl::point2d(xNew,yNew),radius,radius,0,360);
     }
 }

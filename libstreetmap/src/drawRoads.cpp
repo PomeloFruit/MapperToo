@@ -7,37 +7,44 @@
 #include "ezgl/graphics.hpp"
 #include "ezgl/point.hpp"
 
-void roadDrawing::setRoadColourSize(int type, ezgl::renderer &g){
-    g.set_line_width(ROADWIDTH);
+void roadDrawing::setRoadColourSize(int type, bool highlight, ezgl::renderer &g){
+    const int HIGHLIGHTFACT = 5;
+    int width = ROADWIDTH;
+    g.set_color(255,255,255,255); //Ddefault white colour
+    
     switch(type){
         case HIGHWAY: // yellowish
-            g.set_line_width(HIGHWAYWIDTH);
+            width =HIGHWAYWIDTH;
             g.set_color(255,238,41,200);
             break;
         case PRIMARY: // white and thick
-            g.set_line_width(PRIMWIDTH);
+            width = PRIMWIDTH;
             g.set_color(255,255,255,255);
             break;
-        case SECONDARY: //
-            g.set_color(255,255,255,255);
-            break;
-        case RESIDENTIAL: //
-            g.set_line_width(RESWIDTH); 
+        case RESIDENTIAL: //===========================================================================
+            width = ROADWIDTH;
             g.set_color(255,255,255,255);
             break;
         case SERVICE: // light gray
             g.set_color(244,244,244,255);
             break;
-        default:
-            g.set_color(255,255,255,255);
+        default: //=====================================================================================
             break;
     }
+    
+    if(highlight){
+        width = width + HIGHLIGHTFACT;
+        g.set_color(255,102,255,175);
+    }
+    
+    g.set_line_width(width);
 }
 
  void roadDrawing::drawStreetRoads(int numSegs, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g){
     LatLon from, to;
     
     for(int i=0 ; i<numSegs ; i++){
+        setRoadColourSize(info.StreetSegInfo[i].type, info.StreetSegInfo[i].clicked, g);
         
         from = info.IntersectionInfo[info.StreetSegInfo[i].fromIntersection].position;
 
@@ -47,8 +54,7 @@ void roadDrawing::setRoadColourSize(int type, ezgl::renderer &g){
             from = to;
         }
         to = info.IntersectionInfo[info.StreetSegInfo[i].toIntersection].position;
-        
-        setRoadColourSize(info.StreetSegInfo[i].type, g);
+
         drawStraightStreet(from, to, xy, g);
     }
 }
@@ -90,10 +96,11 @@ void roadDrawing::drawOneIntersection(int id, mapBoundary &xy, infoStrucs &info,
         //outer circle (turquoise)
         g.set_color(110,236,209,125);
         g.fill_elliptic_arc(ezgl::point2d(x,y),RADIUS,RADIUS,0,360);
+        
         //inner circle (dark navy)
         g.set_color(0,119,119,255);
         g.fill_elliptic_arc(ezgl::point2d(x, y),RADIUS/5,RADIUS/5,0,360);
-        //g.fill_rectangle({x-HIGHWIDTH, y-HIGHWIDTH},{x+HIGHWIDTH, y+HIGHWIDTH});        
+        
     } else {
         //regular intersection (white)
         g.set_color(255,255,255,255);

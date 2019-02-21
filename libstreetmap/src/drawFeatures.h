@@ -8,7 +8,7 @@ class featureDrawing {
 public:
     void setFeatureColour(int type, ezgl::renderer &g);
     
-    int classifyPOI (std::string type, ezgl::renderer &g);
+    int classifyPOI (std::string type);
     
     void setPOIColour (int type, ezgl::renderer &g); 
 

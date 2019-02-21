@@ -8,7 +8,7 @@
 class roadDrawing {
 
 public: 
-    void setRoadColourSize(int type, ezgl::renderer &g);
+    void setRoadColourSize(int type, bool highlight, ezgl::renderer &g);
     
     void drawStreetRoads(int numSegs, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g);
     

@@ -69,9 +69,7 @@ int populateData::getRoadType(const OSMWay* wayPtr){
                 return HIGHWAY;
             } else if (value == "trunk" || value == "trunk_link" || value == "primary"){
                 return PRIMARY;
-            } else if (value == "secondary" || value == "tertiary"){
-                return SECONDARY;
-            } else if (value == "residential"){
+            } else if (value == "secondary" || value == "tertiary" || value == "residential"){
                 return RESIDENTIAL;
             } else {
                 return SERVICE;

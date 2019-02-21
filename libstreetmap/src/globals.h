@@ -10,16 +10,14 @@
 #include <iostream>
 #include <map>
 
-#define RESWIDTH 2
 #define ROADWIDTH 3
 #define PRIMWIDTH 4
 #define HIGHWAYWIDTH 5
 
 #define HIGHWAY 0
 #define PRIMARY 1
-#define SECONDARY 2
-#define RESIDENTIAL 3
-#define SERVICE 4
+#define RESIDENTIAL 2
+#define SERVICE 3
 
 struct intersectionData {
     LatLon position;
