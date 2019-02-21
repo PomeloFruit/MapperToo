@@ -42,6 +42,7 @@ void draw_main_canvas(ezgl::renderer &g);
 void initial_setup(ezgl::application *application);
 void act_on_mouse_press(ezgl::application *application, GdkEventButton *event, double x, double y);
 void pressFind(GtkWidget *widget, ezgl::application *application);
+void loadSubwayButton(GtkWidget *widget, ezgl::application *application);
 void hideSubwayButton(GtkWidget *widget, ezgl::application *application);
 void showSubwayButton(GtkWidget *widget, ezgl::application *application);
 
@@ -91,7 +92,7 @@ void initial_setup(ezgl::application *application){
     application->update_message("Left-click for Points of Interest | Right-click for Intersections");
     application->connect_feature(pressFind);
     
-    application->create_button("Hide Subways",8,hideSubwayButton);
+    application->create_button("Show Subways",8,loadSubwayButton);
 }
 
 
@@ -100,18 +101,19 @@ void act_on_mouse_press(ezgl::application *application, GdkEventButton *event, d
     std::string message;
 
     if (event->button == 1) { //left click
-        message = ck.clickedOnPOI(x, y, xy, info);
+        if ((event->state & GDK_SHIFT_MASK) && info.showSubway) { //click with shift key
+            message = ck.clickedOnSubway(x, y, xy, info);
+        } else { //without shift key
+            message = ck.clickedOnPOI(x, y, xy, info);
+        }
     } else if (event->button == 3) { //right click
         message = ck.clickedOnIntersection(x, y, xy, info);
-    }
-        
+    }        
 
 //    if ((event->state & GDK_CONTROL_MASK) && (event->state & GDK_SHIFT_MASK))
 //    std::cout << "with control and shift pressed ";
 //    else if (event->state & GDK_CONTROL_MASK)
 //    std::cout << "with control pressed ";
-//    else if (event->state & GDK_SHIFT_MASK)
-//    std::cout << "with shift pressed ";
     
     
     application->update_message(message);
@@ -130,6 +132,16 @@ void pressFind(GtkWidget *widget, ezgl::application *application){
 
     message = ck.searchOnMap(info);
     application->update_message(message);
+    application->refresh_drawing();
+}
+
+void loadSubwayButton(GtkWidget *widget, ezgl::application *application){
+    info.showSubway = true;
+    
+    pop.loadAfterDraw(info);
+    
+    application->destroy_button("Show Subways");
+    application->create_button("Hide Subways",8,hideSubwayButton);
     application->refresh_drawing();
 }
 

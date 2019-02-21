@@ -20,12 +20,15 @@ void populateData::initialize(infoStrucs &info, mapBoundary &xy){
     populateIntersectionInfo(info);
     populateFeatureInfo(info, xy);
     populatePOIInfo(info);
-    populateOSMSubwayInfo(info);
-
+    
     info.lastIntersection.clear();
     info.lastPOI.clear();
     info.lastSeg.clear();
-    info.showSubway = true;
+    info.showSubway = false;
+}
+
+void populateData::loadAfterDraw(infoStrucs &info){
+    populateOSMSubwayInfo(info);
 }
 
 void populateData::populateOSMWayInfo(infoStrucs &info){

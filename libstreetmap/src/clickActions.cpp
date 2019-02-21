@@ -40,6 +40,33 @@ std::string clickActions::clickedOnIntersection(double x, double y, mapBoundary 
     return displayName;
 }
 
+std::string clickActions::clickedOnSubway(double x, double y, mapBoundary &xy, infoStrucs &info){
+    LatLon clickPos;
+    unsigned clickedID = 0;
+    std::string displayName = "Subway Station Clicked: ";
+    
+    clickPos = xy.LatLonFromXY(x,y);
+    clickedID = findNearestSubway(info, clickPos);
+    displayName += info.SubwayInfo[clickedID].name;
+            
+    return displayName;
+}
+
+unsigned clickActions::findNearestSubway(infoStrucs &info, LatLon pt){
+    double min = EARTH_RADIUS_IN_METERS;
+    unsigned nearestIndex = 0; 
+
+    for(unsigned i = 0; i < info.SubwayInfo.size(); i++){
+        double temp = find_distance_between_two_points(info.SubwayInfo[i].point, pt);
+        if(temp <= min){
+            min = temp;
+            nearestIndex = i;
+        }
+    }
+    return nearestIndex; 
+}
+
+
 std::string clickActions::searchOnMap(infoStrucs &info){
     std::string displayMessage;
     std::vector<unsigned> street1ID, street2ID, resultID;
@@ -72,6 +99,8 @@ std::string clickActions::searchOnMap(infoStrucs &info){
 
     return displayMessage;
 }
+
+
 
 void clickActions::highlightStreet(infoStrucs &info, unsigned highID){
     std::vector<unsigned> highSegs;

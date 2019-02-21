@@ -12,6 +12,8 @@ public:
     
     void initialize(infoStrucs &info, mapBoundary &xy);
     
+    void loadAfterDraw(infoStrucs &info);
+    
     void populateOSMWayInfo(infoStrucs &info);
     
     int getRoadType(const OSMWay* wayPtr);
