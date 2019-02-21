@@ -137,10 +137,12 @@ void hideSubwayButton(GtkWidget *widget, ezgl::application *application){
     info.showSubway = false;
     application->destroy_button("Hide Subways");
     application->create_button("Show Subways",8,showSubwayButton);
+    application->refresh_drawing();
 }
 
 void showSubwayButton(GtkWidget *widget, ezgl::application *application){
     info.showSubway = true;
     application->destroy_button("Show Subways");
-    application->create_button("Hide Subways",8,showSubwayButton);
+    application->create_button("Hide Subways",8,hideSubwayButton);
+    application->refresh_drawing();
 }
