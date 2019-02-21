@@ -173,6 +173,7 @@ void featureDrawing::drawOnePOI(int i, mapBoundary &xy, infoStrucs &info, ezgl::
         radius = forcedRadius;
         g.set_color(79,0,79,255);
         g.fill_elliptic_arc(ezgl::point2d(xNew,yNew),radius,radius,0,360);
+        //g.draw_surface(g.load_png("/homes/d/dujia3/ece297/work/mapper/libstreetmap/resources/POI_select.png"), ezgl::point2d(xNew, yNew));
 
     } else {
         //regular POI (dark red)
