@@ -181,9 +181,6 @@ void loadSubwayButton(GtkWidget *widget, ezgl::application *application){
     application->refresh_drawing();
 }
 
-
-
-
 void hideSubwayButton(GtkWidget *widget, ezgl::application *application){
     info.showSubway = false;
     application->destroy_button("Hide Subways");

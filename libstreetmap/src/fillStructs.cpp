@@ -176,10 +176,14 @@ void populateData::populateOSMSubwayInfo(infoStrucs &info){
         if(isSubway){
             subwayData newStop;
             newStop.name = getOSMNodeName(currentPtr);
+            if(newStop.name.size()<=7 || newStop.name.compare(newStop.name.size()-7, 7, "Station") != 0){
+                newStop.name.append(" Station");
+            }
             newStop.nodePtr = currentPtr;
             newStop.clicked = false;
             newStop.point = currentPtr->coords();
             newStop.id = currentPtr->id();
+            std::cout << newStop.name << std::endl;
             
             info.SubwayInfo.push_back(newStop);
         }

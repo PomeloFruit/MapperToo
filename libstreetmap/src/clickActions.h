@@ -15,7 +15,10 @@ public:
     
     unsigned findNearestSubway(infoStrucs &info, LatLon pt);
     
-    int findMatches(std::vector<unsigned> &streetID, std::string userInput);
+    int findMatches(std::vector<unsigned> &streetID, std::string userInput, infoStrucs &info);
+    void findPOIByName(std::vector<unsigned> &streetID, std::string userInput, infoStrucs &info);
+    void findSubwaysByName(std::vector<unsigned> &streetID, std::string userInput, infoStrucs &info);
+    void findFeaturesByName(std::vector<unsigned> &streetID, std::string userInput, infoStrucs &info);
     std::string getMessagesFromMatches(int match1, int match2);
     
     void highlightStreet(infoStrucs &info, unsigned highID);
