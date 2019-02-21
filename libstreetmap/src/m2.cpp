@@ -51,8 +51,6 @@ void showSubwayButton(GtkWidget *widget, ezgl::application *application);
 //void act_on_mouse_move(ezgl::application *application, GdkEventButton *event, double x, double y);
 //void act_on_key_press(ezgl::application *application, GdkEventKey *event, char *key_name);
 
-<<<<<<< HEAD
-=======
 void act_on_mouse_press(ezgl::application *application, GdkEventButton *event, double x, double y);
 void act_on_mouse_move(ezgl::application *application, GdkEventButton *event, double x, double y);
 void act_on_key_press(ezgl::application *application, GdkEventKey *event, char *key_name);
@@ -65,7 +63,6 @@ void test_button(GtkWidget *widget, ezgl::application *application);
 
 double startArea;
 
->>>>>>> Created functions to change the size of the POI's and the roads
 //=========================== Function Definitions ===========================
 
 
@@ -108,13 +105,10 @@ void draw_main_canvas(ezgl::renderer &g){
     ft.drawFeatures(getNumFeatures(), info, g);
     rd.drawStreetRoads(getNumStreetSegments(), xy, info, g, startArea, currentArea);
     rd.drawIntersections(getNumIntersections(), xy, info, g);
-<<<<<<< HEAD
-    ft.drawPOI(getNumPointsOfInterest(), xy, info, g);
+    ft.drawPOI(getNumPointsOfInterest(), xy, info, g, screenRatio, currentArea);
     ft.drawSubways(info.showSubway, xy, info, g);
     rd.drawSpecialIntersections(xy,info,g);
-=======
-    ft.drawPOI(getNumPointsOfInterest(), xy, info, g, screenRatio, currentArea);
->>>>>>> Created functions to change the size of the POI's and the roads
+
 
     dt.createText(getNumStreetSegments(), getNumStreets(), xy, info, g);
     std::cout<<currentArea<<'\n';

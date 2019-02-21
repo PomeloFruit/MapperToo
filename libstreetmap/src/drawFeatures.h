@@ -18,13 +18,10 @@ public:
     
     void drawClickedPOI(mapBoundary &xy, infoStrucs &info, ezgl::renderer &g, double adjustmentFactor, double currentArea);
     
-<<<<<<< HEAD
     void drawOnePOI(int i, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g);
     
     void drawSubways(bool draw, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g);
     
     void drawOneSubway(unsigned i, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g);
-=======
     void drawOnePOI(int i, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g, double adjustmentFactor, double currentArea);
->>>>>>> Created functions to change the size of the POI's and the roads
 };

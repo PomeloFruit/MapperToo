@@ -59,7 +59,10 @@ int populateData::getRoadType(const OSMWay* wayPtr){
                 return HIGHWAY;
             } else if (value == "trunk" || value == "trunk_link" || value == "primary"){
                 return PRIMARY;
-            } else if (value == "secondary" || value == "tertiary" || value == "residential"){
+            } else if (value == "secondary" || value == "tertiary"){
+                return SECONDARY;
+            }
+            else if (value == "residential"){
                 return RESIDENTIAL;
             } else {
                 return SERVICE;
@@ -90,11 +93,7 @@ void populateData::populateStreetSegInfo(infoStrucs &info){
         info.StreetSegInfo[i].type = getRoadType(info.StreetSegInfo[i].wayPtr);
         info.StreetSegInfo[i].name = getStreetName((getInfoStreetSegment(i).streetID));//gives the name of the street segment (for use in putting the names))
         info.StreetSegInfo[i].streetID=getInfoStreetSegment(i).streetID;
-<<<<<<< HEAD
         info.StreetSegInfo[i].clicked = false;
-=======
-        
->>>>>>> Created functions to change the size of the POI's and the roads
     }
 }
 

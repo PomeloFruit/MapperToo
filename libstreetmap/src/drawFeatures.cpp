@@ -159,13 +159,8 @@ void featureDrawing::drawOnePOI(int i, mapBoundary &xy, infoStrucs &info, ezgl::
 
     } else {
         //regular POI (dark red)
-<<<<<<< HEAD
-        radius = NORMALRAD;
-        setPOIColour(classifyPOI(info.POIInfo[i].type), g); 
-=======
         radius = forcedRadius;
-        setPOIColour(classifyPOI(info.POIInfo[i].type, g), g); 
->>>>>>> Created functions to change the size of the POI's and the roads
+        setPOIColour(classifyPOI(info.POIInfo[i].type), g); 
         g.fill_elliptic_arc(ezgl::point2d(xNew,yNew),radius,radius,0,360);
     }
 }

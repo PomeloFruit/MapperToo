@@ -8,24 +8,33 @@
 #include "ezgl/point.hpp"
 
 
-void roadDrawing::setRoadColourSize(int type, bool highlight, ezgl::renderer &g){
+
+void roadDrawing::setRoadColourSize(int type, bool highlight, ezgl::renderer &g, double startArea, double currentArea){
     const int HIGHLIGHTFACT = 5;
     int width = ROADWIDTH;
     g.set_color(255,255,255,255); //Ddefault white colour
+    //1/(cur/start))
+    double inputAdjust=1/(currentArea/startArea);
+    double adjustingAdd=(280930.9-(2586289/1221110)) + (2.117982 - 280930.9)/(1 + (pow(inputAdjust/17546410000, 0.7331144)));
     switch(type){
         case HIGHWAY: // yellowish
-            width =HIGHWAYWIDTH;
+            width =HIGHWAYWIDTH+adjustingAdd;
             g.set_color(255,238,41,200);
             break;
         case PRIMARY: // white and thick
-            width = PRIMWIDTH;
+            width = PRIMWIDTH+adjustingAdd;
+            g.set_color(255,255,255,255);
+            break;
+        case SECONDARY: //===========================================================================
+            width = ROADWIDTH+adjustingAdd;
             g.set_color(255,255,255,255);
             break;
         case RESIDENTIAL: //===========================================================================
-            width = ROADWIDTH;
+            width = ROADWIDTH+adjustingAdd-2;
             g.set_color(255,255,255,255);
             break;
         case SERVICE: // light gray
+            width = ROADWIDTH+adjustingAdd-2;
             g.set_color(244,244,244,255);
             break;
         default: //=====================================================================================
@@ -39,23 +48,28 @@ void roadDrawing::setRoadColourSize(int type, bool highlight, ezgl::renderer &g)
     
     g.set_line_width(width);
 }
-
- void roadDrawing::drawStreetRoads(int numSegs, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g){
+//y = (280930.9-(2586289/1221110)) + (2.117982 - 280930.9)/(1 + (x/17546410000)^0.7331144)
+ void roadDrawing::drawStreetRoads(int numSegs, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g, double startArea, double currentArea){
     LatLon from, to;
-    
+    bool sufficentlyZoomed;
+    bool sufficentlyBig;
     for(int i=0 ; i<numSegs ; i++){
-        setRoadColourSize(info.StreetSegInfo[i].type, info.StreetSegInfo[i].clicked, g);
+        setRoadColourSize(info.StreetSegInfo[i].type, info.StreetSegInfo[i].clicked, g, startArea, currentArea);
         
         from = info.IntersectionInfo[info.StreetSegInfo[i].fromIntersection].position;
+        
+        sufficentlyZoomed=(currentArea/startArea)<0.25;
+        sufficentlyBig=(info.StreetSegInfo[i].type==0||info.StreetSegInfo[i].type==1||info.StreetSegInfo[i].type==2);
+        if(sufficentlyZoomed||sufficentlyBig){
+            for(int c=0;c<info.StreetSegInfo[i].numCurvePoints;c++){
+                to = getStreetSegmentCurvePoint(c,i);
+                drawStraightStreet(from, to, xy, g);
+                from = to;
+            }
+            to = info.IntersectionInfo[info.StreetSegInfo[i].toIntersection].position;
 
-        for(int c=0;c<info.StreetSegInfo[i].numCurvePoints;c++){
-            to = getStreetSegmentCurvePoint(c,i);
             drawStraightStreet(from, to, xy, g);
-            from = to;
         }
-        to = info.IntersectionInfo[info.StreetSegInfo[i].toIntersection].position;
-
-        drawStraightStreet(from, to, xy, g);
     }
 }
 
