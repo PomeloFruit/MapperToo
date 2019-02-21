@@ -26,7 +26,6 @@ std::string clickActions::clickedOnPOI(double x, double y, mapBoundary &xy, info
     return displayName;
 }
 
-
 std::string clickActions::clickedOnIntersection(double x, double y, mapBoundary &xy, infoStrucs &info){
     LatLon clickPos;
     unsigned clickedID = 0;

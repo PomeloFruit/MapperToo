@@ -36,9 +36,10 @@ public:
     
     void getOSMSubwayRelations(infoStrucs &info);
     
+    bool checkIfSubwayRouteNode(OSMID id, infoStrucs &info);
+    
     bool checkIfSubwayRoute(const OSMRelation* relPtr);
     
-    void checkOSMRelationTags(const OSMRelation* relPtr, std::string k, std::string v);
-
+    bool checkOSMRelationTags(const OSMRelation* relPtr, std::string k, std::string v);
 };
 

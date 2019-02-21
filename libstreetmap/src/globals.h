@@ -57,23 +57,24 @@ struct POIData {
     OSMID id;
 };
 
+struct subwayRouteData {
+    std::string name;
+    std::vector< LatLon > point;
+    std::vector< OSMID > nodePoints;
+    bool clicked;
+    
+    std::vector< const OSMWay* > wayPtr; 
+};
+
 struct subwayData {
     std::string name;
     LatLon point;
     bool clicked;
     OSMID id;
+    subwayRouteData* srd;
     
     const OSMNode* nodePtr; 
 };
-
-//struct subwayRouteData {
-//    std::string name;
-//    std::vector< LatLon > point;
-//    std::vector< OSMID > nodePoints;
-//    bool clicked;
-//    
-//    std::vector< OSMWay* > wayPtr; 
-//};
 
 class infoStrucs {
 public:
@@ -81,7 +82,7 @@ public:
 
     std::vector<subwayData> SubwayInfo;
     
-   // std::vector<subwayRouteData> SubwayRouteInfo;
+    std::vector<subwayRouteData> SubwayRouteInfo;
 
     std::vector<intersectionData> IntersectionInfo;
 

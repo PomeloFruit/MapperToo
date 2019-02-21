@@ -165,13 +165,17 @@ void populateData::populatePOIInfo(infoStrucs &info){
 
 void populateData::populateOSMSubwayInfo(infoStrucs &info){
     bool isSubway = false;
+    bool isSubwayRoute = false;
     const OSMNode* currentPtr;
 
+    std::cout << "____start population\n"; //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     info.SubwayInfo.clear();
+    getOSMSubwayRelations(info);
     
     for(unsigned i=0 ; i< getNumberOfNodes(); i++){
         currentPtr = getNodeByIndex(i);
         isSubway = checkIfSubway(currentPtr);
+        isSubwayRoute = checkIfSubwayRouteNode(currentPtr->id(), info);  
         
         if(isSubway){
             subwayData newStop;
@@ -220,51 +224,78 @@ std::string populateData::getOSMNodeName(const OSMNode* nodePtr){
     return name;
 }
 
-//void populateData::getOSMSubwayRelations(infoStrucs &info){
-//    bool isSubwayRoute = false;
-//    const OSMRelation* currentPtr;
-//    const OSMWay* wayPtr;
-//
-//    info.SubwayInfo.clear();
-//    for(unsigned i=0 ; i< getNumberOfRelations(); i++){
-//        currentPtr = getRelationByIndex(i);
-//        isSubwayRoute = checkIfSubwayRoute(currentPtr, info);
-//        
-//        if(isSubwayRoute){
-//            subwayRouteData newRoute;
-//            for(unsigned i=0 ; i < currentPtr->members().size() ; i++){ //many ways
-//                wayPtr = info.WayMap[OSMID(currentPtr->members().at(i).tid)];
-//                newRoute.wayPtr.push_back(wayPtr); 
-//                for(unsigned i=0 ; i<wayPtr->ndrefs().size() ; i++){ //many nodes
-//                    newRoute.nodePoints.push_back(wayPtr->ndrefs().at(i));
-//                }
-//            }
-//            info.SubwayRouteInfo.push_back(newRoute);
-//        }
-//    }
-//}
-//
-//bool populateData::checkIfSubwayRoute(const OSMRelation* relPtr){
-//    if(relPtr == NULL){
-//        return false;
-//    }
-//
-//    if(checkOSMRelationTags(relPtr,"type","route") && checkOSMRelationTags(relPtr,"route","subway")){
-//        return true;
-//    } else {
-//        return false;
-//    }
-//}
-//    
-//
-//void populateData::checkOSMRelationTags(const OSMRelation* relPtr, std::string k, std::string v){
-//    for(unsigned i=0 ; i < getTagCount(relPtr) ; i++){
-//        std::string key,value;
-//        std::tie(key,value) = getTagPair(relPtr,i);
-//        
-//        if(key == k && value == v){
-//            return true;
-//        }
-//    }
-//    return false;
-//}
+void populateData::getOSMSubwayRelations(infoStrucs &info){
+    bool isSubwayRoute = false;
+    const OSMRelation* currentPtr;
+    const OSMWay* wayPtr;
+
+    info.SubwayInfo.clear();
+    for(unsigned i=0 ; i< getNumberOfRelations(); i++){
+        currentPtr = getRelationByIndex(i);
+        std::cout << "++++++++++++++++++++++++++++++++++\n"; //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        isSubwayRoute = checkIfSubwayRoute(currentPtr);
+        
+        if(isSubwayRoute){
+            subwayRouteData newRoute;
+            std::cout << currentPtr->members().size() << "size \n";
+            std::cout << "=============================\n"; //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+            for(unsigned j=0 ; j<currentPtr->members().size() ; j++){ //many ways
+                std::cout << currentPtr->members().at(j).tid << std::endl;
+                if(currentPtr->members().at(j).tid.type() == 1){
+                    std::cout << "yo mama\n";
+                } else {
+                    wayPtr = info.WayMap[OSMID(currentPtr->members().at(j).tid)];
+                    newRoute.wayPtr.push_back(wayPtr);
+                    std::cout << j << " ppp " << wayPtr->ndrefs().size() << std::endl;//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+                    for(unsigned k=0 ; k<wayPtr->ndrefs().size() ; k++){ //many nodes
+                        newRoute.nodePoints.push_back(wayPtr->ndrefs().at(k));
+                        std::cout << k << ".. " << wayPtr->ndrefs().at(k) << "____\n"; //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+                    }
+                }
+                
+            }
+            
+            info.SubwayRouteInfo.push_back(newRoute);
+        }
+    }
+    std::cout << "end\n"; //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+}
+
+bool populateData::checkIfSubwayRouteNode(OSMID id, infoStrucs &info){
+    for(unsigned i=0 ; i<info.SubwayRouteInfo.size() ; i++){
+        subwayRouteData srd = info.SubwayRouteInfo[i];
+        for(unsigned n=0 ; n<srd.nodePoints.size() ; n++){
+            if(id == srd.nodePoints[n]){
+                std::cout << id << "found\n"; 
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+bool populateData::checkIfSubwayRoute(const OSMRelation* relPtr){
+    if(relPtr == NULL){
+        return false;
+    }
+
+    if(checkOSMRelationTags(relPtr,"type","route") && checkOSMRelationTags(relPtr,"route","subway")){
+        return true;
+    } else {
+        return false;
+    }
+}
+
+bool populateData::checkOSMRelationTags(const OSMRelation* relPtr, std::string k, std::string v){
+    for(unsigned i=0 ; i < getTagCount(relPtr) ; i++){
+        std::string key,value;
+        std::tie(key,value) = getTagPair(relPtr,i);
+       // std::cout << key << " " << value << std::endl;//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        if(key == k && value == v){
+            return true;
+        }
+    }
+    return false;
+    //can pull name and operator from tags
+}
