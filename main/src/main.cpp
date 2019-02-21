@@ -33,6 +33,12 @@ constexpr int BAD_ARGUMENTS_EXIT_CODE = 2;  //Invalid command-line usage
 
 //The default map to load if none is specified
 std::string default_map_path = "/cad2/ece297s/public/maps/toronto_canada.streets.bin";
+<<<<<<< HEAD
+=======
+std::string default_map_path_osm = "/cad2/ece297s/public/maps/toronto_canada.osm.bin";
+//std::string default_map_path = "/cad2/ece297s/public/maps/new-delhi_india.streets.bin";
+//std::string default_map_path_osm = "/cad2/ece297s/public/maps/new-delhi_india.osm.bin";
+>>>>>>> Created functions to change the size of the POI's and the roads
 
 int main(int argc, char** argv) {
     

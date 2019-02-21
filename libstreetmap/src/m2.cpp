@@ -51,7 +51,23 @@ void showSubwayButton(GtkWidget *widget, ezgl::application *application);
 //void act_on_mouse_move(ezgl::application *application, GdkEventButton *event, double x, double y);
 //void act_on_key_press(ezgl::application *application, GdkEventKey *event, char *key_name);
 
+<<<<<<< HEAD
+=======
+void act_on_mouse_press(ezgl::application *application, GdkEventButton *event, double x, double y);
+void act_on_mouse_move(ezgl::application *application, GdkEventButton *event, double x, double y);
+void act_on_key_press(ezgl::application *application, GdkEventKey *event, char *key_name);
+void initial_setup(ezgl::application *application);
+void find_button(GtkWidget *widget, ezgl::application *application);
+void test_button(GtkWidget *widget, ezgl::application *application);
+///////
+
+//=========================== Global Variables ===========================
+
+double startArea;
+
+>>>>>>> Created functions to change the size of the POI's and the roads
 //=========================== Function Definitions ===========================
+
 
 void draw_map(){
     ezgl::application::settings settings;
@@ -65,6 +81,8 @@ void draw_map(){
     pop.initialize(info, xy);
 
     ezgl::rectangle initial_world({xy.xMin,xy.yMin},{xy.xMax,xy.yMax});
+        
+    startArea=abs((initial_world.right()-initial_world.left())*(initial_world.top()-initial_world.bottom()));
     
     dt.initilize(getNumStreetSegments(), initial_world, xy, info);
     
@@ -73,20 +91,33 @@ void draw_map(){
     application.run(initial_setup, act_on_mouse_press, NULL, NULL);
     
     //application.run(initial_setup, act_on_mouse_press, act_on_mouse_move, act_on_key_press);
+    
 }
 
 void draw_main_canvas(ezgl::renderer &g){
     g.set_color(219,219,219,255); //light gray for background
     g.fill_rectangle(g.get_visible_world());
     
+    ezgl::rectangle currentRectangle=g.get_visible_world();
+    double currentArea=abs((currentRectangle.right()-currentRectangle.left())*(currentRectangle.top()-currentRectangle.bottom()));
+    double adjustmentFactor=1/(currentArea/startArea);//for some reason it's not letting me take in the visible screen stuff, so I'm just going to do it here
+    double screenRatio=(currentArea/startArea);
+//    
+//    std::cout<<adjustmentFactor<<currentArea<<startArea<<'\n';
+    
     ft.drawFeatures(getNumFeatures(), info, g);
-    rd.drawStreetRoads(getNumStreetSegments(), xy, info, g);
+    rd.drawStreetRoads(getNumStreetSegments(), xy, info, g, startArea, currentArea);
     rd.drawIntersections(getNumIntersections(), xy, info, g);
+<<<<<<< HEAD
     ft.drawPOI(getNumPointsOfInterest(), xy, info, g);
     ft.drawSubways(info.showSubway, xy, info, g);
     rd.drawSpecialIntersections(xy,info,g);
+=======
+    ft.drawPOI(getNumPointsOfInterest(), xy, info, g, screenRatio, currentArea);
+>>>>>>> Created functions to change the size of the POI's and the roads
 
     dt.createText(getNumStreetSegments(), getNumStreets(), xy, info, g);
+    std::cout<<currentArea<<'\n';
 }
 
 void initial_setup(ezgl::application *application){

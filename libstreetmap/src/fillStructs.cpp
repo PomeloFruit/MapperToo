@@ -90,7 +90,11 @@ void populateData::populateStreetSegInfo(infoStrucs &info){
         info.StreetSegInfo[i].type = getRoadType(info.StreetSegInfo[i].wayPtr);
         info.StreetSegInfo[i].name = getStreetName((getInfoStreetSegment(i).streetID));//gives the name of the street segment (for use in putting the names))
         info.StreetSegInfo[i].streetID=getInfoStreetSegment(i).streetID;
+<<<<<<< HEAD
         info.StreetSegInfo[i].clicked = false;
+=======
+        
+>>>>>>> Created functions to change the size of the POI's and the roads
     }
 }
 

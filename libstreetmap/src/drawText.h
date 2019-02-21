@@ -26,7 +26,7 @@ class drawText{
         void initilize(int numStreetSegs, ezgl::rectangle& g, mapBoundary &xy, infoStrucs &info);
         void createText(int numStreetSegs, int numStreets, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g);
     private:
-        double findAngle(LatLon &initialPosition, LatLon &finalPosition, mapBoundary &xy);
+        std::pair<double, bool> findAngle(LatLon &initialPosition, LatLon &finalPosition, mapBoundary &xy);
         int indexOfLargestGoodCurvepoint(int streetSegment, ezgl::rectangle& curBounds, mapBoundary &xy, infoStrucs &info);
         bool inBounds(ezgl::rectangle& curBounds, LatLon &position, mapBoundary& xy);
 };

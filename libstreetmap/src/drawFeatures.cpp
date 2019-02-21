@@ -114,23 +114,30 @@ void featureDrawing::drawFeatures(int numFeatures, infoStrucs &info, ezgl::rende
 
 
 // draw all
-void featureDrawing::drawPOI(int numPOI, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g){
-    for(int i=0 ; i<numPOI ; i++){   
-        drawOnePOI(i, xy, info, g);
+void featureDrawing::drawPOI(int numPOI, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g, double adjustmentFactor, double currentArea){
+    bool sufficentlyZoomed=(adjustmentFactor)<0.01;
+    if(sufficentlyZoomed){
+        for(int i=0 ; i<numPOI ; i++){   
+            drawOnePOI(i, xy, info, g, adjustmentFactor, currentArea);
+        }
+        drawClickedPOI(xy, info, g, adjustmentFactor, currentArea);
     }
-    drawClickedPOI(xy, info, g);
 }
 
 // make sure last clicked is on top of others
-void featureDrawing::drawClickedPOI(mapBoundary &xy, infoStrucs &info, ezgl::renderer &g){
+void featureDrawing::drawClickedPOI(mapBoundary &xy, infoStrucs &info, ezgl::renderer &g, double adjustmentFactor, double currentArea){
     for(unsigned i=0 ; i<info.lastPOI.size() ; i++){
-        drawOnePOI(info.lastPOI[i], xy, info, g);
+        drawOnePOI(info.lastPOI[i], xy, info, g, adjustmentFactor, currentArea);
     }
 }
 
-void featureDrawing::drawOnePOI(int i, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g){
+void featureDrawing::drawOnePOI(int i, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g, double adjustmentFactor, double currentArea){
     const double HIGHLIGHTRAD = 0.0005;
     const double NORMALRAD = 0.00015;
+    double areaForcer=sqrt(0.000073593*currentArea/M_PI)/NORMALRAD;//that first number is the average of two proportions of areas that were deemed to be desireable
+    double areaForcerClick=sqrt(0.000432814*currentArea/M_PI)/HIGHLIGHTRAD;
+    double forcedRadius=areaForcer*NORMALRAD;
+    double forcedRadiusClick=areaForcerClick*HIGHLIGHTRAD;
     
     LatLon newPoint;
     double xNew, yNew, radius; 
@@ -141,19 +148,24 @@ void featureDrawing::drawOnePOI(int i, mapBoundary &xy, infoStrucs &info, ezgl::
     
     if (info.POIInfo[i].clicked) {
         //highlight circle (pink)
-        radius = HIGHLIGHTRAD;
+        radius = forcedRadiusClick;
         g.set_color(255,77,190,125);
         g.fill_elliptic_arc(ezgl::point2d(xNew,yNew),radius,radius,0,360);
         
         //inner circle (dark purple)
-        radius = NORMALRAD;
+        radius = forcedRadius;
         g.set_color(79,0,79,255);
         g.fill_elliptic_arc(ezgl::point2d(xNew,yNew),radius,radius,0,360);
 
     } else {
         //regular POI (dark red)
+<<<<<<< HEAD
         radius = NORMALRAD;
         setPOIColour(classifyPOI(info.POIInfo[i].type), g); 
+=======
+        radius = forcedRadius;
+        setPOIColour(classifyPOI(info.POIInfo[i].type, g), g); 
+>>>>>>> Created functions to change the size of the POI's and the roads
         g.fill_elliptic_arc(ezgl::point2d(xNew,yNew),radius,radius,0,360);
     }
 }
