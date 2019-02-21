@@ -6,7 +6,7 @@
 
 class featureDrawing {
 public:
-    void setFeatureColour(int type, ezgl::renderer &g);
+    void setFeatureColour(int type, ezgl::renderer &g, bool special);
     
     int classifyPOI (std::string type);
     
@@ -23,5 +23,6 @@ public:
     void drawSubways(bool draw, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g);
     
     void drawOneSubway(unsigned i, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g);
+    
     void drawOnePOI(int i, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g, double adjustmentFactor, double currentArea);
 };

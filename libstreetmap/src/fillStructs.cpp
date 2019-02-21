@@ -183,8 +183,6 @@ void populateData::populateOSMSubwayInfo(infoStrucs &info){
             newStop.clicked = false;
             newStop.point = currentPtr->coords();
             newStop.id = currentPtr->id();
-            std::cout << newStop.name << std::endl;
-            
             info.SubwayInfo.push_back(newStop);
         }
     }    

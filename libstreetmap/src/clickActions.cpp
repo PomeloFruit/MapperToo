@@ -70,11 +70,12 @@ unsigned clickActions::findNearestSubway(infoStrucs &info, LatLon pt){
 }
 
 std::string clickActions::searchOnMap(infoStrucs &info, ezgl::application *&application){
-    const std::string STREETEXT = ".street.bin";
+  //  const std::string STREETEXT = ".street.bin";
     std::string displayMessage;
     std::vector<unsigned> street1ID, street2ID, resultID;
     int match1, match2;
-    unsigned correct1,correct2;
+    unsigned correct1 = 0;
+    unsigned correct2 = 0;
     
 //    if(info.textInput1.compare(info.textInput1.size()-(STREETEXT.size()+1), STREETEXT.size(), STREETEXT)){
 //        application->quit();
@@ -166,7 +167,7 @@ std::string clickActions::searchOnMap(infoStrucs &info, ezgl::application *&appl
     } else if(match1 == -3) { // find subways
         
         resultID = street1ID;
-        displayMessage = "Street Found: ";
+        displayMessage = "Subway Found: ";
         displayMessage += info.SubwayInfo[resultID[0]].name;
         info.corInput1 = info.SubwayInfo[resultID[0]].name;
         if(resultID.size()>1){
@@ -179,19 +180,16 @@ std::string clickActions::searchOnMap(infoStrucs &info, ezgl::application *&appl
     } else if(match1 == -4) { // find Features
         resultID = street1ID;
         displayMessage = "Feature Found: ";
-        displayMessage += getStreetName(resultID[0]);
-        info.corInput1=getStreetName(resultID[0]);
+        displayMessage += info.FeatureInfo[resultID[0]].name;
+        info.corInput1 = info.FeatureInfo[resultID[0]].name;
         if(resultID.size()>1){
             displayMessage += " (" + std::to_string(resultID.size()) + ")"; 
         }
-        highlightStreet(info, resultID[0]);
+        highlightFeature(info, resultID[0]);
     }
-    
     
     return displayMessage;
 }
-
-
 
 void clickActions::highlightStreet(infoStrucs &info, unsigned highID){
     std::vector<unsigned> highIDinVec;
@@ -268,6 +266,22 @@ void clickActions::highlightSubway(infoStrucs &info, std::vector<unsigned> &high
     info.lastSubway = highID;
 }
 
+void clickActions::highlightFeature(infoStrucs &info, unsigned highID){
+    std::vector<unsigned> highIDinVec;
+    highIDinVec.clear();
+    highIDinVec.push_back(highID);
+    highlightFeature(info, highIDinVec);
+}
+
+void clickActions::highlightFeature(infoStrucs &info, std::vector<unsigned> &highID){
+    clearPreviousHighlights(info);
+    
+    for(unsigned i=0 ; i<highID.size() ; i++){
+        info.FeatureInfo[highID[i]].clicked = true;
+    }
+    info.lastFeature = highID;
+}
+
 void clickActions::clearPreviousHighlights(infoStrucs &info){
     unsigned currentIndex;
     
@@ -294,6 +308,12 @@ void clickActions::clearPreviousHighlights(infoStrucs &info){
         info.SubwayInfo[currentIndex].clicked = false;
     }
     info.lastSubway.clear();
+    
+    for(unsigned i=0 ; i<info.lastFeature.size() ; i++){
+        currentIndex = info.lastFeature[i];
+        info.FeatureInfo[currentIndex].clicked = false;
+    }
+    info.lastFeature.clear();
 }
 
 // -1 for no input, 0 for no match, >0 for number of matches, -2 for POI, -3 for Subway, -4 for feature 
@@ -305,8 +325,7 @@ int clickActions::findMatches(std::vector<unsigned> &streetID, std::string userI
     if(userInput != ""){
         streetID = find_street_ids_from_partial_street_name(userInput);        
         numMatches = streetID.size();
-        
-        if(userInput.compare(userInput.size()-(station.size()+1), station.size(), station)){
+        if(userInput.size()>station.size() && userInput.compare(userInput.size()-(station.size()), station.size(), station)==0){
             findSubwaysByName(streetID, userInput, info);
             numMatches = streetID.size();
             if(numMatches > 0){
@@ -318,9 +337,17 @@ int clickActions::findMatches(std::vector<unsigned> &streetID, std::string userI
 
                 findPOIByName(streetID, userInput, info);
                 numMatches = streetID.size();
+                
                 if(numMatches > 0){
                     match = -2;
-                } 
+                } else {
+                    findFeaturesByName(streetID, userInput, info);
+                    numMatches = streetID.size();
+                    if(numMatches > 0){
+                        match = -4;
+                    }
+                }
+                
             } else if(numMatches == 1){
                 match = 1;
             } else { //if(numMatches > 1)
@@ -334,7 +361,6 @@ int clickActions::findMatches(std::vector<unsigned> &streetID, std::string userI
 void clickActions::findPOIByName(std::vector<unsigned> &streetID, std::string userInput, infoStrucs &info){
     std::string temp;
     int sim;
-   // std::transform(userInput.begin(), userInput.end(), userInput.begin(), ::tolower);
     
     for(unsigned i=0 ; i<info.POIInfo.size() ; i++){
         temp = info.POIInfo[i].name;
@@ -357,8 +383,6 @@ void clickActions::findSubwaysByName(std::vector<unsigned> &streetID, std::strin
         
         if(temp.size() >= userInput.size()){
             sim = temp.compare(0, userInput.size(), userInput);
-        } else { //station name smaller than input
-            sim = userInput.compare(0, temp.size(), temp);
         }
         
         if(sim == 0){
@@ -370,10 +394,9 @@ void clickActions::findSubwaysByName(std::vector<unsigned> &streetID, std::strin
 void clickActions::findFeaturesByName(std::vector<unsigned> &streetID, std::string userInput, infoStrucs &info){
     std::string temp;
     int sim;
-   // std::transform(userInput.begin(), userInput.end(), userInput.begin(), ::tolower);
     
-    for(unsigned i=0 ; i<info.POIInfo.size() ; i++){
-        temp = info.POIInfo[i].name;
+    for(unsigned i=0 ; i<info.FeatureInfo.size() ; i++){
+        temp = info.FeatureInfo[i].name;
         std::transform(temp.begin(), temp.end(), temp.begin(), ::tolower);
         sim = temp.compare(0, userInput.size(), userInput);
         if(sim == 0){
@@ -384,24 +407,22 @@ void clickActions::findFeaturesByName(std::vector<unsigned> &streetID, std::stri
 
 std::string clickActions::getMessagesFromMatches(int match1, int match2){
     std::string displayMessage = "";
-    int numMatches1 = match1-5;
-    int numMatches2 = match2-5;
     
     if(match1 == -1){ //no input in field 1
         displayMessage = "Please try again <input 1 - no names detected>!";
     } else if(match1 == 0 || match1 >= 5){ //no match, too many matches found for field 1
         if(match2 == 0 || match2 >= 5){
             displayMessage = "Please try again | ";
-            displayMessage += std::to_string(numMatches1) + " matches found for name 1 | ";
-            displayMessage += std::to_string(numMatches2) + " matches found for name 2";
+            displayMessage += std::to_string(match1) + " matches found for name 1 | ";
+            displayMessage += std::to_string(match2) + " matches found for name 2";
         } else if((match2 == 1) || (match2 == -1)) {
             displayMessage = "Please try again | ";
-            displayMessage += std::to_string(numMatches1) + " matches found for name 1.";
+            displayMessage += std::to_string(match1) + " matches found for name 1.";
         }
     } else if(match1 == 1){  //unique match for field 1
         if(match2 == 0 || match2 >= 5){ // no match or too many matches
             displayMessage = "Please try again | ";
-            displayMessage += std::to_string(numMatches2) + " matches found for name 2.";
+            displayMessage += std::to_string(match2) + " matches found for name 2.";
         }
     }
     return displayMessage;

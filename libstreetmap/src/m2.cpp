@@ -111,7 +111,7 @@ void draw_main_canvas(ezgl::renderer &g){
 
 
     dt.createText(getNumStreetSegments(), getNumStreets(), xy, info, g);
-    std::cout<<currentArea<<'\n';
+ //   std::cout<<currentArea<<'\n';
 }
 
 void initial_setup(ezgl::application *application){
@@ -162,9 +162,12 @@ void pressFind(GtkWidget *widget, ezgl::application *application){
 
     message = ck.searchOnMap(info, application);
     
-    name1 = info.corInput1.c_str();
-    name2 = info.corInput2.c_str();
-    
+    if(info.corInput1 != ""){
+        name1 = info.corInput1.c_str();
+    }
+    if(info.corInput2 != ""){
+        name2 = info.corInput2.c_str();
+    }
     application->set_input_text(name1, name2);
     
     application->update_message(message);

@@ -19,43 +19,47 @@ std::vector<std::string> shops {"department_store", "general", "kiosk", "mall", 
     , "fishing", "fuel", "outdoor", "scuba_diving", "ski", "sports", "swimming_pool", "art", "collector", "craft", "games", "model", "music", "musical_instrument"
     , "photo", "camera", "video", "video_games", "anime", "books", "gift", "stationery", "ticket", "cannabis", "e-cigarette", "tobacco", "toys", "travel_agency"};
         
-void featureDrawing::setFeatureColour(int type, ezgl::renderer &g){
-    switch(type){
-        case 0: // unknown = dark gray
-            g.set_color(152,151,150,255);
-            break;
-        case 1: // park = darkish green
-            g.set_color(85, 209, 49, 79);
-            break;
-        case 2: // beach = peach
-            g.set_color(235,210,111,255);
-            break;
-        case 3: // lake = blue 
-            g.set_color(60, 182, 255, 163);
-            //g.set_color(16,184,225,255);
-            break;
-        case 4: // river = dark blue 
-            g.set_color(80, 179, 255, 128);
-            break;
-        case 5: // island = dark green
-            g.set_color(100,209, 0, 99);
-            break;
-        case 6: // building = darkish gray
-            g.set_color(22, 23, 56, 20);
-            break;
-        case 7: // green space = light green 
-            g.set_color(82, 204, 42, 56);
-            //g.set_color(95,218,24,255);
-            break;
-        case 8: // golf course = putting green
-            g.set_color(148,235,87,155);
-            break;
-        case 9: // stream = light blue
-            g.set_color(80, 179, 255, 128);
-            break;
-        default:
-            g.set_color(152,151,150,255);
-            break;
+void featureDrawing::setFeatureColour(int type, ezgl::renderer &g, bool special){
+    if(special){
+        g.set_color(0,0,0,150);
+    } else {
+        switch(type){
+            case 0: // unknown = dark gray
+                g.set_color(152,151,150,255);
+                break;
+            case 1: // park = darkish green
+                g.set_color(85, 209, 49, 79);
+                break;
+            case 2: // beach = peach
+                g.set_color(235,210,111,255);
+                break;
+            case 3: // lake = blue 
+                g.set_color(60, 182, 255, 163);
+                //g.set_color(16,184,225,255);
+                break;
+            case 4: // river = dark blue 
+                g.set_color(80, 179, 255, 128);
+                break;
+            case 5: // island = dark green
+                g.set_color(100,209, 0, 99);
+                break;
+            case 6: // building = darkish gray
+                g.set_color(22, 23, 56, 20);
+                break;
+            case 7: // green space = light green 
+                g.set_color(82, 204, 42, 56);
+                //g.set_color(95,218,24,255);
+                break;
+            case 8: // golf course = putting green
+                g.set_color(148,235,87,155);
+                break;
+            case 9: // stream = light blue
+                g.set_color(80, 179, 255, 128);
+                break;
+            default:
+                g.set_color(152,151,150,255);
+                break;
+        }
     }
 }
  
@@ -94,7 +98,7 @@ void featureDrawing::drawFeatures(int numFeatures, infoStrucs &info, ezgl::rende
     for(int s = 1; s <= 4; s++){        //drawing by priority number where 1 is the highest and 4 is the lowest (all open features are 4 automatically)
         for(int i = 0; i < numFeatures; i++){
             if(info.FeatureInfo[i].priorityNum == s){
-                setFeatureColour(info.FeatureInfo[i].featureType, g);
+                setFeatureColour(info.FeatureInfo[i].featureType, g, info.FeatureInfo[i].clicked);
                 if(info.FeaturePointVec[i].size()>1){
                     if(info.FeatureInfo[i].isOpen){
                         for(int p=1; p< static_cast<int>(info.FeaturePointVec[i].size()); p++){

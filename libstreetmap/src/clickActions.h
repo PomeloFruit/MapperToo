@@ -33,6 +33,9 @@ public:
     void highlightSubway(infoStrucs &info, unsigned highID);
     void highlightSubway(infoStrucs &info, std::vector<unsigned> &highID);
     
+    void highlightFeature(infoStrucs &info, unsigned highID);
+    void highlightFeature(infoStrucs &info, std::vector<unsigned> &highID);
+    
     void clearPreviousHighlights(infoStrucs &info);
 };
 
