@@ -157,7 +157,7 @@ int clickActions::findMatches(std::vector<unsigned> &streetID, std::string userI
         } else if(numMatches == 1){
             match = 1;
         } else { //if(numMatches > 1)
-            match = 2;
+            match = numMatches+5;
         }
     }
     return match;
@@ -165,27 +165,25 @@ int clickActions::findMatches(std::vector<unsigned> &streetID, std::string userI
 
 std::string clickActions::getMessagesFromMatches(int match1, int match2){
     std::string displayMessage = "";
+    int numMatches1 = match1-5;
+    int numMatches2 = match2-5;
     
-    switch(match1){
-        case -1: //no input in field 1
-            displayMessage = "Please try again <input 1 - no names detected>!";
-            break;
-            
-        case 0: case 2: //no match, too many matches found for field 1
-            if(match2 == 0 || match2 == 2){
-                displayMessage = "Please try again <input 1 & 2 - no unique matches found>!";
-            } else { //if(match2 == 1) or (match2 == -1) 
-                displayMessage = "Please try again <input 1 - no unique matches found>!";
-            }           
-            break;
-            
-        case 1: //unique match for field 1
-            if(match2 == 0 || match2 == 2){
-                displayMessage = "Please try again <input 2 - no unique matches found>!";
-            }           
-            break;
-        default:
-            break;
+    if(match1 == -1){ //no input in field 1
+        displayMessage = "Please try again <input 1 - no names detected>!";
+    } else if(match1 == 0 || match1 >= 5){ //no match, too many matches found for field 1
+        if(match2 == 0 || match2 >= 5){
+            displayMessage = "Please try again | ";
+            displayMessage += std::to_string(numMatches1) + " matches found for name 1 | ";
+            displayMessage += std::to_string(numMatches2) + " matches found for name 2";
+        } else if((match2 == 1) || (match2 == -1)) {
+            displayMessage = "Please try again | ";
+            displayMessage += std::to_string(numMatches1) + " matches found for name 1.";
+        }
+    } else if(match1 == 1){  //unique match for field 1
+        if(match2 == 0 || match2 >= 5){ // no match or too many matches
+            displayMessage = "Please try again | ";
+            displayMessage += std::to_string(numMatches2) + " matches found for name 2.";
+        }
     }
     return displayMessage;
 }

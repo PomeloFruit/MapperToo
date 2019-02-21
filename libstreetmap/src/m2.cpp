@@ -79,8 +79,8 @@ void draw_main_canvas(ezgl::renderer &g){
     rd.drawStreetRoads(getNumStreetSegments(), xy, info, g);
     rd.drawIntersections(getNumIntersections(), xy, info, g);
     ft.drawPOI(getNumPointsOfInterest(), xy, info, g);
+    rd.drawSpecialIntersections(xy,info,g);
 
-    //rd.drawOneIntersection(info.lastIntersection, xy, info, g);//void roadDrawing::drawOneIntersection(int id, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g)
     dt.createText(getNumStreetSegments(), getNumStreets(), xy, info, g);
 }
 
