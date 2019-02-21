@@ -179,6 +179,10 @@ void featureDrawing::drawOnePOI(int i, mapBoundary &xy, infoStrucs &info, ezgl::
         radius = forcedRadius;
         setPOIColour(classifyPOI(info.POIInfo[i].type), g); 
         g.fill_elliptic_arc(ezgl::point2d(xNew,yNew),radius,radius,0,360);
+        //g.draw_surface(g.load_png("/homes/d/dujia3/ece297/work/mapper/libstreetmap/resources/small_image.png"), ezgl::point2d(xNew, yNew));
+        //radius = NORMALRAD;
+        //setPOIColour(classifyPOI(info.POIInfo[i].type), g);  
+        //g.fill_elliptic_arc(ezgl::point2d(xNew,yNew),radius,radius,0,360);
     }
 }
 
