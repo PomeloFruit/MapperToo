@@ -168,14 +168,24 @@ void featureDrawing::drawSubways(bool draw, mapBoundary &xy, infoStrucs &info, e
 
 void featureDrawing::drawOneSubway(unsigned i, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g){
     const double SUBWAYRAD = 0.0005;
+    const double HIGHLIGHTRAD = 0.0015;
+    
     double xNew, yNew;
     LatLon drawPoint;
     
     drawPoint = info.SubwayInfo[i].point;
+    g.set_color(79,0,79,255);
     
     xNew = xy.xFromLon(drawPoint.lon());
     yNew = xy.yFromLat(drawPoint.lat());
     
-    g.set_color(79,0,79,255);
+    if(info.SubwayInfo[i].clicked){
+        g.set_color(64,255,194,255);
+        g.fill_elliptic_arc(ezgl::point2d(xNew,yNew),SUBWAYRAD,SUBWAYRAD,0,360);
+        g.set_color(255,155,36,150);
+        g.fill_elliptic_arc(ezgl::point2d(xNew,yNew),HIGHLIGHTRAD,HIGHLIGHTRAD,0,360);
+        return;
+    }
+    
     g.fill_elliptic_arc(ezgl::point2d(xNew,yNew),SUBWAYRAD,SUBWAYRAD,0,360);
 }

@@ -92,13 +92,11 @@ public:
 
     std::vector<POIData> POIInfo;
     
-    std::vector<unsigned> lastIntersection;
-    
-    std::vector<unsigned> lastPOI;
-    
-    std::vector<unsigned> lastSeg;
+    std::vector<unsigned> lastIntersection, lastPOI, lastSeg, lastSubway;
     
     std::string textInput1, textInput2;
+    
+    std::string corInput1, corInput2;
     
     bool showSubway;
 };

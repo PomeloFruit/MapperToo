@@ -11,7 +11,7 @@ public:
     std::string clickedOnIntersection(double x, double y, mapBoundary &xy, infoStrucs &info);
     std::string clickedOnPOI(double x, double y, mapBoundary &xy, infoStrucs &info);
     std::string clickedOnSubway(double x, double y, mapBoundary &xy, infoStrucs &info);
-    std::string searchOnMap(infoStrucs &info);
+    std::string searchOnMap(infoStrucs &info, ezgl::application *&application);
     
     unsigned findNearestSubway(infoStrucs &info, LatLon pt);
     
@@ -19,10 +19,17 @@ public:
     std::string getMessagesFromMatches(int match1, int match2);
     
     void highlightStreet(infoStrucs &info, unsigned highID);
+    void highlightStreet(infoStrucs &info, std::vector<unsigned> highID);
+
     void highlightPOI(infoStrucs &info, unsigned highID);
     void highlightPOI(infoStrucs &info, std::vector<unsigned> &highID);
+    
     void highlightIntersection(infoStrucs &info, unsigned highID);
     void highlightIntersection(infoStrucs &info, std::vector<unsigned> &highID);
+    
+    void highlightSubway(infoStrucs &info, unsigned highID);
+    void highlightSubway(infoStrucs &info, std::vector<unsigned> &highID);
+    
     void clearPreviousHighlights(infoStrucs &info);
 };
 

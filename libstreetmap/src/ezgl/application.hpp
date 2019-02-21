@@ -116,6 +116,8 @@ public:
   
   //retrieve input text from text fields
   void get_input_text(const char *&street1, const char *&street2);
+  
+  void set_input_text(const char *&street1, const char *&street2);
 
   /**
    * Add a button

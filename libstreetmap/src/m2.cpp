@@ -35,9 +35,6 @@ roadDrawing rd;
 clickActions ck;
 drawText dt;
 
-void relationshipsButton(GtkWidget *widget, ezgl::application *application){
-    std::cout << getNumberOfRelations() << std::endl;
-}
 //=========================== Function Prototypes ===========================
 
 void draw_main_canvas(ezgl::renderer &g);
@@ -63,6 +60,7 @@ void draw_map(){
     settings.canvas_identifier = "MainCanvas";
     ezgl::application application(settings);
     
+    
     xy.initialize();
     pop.initialize(info, xy);
 
@@ -73,6 +71,7 @@ void draw_map(){
     application.add_canvas("MainCanvas",draw_main_canvas,initial_world);
 
     application.run(initial_setup, act_on_mouse_press, NULL, NULL);
+    
     //application.run(initial_setup, act_on_mouse_press, act_on_mouse_move, act_on_key_press);
 }
 
@@ -95,8 +94,6 @@ void initial_setup(ezgl::application *application){
     application->connect_feature(pressFind);
     
     application->create_button("Show Subways",8,loadSubwayButton);
-    application->create_button("Get Relationships",10,relationshipsButton);
-
 }
 
 // left click for POI, right click for intersection
@@ -138,7 +135,13 @@ void pressFind(GtkWidget *widget, ezgl::application *application){
     info.textInput1 = name1;
     info.textInput2 = name2;
 
-    message = ck.searchOnMap(info);
+    message = ck.searchOnMap(info, application);
+    
+    name1 = info.corInput1.c_str();
+    name2 = info.corInput2.c_str();
+    
+    application->set_input_text(name1, name2);
+    
     application->update_message(message);
     application->refresh_drawing();
 }

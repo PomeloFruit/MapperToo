@@ -243,6 +243,7 @@ void close_map() {
     //streetBlock.poiGrid.clear(); 
     //streetBlock.intGrid.clear();
     closeStreetDatabase();
+    closeOSMDatabase();
 }
 
 
