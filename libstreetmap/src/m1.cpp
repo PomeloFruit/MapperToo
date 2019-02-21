@@ -30,6 +30,7 @@
 #include <algorithm>
 #include <string>
 #include <iostream>
+#include <sstream>
 
 //============================= Type Declarations =============================
 
@@ -82,11 +83,19 @@ std::vector<double> segTravelTimeVector;
  */
 bool load_map(std::string path/*map_path*/) {
     bool load_successful = false; 
-    
+    std::string path_osm;
+    const std::string STREETEXT = "street.bin";
+    const std::string OSMEXT = "osm.bin";
+
     //Indicates whether the map has loaded successfully
     load_successful = loadStreetsDatabaseBIN(path);
     
-    if(load_successful){      
+    if(load_successful){
+        
+        //load osm map data
+        path_osm = path.substr(0, path.size()-(STREETEXT.size()+1));
+        path_osm = path_osm + OSMEXT;
+        loadOSMDatabaseBIN(path_osm);
         
         //clears all global data structures before filling with new data
         streetIDMap.clear();
@@ -678,7 +687,7 @@ unsigned find_closest_point_of_interest(LatLon my_position){
     double min = EARTH_RADIUS_IN_METERS;
     int nearestPOIIndex = 0; 
 
-    for(unsigned i = 0; i < getNumPointsOfInterest(); i++){
+    for(int i = 0; i < getNumPointsOfInterest(); i++){
         double temp = find_distance_between_two_points(my_position, getPointOfInterestPosition(i));
         if(temp <= min){
             min = temp;
@@ -702,7 +711,7 @@ unsigned find_closest_intersection(LatLon my_position){
     double min = EARTH_RADIUS_IN_METERS;
     int nearestIntIndex = 0; 
 
-    for(unsigned i = 0; i < getNumIntersections(); i++){
+    for(int i = 0; i < getNumIntersections(); i++){
         double temp = find_distance_between_two_points(my_position, getIntersectionPosition(i));
         if(temp <= min){
             min = temp;

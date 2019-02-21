@@ -32,11 +32,11 @@ constexpr int BAD_ARGUMENTS_EXIT_CODE = 2;  //Invalid command-line usage
 
 //The default map to load if none is specified
 std::string default_map_path = "/cad2/ece297s/public/maps/toronto_canada.streets.bin";
-std::string default_map_path_osm = "/cad2/ece297s/public/maps/toronto_canada.osm.bin";
 
 int main(int argc, char** argv) {
     
     std::string map_path;
+    
     if(argc == 1) {
         //Use a default map
         map_path = default_map_path;
@@ -50,11 +50,8 @@ int main(int argc, char** argv) {
         return BAD_ARGUMENTS_EXIT_CODE;
     }
 
-    
-    loadOSMDatabaseBIN(default_map_path_osm);
-    
     //Load the map and related data structures
-    bool load_success = load_map(map_path);
+    bool load_success = load_map(map_path);    
     if(!load_success) {
         std::cerr << "Failed to load map '" << map_path << "'\n";
         return ERROR_EXIT_CODE;
