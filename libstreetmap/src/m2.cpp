@@ -40,7 +40,7 @@ drawText dt;
 void draw_main_canvas(ezgl::renderer &g);
 void initial_setup(ezgl::application *application);
 void act_on_mouse_press(ezgl::application *application, GdkEventButton *event, double x, double y);
-void pressFind(GtkWidget *widget, ezgl::application *application);
+void findButton(GtkWidget *widget, ezgl::application *application);
 void loadSubwayButton(GtkWidget *widget, ezgl::application *application);
 void hideSubwayButton(GtkWidget *widget, ezgl::application *application);
 void showSubwayButton(GtkWidget *widget, ezgl::application *application);
@@ -48,17 +48,9 @@ void loadTrainsButton(GtkWidget *widget, ezgl::application *application);
 void hideTrainsButton(GtkWidget *widget, ezgl::application *application);
 void showTrainsButton(GtkWidget *widget, ezgl::application *application);
 
-// Callback functions for event handling
-
-
-//void act_on_mouse_move(ezgl::application *application, GdkEventButton *event, double x, double y);
-//void act_on_key_press(ezgl::application *application, GdkEventKey *event, char *key_name);
-
-///////
-
 //=========================== Global Variables ===========================
 
-double startArea;
+double startArea; //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< this should really be in global.h
 
 //=========================== Function Definitions ===========================
 
@@ -69,6 +61,7 @@ double startArea;
  * @param none
  * @return void
  */
+
 void draw_map(){
     ezgl::application::settings settings;
     settings.main_ui_resource = "libstreetmap/resources/main.ui";
@@ -93,6 +86,15 @@ void draw_map(){
     application.run(initial_setup, act_on_mouse_press, NULL, NULL);
 }
 
+
+/* draw_main_canvas function
+ * - calls for all draw functions for map elements
+ * 
+ * @param g <ezgl::renderer> - renderer object to draw and modify graphics
+ * 
+ * @return void
+ */
+
 void draw_main_canvas(ezgl::renderer &g){
     g.set_color(219,219,219,255); //light gray for background
     g.fill_rectangle(g.get_visible_world());
@@ -116,48 +118,82 @@ void draw_main_canvas(ezgl::renderer &g){
  //   std::cout<<currentArea<<'\n';
 }
 
+
+/* initial_setup function
+ * - creates initial buttons and puts instructional message in status bar at startup
+ * 
+ * @param application <ezgl::application> - application object to access window elements
+ * 
+ * @return void
+ */
+
 void initial_setup(ezgl::application *application){
-    application->update_message("Left-click for Points of Interest | Right-click for Intersections");
-    application->connect_feature(pressFind);
+    application->update_message("Left-click for Points of Interest | Right-click for Intersections | <ctrl> + Left-click for Subways ");
+    application->connect_feature(findButton);
     
     application->create_button("Show Subways",8,loadSubwayButton);
     application->create_button("Show Trains",9,loadTrainsButton);
 }
 
-// left click for POI, right click for intersection
+
+/* act_on_mouse_press function
+ * - determines mouse-click/key combination and calls for appropriate action
+ * - calls for update of graphics to reflect change, and updates status
+ * 
+ * - left click alone finds POI
+ * - right click alone gets intersections
+ * - left-click with CTRL key gets subways/routes
+ * 
+ * @param application <ezgl::application> - application object to access window elements
+ * @param event <GdkEventButton> -event object to determine mouse action
+ * @param x <double> - x coordinate of the mouse click (in screen co-ords)
+ * @param y <double> - y coordinate of the mouse click (in screen co-ords)
+ * 
+ * @return void
+ */
+
 void act_on_mouse_press(ezgl::application *application, GdkEventButton *event, double x, double y){
     std::string message;
 
     if (event->button == 1) { //left click
         
-        if ((event->state & GDK_CONTROL_MASK) && info.showRoute>0) { //click with control key
-        
-            message = ck.clickedOnSubway(x, y, xy, info);
-            
-        } else { //without shift key
-            
+        if ((event->state & GDK_CONTROL_MASK) && info.showRoute>0) { // control key   
+            message = ck.clickedOnSubway(x, y, xy, info);   
+        } else {  //without shift key
             message = ck.clickedOnPOI(x, y, xy, info);
-            
-        }        
-    } else if (event->button == 3) { //right click
+        }
+        
+    } else if (event->button == 3) { // right click
+        
         message = ck.clickedOnIntersection(x, y, xy, info);
-    }        
-
-//    if ((event->state & GDK_CONTROL_MASK) && (event->state & GDK_SHIFT_MASK))
-//    std::cout << "with control and shift pressed ";
-//    else if (event->state & GDK_CONTROL_MASK)
-//    std::cout << "with control pressed ";
-    
+    }
     
     application->update_message(message);
     application->refresh_drawing();
 }
 
-void pressFind(GtkWidget *widget, ezgl::application *application){
+
+/* findButton function
+ * - writes and reads words in input fields 1 and 2
+ * - sets the text in fields to "corrected" name if searched
+ * - reads the text in fields to search for
+ * 
+ * @param widget <GtkWidget> -event object to determine mouse action
+ * @param application <ezgl::application> - application object to access window elements
+ * 
+ * @return void
+ */
+
+void findButton(GtkWidget *widget, ezgl::application *application){
+
+    //cancels warning / not needed at all
+    widget->parent_instance.ref_count;
+        
     const char *name1;
     const char *name2;
     std::string message;
     
+    // do the search
     application->get_input_text(name1, name2);
     
     info.textInput1 = name1;
@@ -165,6 +201,7 @@ void pressFind(GtkWidget *widget, ezgl::application *application){
 
     message = ck.searchOnMap(info);
     
+    // auto-correct the input
     if(info.corInput1 != ""){
         name1 = info.corInput1.c_str();
     }
@@ -173,9 +210,21 @@ void pressFind(GtkWidget *widget, ezgl::application *application){
     }
     application->set_input_text(name1, name2);
     
+    // reflect the changes
     application->update_message(message);
     application->refresh_drawing();
 }
+
+
+/* loadSubwayButton function
+ * - calls for the population of the subway structures (if not already populated)
+ * - calls another function to switch button to "hide subway"
+ * 
+ * @param widget <GtkWidget> -event object to determine mouse action
+ * @param application <ezgl::application> - application object to access window elements
+ * 
+ * @return void
+ */
 
 void loadSubwayButton(GtkWidget *widget, ezgl::application *application){
     if(info.SubwayInfo.size()==0){
@@ -185,7 +234,21 @@ void loadSubwayButton(GtkWidget *widget, ezgl::application *application){
     showSubwayButton(widget, application);
 }
 
+
+/* hideSubwayButton function
+ * - calls to change button from hide to show
+ * 
+ * @param widget <GtkWidget> -event object to determine mouse action
+ * @param application <ezgl::application> - application object to access window elements
+ * 
+ * @return void
+ */
+
 void hideSubwayButton(GtkWidget *widget, ezgl::application *application){
+    
+    //cancels warning / not needed at all
+    widget->parent_instance.ref_count;
+        
     info.showRoute = info.showRoute - 1;
 
     application->destroy_button("Hide Subways");
@@ -194,7 +257,21 @@ void hideSubwayButton(GtkWidget *widget, ezgl::application *application){
     application->refresh_drawing();
 }
 
+
+/* showSubwayButton function
+ * - calls to change button from show to hide
+ * 
+ * @param widget <GtkWidget> -event object to determine mouse action
+ * @param application <ezgl::application> - application object to access window elements
+ * 
+ * @return void
+ */
+
 void showSubwayButton(GtkWidget *widget, ezgl::application *application){
+    
+    //cancels warning / not needed at all
+    widget->parent_instance.ref_count;
+        
     info.showRoute = info.showRoute + 1;
     
     application->destroy_button("Show Subways");
@@ -203,6 +280,17 @@ void showSubwayButton(GtkWidget *widget, ezgl::application *application){
     application->refresh_drawing();
 }
 
+
+/* loadTrainsButton function
+ * - calls for the population of the subway structures (if not already populated)
+ * - calls another function to switch button to "hide trains"
+ * 
+ * @param widget <GtkWidget> -event object to determine mouse action
+ * @param application <ezgl::application> - application object to access window elements
+ * 
+ * @return void
+ */
+
 void loadTrainsButton(GtkWidget *widget, ezgl::application *application){
     if(info.SubwayInfo.size()==0){
         pop.loadAfterDraw(info);
@@ -210,7 +298,21 @@ void loadTrainsButton(GtkWidget *widget, ezgl::application *application){
     showTrainsButton(widget, application);
 }
 
+
+/* hideTrainsButton function
+ * - calls to change button from hide to show
+ * 
+ * @param widget <GtkWidget> -event object to determine mouse action
+ * @param application <ezgl::application> - application object to access window elements
+ * 
+ * @return void
+ */
+
 void hideTrainsButton(GtkWidget *widget, ezgl::application *application){
+    
+    //cancels warning / not needed at all
+    widget->parent_instance.ref_count;
+        
     info.showRoute = info.showRoute - 2;
     
     application->destroy_button("Hide Trains");
@@ -219,7 +321,21 @@ void hideTrainsButton(GtkWidget *widget, ezgl::application *application){
     application->refresh_drawing();
 }
 
+
+/* showTrainsButton function
+ * - calls to change button from show to hide
+ * 
+ * @param widget <GtkWidget> -event object to determine mouse action
+ * @param application <ezgl::application> - application object to access window elements
+ * 
+ * @return void
+ */
+
 void showTrainsButton(GtkWidget *widget, ezgl::application *application){
+    
+    //cancels warning / not needed at all
+    widget->parent_instance.ref_count;
+        
     info.showRoute = info.showRoute + 2;
     
     application->destroy_button("Show Trains");

@@ -19,6 +19,13 @@ std::vector<std::string> shops {"department_store", "general", "kiosk", "mall", 
     , "fishing", "fuel", "outdoor", "scuba_diving", "ski", "sports", "swimming_pool", "art", "collector", "craft", "games", "model", "music", "musical_instrument"
     , "photo", "camera", "video", "video_games", "anime", "books", "gift", "stationery", "ticket", "cannabis", "e-cigarette", "tobacco", "toys", "travel_agency"};
         
+const double SUBWAYRAD = 0.0005;
+const double HIGHLIGHTRAD = 0.0015;   
+const int TRAINROUTE = 3;
+const int HIGHTRAINROUTE = 6;
+const int SUBWAYROUTE = 5;
+const int HIGHSUBWAYROUTE = 10;
+    
 void featureDrawing::setFeatureColour(int type, ezgl::renderer &g, bool special){
     if(special){
         g.set_color(0,0,0,150);
@@ -56,7 +63,7 @@ void featureDrawing::setFeatureColour(int type, ezgl::renderer &g, bool special)
             case 9: // stream = light blue
                 g.set_color(80, 179, 255, 128);
                 break;
-            default:
+            default: //dark gray
                 g.set_color(152,151,150,255);
                 break;
         }
@@ -180,9 +187,6 @@ void featureDrawing::drawSubways(int draw, mapBoundary &xy, infoStrucs &info, ez
 }
 
 void featureDrawing::drawOneSubway(unsigned i, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g){
-    const double SUBWAYRAD = 0.0005;
-    const double HIGHLIGHTRAD = 0.0015;
-    
     double xNew, yNew;
     LatLon drawPoint;
     
@@ -235,10 +239,7 @@ void featureDrawing::drawSubwayRoute(int draw, mapBoundary &xy, infoStrucs &info
 
 void featureDrawing::drawStraightSubwaySection(LatLon &pt1, LatLon &pt2, mapBoundary &xy, ezgl::renderer &g, bool high, int t){
     float xInitial, yInitial, xFinal, yFinal;
-    const int TRAINROUTE = 3;
-    const int HIGHTRAINROUTE = 6;
-    const int SUBWAYROUTE = 5;
-    const int HIGHSUBWAYROUTE = 10;
+
     
     xInitial = xy.xFromLon(pt1.lon());
     yInitial = xy.yFromLat(pt1.lat());
