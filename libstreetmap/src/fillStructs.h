@@ -38,7 +38,7 @@ public:
     
     std::vector< unsigned > checkIfSubwayRouteNode(const OSMNode*, infoStrucs &info);
     
-    bool checkIfSubwayRoute(const OSMRelation* relPtr);
+    int checkIfSubwayRoute(const OSMRelation* relPtr);
     
     bool checkOSMRelationTags(const OSMRelation* relPtr, std::string k, std::string v);
     

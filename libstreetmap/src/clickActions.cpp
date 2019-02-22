@@ -50,9 +50,9 @@ std::string clickActions::clickedOnSubway(double x, double y, mapBoundary &xy, i
     displayName += info.SubwayInfo[clickedID].name;
     
     for(unsigned i=0 ; i<info.SubwayInfo[clickedID].routeNum.size() ; i++){
-        displayName += " | Route Name: ";
+        displayName += " | ";
         displayName += info.SubwayRouteInfo[info.SubwayInfo[clickedID].routeNum[i]].name;
-        displayName += " by ";
+        displayName += " Metro Line by ";
         displayName += info.SubwayRouteInfo[info.SubwayInfo[clickedID].routeNum[i]].operatorName;
     }
     
@@ -389,7 +389,7 @@ void clickActions::findPOIByName(std::vector<unsigned> &streetID, std::string us
 
 void clickActions::findSubwaysByName(std::vector<unsigned> &streetID, std::string userInput, infoStrucs &info){
     std::string temp;
-    int sim;
+    int sim = 0;
 
     for(unsigned i=0 ; i<info.SubwayInfo.size() ; i++){
         

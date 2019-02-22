@@ -26,7 +26,7 @@ void populateData::initialize(infoStrucs &info, mapBoundary &xy){
     info.lastIntersection.clear();
     info.lastPOI.clear();
     info.lastSeg.clear();
-    info.showSubway = false;
+    info.showRoute = 0;
 }
 
 void populateData::loadAfterDraw(infoStrucs &info){
@@ -167,7 +167,7 @@ void populateData::populatePOIInfo(infoStrucs &info){
 
 void populateData::populateOSMSubwayInfo(infoStrucs &info){
     bool isSubway = false;
-    std::vector <unsigned> isSubwayRoute;
+    std::vector <unsigned> routeVec;
     const OSMNode* currentPtr;
 
     info.SubwayInfo.clear();
@@ -175,7 +175,7 @@ void populateData::populateOSMSubwayInfo(infoStrucs &info){
     
     for(unsigned i=0 ; i< getNumberOfNodes(); i++){
         currentPtr = getNodeByIndex(i);
-        isSubwayRoute = checkIfSubwayRouteNode(currentPtr, info);  
+        routeVec = checkIfSubwayRouteNode(currentPtr, info);  
         
         isSubway = checkIfSubway(currentPtr);
         if(isSubway){
@@ -188,7 +188,7 @@ void populateData::populateOSMSubwayInfo(infoStrucs &info){
             newStop.clicked = false;
             newStop.point = currentPtr->coords();
             newStop.id = currentPtr->id();
-            newStop.routeNum = isSubwayRoute;
+            newStop.routeNum = routeVec;
             
             info.SubwayInfo.push_back(newStop);
         }            
@@ -227,17 +227,18 @@ std::string populateData::getOSMNodeName(const OSMNode* nodePtr){
     return name;
 }
 
+
 void populateData::getOSMSubwayRelations(infoStrucs &info){
-    bool isSubwayRoute = false;
+    int subwayRouteType = 0; // 0 = no, 1 = subway , 2 = railway
     const OSMRelation* currentPtr;
     const OSMWay* wayPtr;
 
     info.SubwayInfo.clear();
     for(unsigned i=0 ; i< getNumberOfRelations(); i++){
         currentPtr = getRelationByIndex(i);
-        isSubwayRoute = checkIfSubwayRoute(currentPtr);
+        subwayRouteType = checkIfSubwayRoute(currentPtr);
         
-        if(isSubwayRoute){
+        if(subwayRouteType > 0){
             subwayRouteData newRoute;
             
             newRoute.name = getOSMRelationInfo(currentPtr, "name");
@@ -255,12 +256,12 @@ void populateData::getOSMSubwayRelations(infoStrucs &info){
                 } else { //if not a node, then it must be a way
                     
                     wayPtr = info.WayMap[OSMID(currentPtr->members().at(j).tid)];
-                    newRoute.wayPtr.push_back(wayPtr);
                     newRoute.nodePoints.push_back(wayPtr->ndrefs());                    
                 }
             }
             
             newRoute.clicked = false;
+            newRoute.type = subwayRouteType;
             
             newRoute.point.resize(newRoute.nodePoints.size());
             for(unsigned j=0 ; j<newRoute.nodePoints.size() ; j++){
@@ -269,6 +270,24 @@ void populateData::getOSMSubwayRelations(infoStrucs &info){
             
             info.SubwayRouteInfo.push_back(newRoute);
         }
+    }
+}
+
+int populateData::checkIfSubwayRoute(const OSMRelation* relPtr){
+    if(relPtr == NULL){
+        return 0;
+    }
+
+    if(checkOSMRelationTags(relPtr,"type","route")){
+        if(checkOSMRelationTags(relPtr,"route","subway")){
+            return 1;
+        } else if (checkOSMRelationTags(relPtr,"route","railway")){
+            return 2;
+        } else {
+            return 0;
+        }
+    } else {
+        return 0;
     }
 }
 
@@ -291,18 +310,6 @@ std::vector< unsigned > populateData::checkIfSubwayRouteNode(const OSMNode* nPtr
     return routesHit;
 }
 
-bool populateData::checkIfSubwayRoute(const OSMRelation* relPtr){
-    if(relPtr == NULL){
-        return false;
-    }
-
-    if(checkOSMRelationTags(relPtr,"type","route") && checkOSMRelationTags(relPtr,"route","subway")){
-        return true;
-    } else {
-        return false;
-    }
-}
-
 bool populateData::checkOSMRelationTags(const OSMRelation* relPtr, std::string k, std::string v){
     if(getOSMRelationInfo(relPtr,k) == v){
         return true;
@@ -312,10 +319,8 @@ bool populateData::checkOSMRelationTags(const OSMRelation* relPtr, std::string k
 
 std::string populateData::getOSMRelationInfo(const OSMRelation* relPtr, std::string k){
     for(unsigned i=0 ; i < getTagCount(relPtr) ; i++){
-        
         std::string key,value;
         std::tie(key,value) = getTagPair(relPtr,i);
-        
         if(key == k){
             return value;
         }

@@ -62,9 +62,8 @@ struct subwayRouteData {
     std::string operatorName;
     std::vector< std::vector< LatLon > > point;
     std::vector< std::vector< OSMID > > nodePoints;
+    int type;
     bool clicked;
-    
-    std::vector< const OSMWay* > wayPtr; //////////////////////////////////is this really needed??????
 };
 
 struct subwayData {
@@ -95,12 +94,14 @@ public:
 
     std::vector<POIData> POIInfo;
     
-    std::vector<unsigned> lastIntersection, lastPOI, lastSeg, lastSubway, lastFeature;
+    std::vector<unsigned> lastIntersection, lastPOI, lastSeg, lastFeature;
+    
+    std::vector<unsigned> lastSubway;
     
     std::string textInput1, textInput2;
     
     std::string corInput1, corInput2;
     
-    bool showSubway;
+    int showRoute;
 };
 

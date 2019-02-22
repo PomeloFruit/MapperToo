@@ -169,8 +169,8 @@ void featureDrawing::drawOnePOI(int i, mapBoundary &xy, infoStrucs &info, ezgl::
     }
 }
 
-void featureDrawing::drawSubways(bool draw, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g){
-    if(draw){
+void featureDrawing::drawSubways(int draw, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g){
+    if(draw>0){
         drawSubwayRoute(draw, xy, info, g);
         
         for(unsigned i=0 ; i<info.SubwayInfo.size() ; i++){
@@ -203,53 +203,65 @@ void featureDrawing::drawOneSubway(unsigned i, mapBoundary &xy, infoStrucs &info
     g.fill_elliptic_arc(ezgl::point2d(xNew,yNew),SUBWAYRAD,SUBWAYRAD,0,360);
 }
 
-void featureDrawing::drawSubwayRoute(bool draw, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g){
-    if(draw){
-        for(unsigned i=0 ; i<info.SubwayRouteInfo.size() ; i++){
-            drawOneSubwayRoute(i, xy, info, g);
+void featureDrawing::drawSubwayRoute(int draw, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g){
+    for(unsigned i=0 ; i<info.SubwayRouteInfo.size() ; i++){
+        
+        int routeType = info.SubwayRouteInfo.at(i).type;
+        
+        if(routeType == draw){
+            drawOneSubwayRoute(i, xy, info, g, draw);
+        } else if (draw ==3) {
+            drawOneSubwayRoute(i, xy, info, g, routeType);
+            drawOneSubwayRoute(i, xy, info, g, routeType);
         }
     }
 }
 
- void featureDrawing::drawOneSubwayRoute(unsigned r, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g){
+ void featureDrawing::drawOneSubwayRoute(unsigned r, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g, int t){
     LatLon from, to;
-    int start = 0;
     subwayRouteData &temp = info.SubwayRouteInfo.at(r);
     
     for(unsigned i=0 ; i<temp.point.size() ; i++){
         
         from = temp.point[i][0];
-        // std::cout << srd.nodePoints.at(start). <<std::endl;
         
         for(unsigned j=0 ; j<temp.point[i].size() ; j++){
-       
             to = temp.point[i][j];
-            //  std::cout << srd.nodePoints.at(c) << "---" << to << " and "<< from <<std::endl;
-            drawStraightSubwaySection(from, to, xy, g, temp.clicked);
+            drawStraightSubwaySection(from, to, xy, g, temp.clicked, t);
             from = to;
         }
     }
 }
 
-void featureDrawing::drawStraightSubwaySection(LatLon &pt1, LatLon &pt2, mapBoundary &xy, ezgl::renderer &g, bool high){
+void featureDrawing::drawStraightSubwaySection(LatLon &pt1, LatLon &pt2, mapBoundary &xy, ezgl::renderer &g, bool high, int t){
     float xInitial, yInitial, xFinal, yFinal;
-    const int NORMTHICKROUTE = 5;
-    const int HIGHTHICKROUTE = 10;
+    const int TRAINROUTE = 3;
+    const int HIGHTRAINROUTE = 6;
+    const int SUBWAYROUTE = 5;
+    const int HIGHSUBWAYROUTE = 10;
     
     xInitial = xy.xFromLon(pt1.lon());
     yInitial = xy.yFromLat(pt1.lat());
     xFinal = xy.xFromLon(pt2.lon());
     yFinal = xy.yFromLat(pt2.lat());
-    
-  //  std::cout << xInitial << "..." << yInitial << "..." << xFinal << "..." << yFinal << std::endl;
-    
-    g.set_color(255,153,0,255);
-    g.set_line_width(NORMTHICKROUTE);
+        
+    if(t==1){
+        g.set_color(255,153,0,255);
+        g.set_line_width(SUBWAYROUTE);
+    } else if (t==2) {
+        g.set_color(75,75,75,255);
+        g.set_line_width(TRAINROUTE);
+    }
     g.draw_line({xInitial, yInitial},{xFinal, yFinal});
     
     if(high){
-        g.set_color(51,102,255,150);
-        g.set_line_width(HIGHTHICKROUTE);
+        if (t==1) { 
+            g.set_color(51,102,255,150);
+            g.set_line_width(HIGHSUBWAYROUTE);
+        } else if (t==2) { 
+            g.set_color(8,157,24,150);
+            g.set_line_width(HIGHTRAINROUTE);
+        }
         g.draw_line({xInitial, yInitial},{xFinal, yFinal});
     }
 }
