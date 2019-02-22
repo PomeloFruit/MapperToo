@@ -69,8 +69,8 @@ void populateData::populateOSMWayInfo(infoStrucs &info){
 }
 
 
-/* populateOSMWayInfo function
- * - fills an ordered map of ways to be searched with by OSMID later
+/* populateStreetSegInfo function
+ * - fills the street segment vector in info 
  * 
  * @param info <infoStrucs> - object containing all essential map information
  * 
@@ -94,6 +94,15 @@ void populateData::populateStreetSegInfo(infoStrucs &info){
     }
 }
 
+
+/* populateIntersectionInfo function
+ * - fills the intersection vector in info 
+ * 
+ * @param info <infoStrucs> - object containing all essential map information
+ * 
+ * @return void
+ */
+
 void populateData::populateIntersectionInfo(infoStrucs &info){
     int numOfIntersections = getNumIntersections();
     info.IntersectionInfo.resize(numOfIntersections);
@@ -104,6 +113,17 @@ void populateData::populateIntersectionInfo(infoStrucs &info){
         info.IntersectionInfo[i].clicked = false;
     }
 }
+
+
+/* populateFeatureInfo function
+ * - fills the feature vector in info 
+ * - also fills feature point vec with converted xy coordinates
+ * 
+ * @param info <infoStrucs> - object containing all essential map information
+ * @param xy <mapBoundary> - object of type mapBoundary with x,y/Lat,Lon conversions
+ * 
+ * @return void
+ */
 
 void populateData::populateFeatureInfo(infoStrucs &info, mapBoundary &xy){
     int numFeatures = getNumFeatures();
@@ -121,18 +141,20 @@ void populateData::populateFeatureInfo(infoStrucs &info, mapBoundary &xy){
         
         numPoints = getFeaturePointCount(i);
         
-        if(info.FeatureInfo[i].isOpen){
+        // classify features by # of points
+        if(info.FeatureInfo[i].isOpen) {
             info.FeatureInfo[i].priorityNum = 4;
-        }else if(numPoints < 5){
+        } else if(numPoints < 5) {
             info.FeatureInfo[i].priorityNum = 3; 
-        }else if (numPoints < 15){
+        } else if (numPoints < 15) {
             info.FeatureInfo[i].priorityNum = 2;
-        }else{
+        } else {
             info.FeatureInfo[i].priorityNum = 1;
         }
 
         info.FeaturePointVec[i].clear();
         
+        // convert and store feature points
         pt1 = getFeaturePoint(0, i);
         pt2 = getFeaturePoint(numPoints-1, i);
         info.FeatureInfo[i].isOpen = isFeatureOpen(pt1,pt2);
@@ -148,6 +170,15 @@ void populateData::populateFeatureInfo(infoStrucs &info, mapBoundary &xy){
     }
 }
 
+
+/* populatePOIInfo function
+ * - fills the POI info structure in info
+ * 
+ * @param info <infoStrucs> - object containing all essential map information
+ * 
+ * @return void
+ */
+
 void populateData::populatePOIInfo(infoStrucs &info){
     int numPOI = getNumPointsOfInterest();
    
@@ -160,12 +191,23 @@ void populateData::populatePOIInfo(infoStrucs &info){
     }
 }
 
+
+/* populateOSMSubwayInfo function
+ * - fills the subway info structure in info
+ * 
+ * @param info <infoStrucs> - object containing all essential map information
+ * 
+ * @return void
+ */
+
 void populateData::populateOSMSubwayInfo(infoStrucs &info){
     bool isSubway = false;
     std::vector <unsigned> routeVec;
     const OSMNode* currentPtr;
 
     info.SubwayInfo.clear();
+    
+    // fill the subway routes structure
     getOSMSubwayRelations(info);
     
     for(unsigned i=0 ; i< getNumberOfNodes(); i++){
@@ -175,20 +217,34 @@ void populateData::populateOSMSubwayInfo(infoStrucs &info){
         isSubway = checkIfSubway(currentPtr);
         if(isSubway){
             subwayData newStop;
+            
+            // adds "station" to end of name if it does not have it
             newStop.name = getOSMNodeName(currentPtr);
             if(newStop.name.size()<=7 || newStop.name.compare(newStop.name.size()-7, 7, "Station") != 0){
                 newStop.name.append(" Station");
             }
+            
             newStop.nodePtr = currentPtr;
             newStop.clicked = false;
             newStop.point = currentPtr->coords();
             newStop.id = currentPtr->id();
+            
+            //associate subway station with route
             newStop.routeNum = routeVec;
             
             info.SubwayInfo.push_back(newStop);
         }            
     }    
 }
+
+
+/* checkIfSubway function
+ * - determines if node matches the key value pair of a subway
+ * 
+ * @param nodePtr <OSMNode*> - contains OSM node information with lots of tags 
+ * 
+ * @return <bool> - true if node is a subway station, false else
+ */
 
 bool populateData::checkIfSubway(const OSMNode* nodePtr){
     if(nodePtr == NULL){
@@ -207,6 +263,15 @@ bool populateData::checkIfSubway(const OSMNode* nodePtr){
     return false;
 }
 
+
+/* getOSMNodeName function
+ * - gets the name of the node
+ * 
+ * @param nodePtr <OSMNode*> - contains OSM node information with lots of tags 
+ * 
+ * @return name<string> - name of osm node nodePtr
+ */
+
 std::string populateData::getOSMNodeName(const OSMNode* nodePtr){
     std::string name = "";
     
@@ -222,6 +287,16 @@ std::string populateData::getOSMNodeName(const OSMNode* nodePtr){
     return name;
 }
 
+
+/* getRoadType function
+ * - goes through the tags of thw way, looking for "highway"
+ * - categorizes the type based on predifined constants
+ * 
+ * @param wayPtr <OSMWay*> - pointer to way with a lot of tags
+ * 
+ * @return <int> - road type based on predefined constants
+ */
+
 int populateData::getRoadType(const OSMWay* wayPtr){
     if(wayPtr == NULL){
         return SERVICE;
@@ -230,6 +305,8 @@ int populateData::getRoadType(const OSMWay* wayPtr){
     for(unsigned i=0 ; i < getTagCount(wayPtr) ; i++){
         std::string key,value;
         std::tie(key,value) = getTagPair(wayPtr,i);
+        
+        //compare only lower cases
         std::transform(key.begin(), key.end(), key.begin(), ::tolower);
         std::transform(value.begin(), value.end(), value.begin(), ::tolower);
         
@@ -240,16 +317,26 @@ int populateData::getRoadType(const OSMWay* wayPtr){
                 return PRIMARY;
             } else if (value == "secondary" || value == "tertiary"){
                 return SECONDARY;
-            }
-            else if (value == "residential"){
+            } else if (value == "residential"){
                 return RESIDENTIAL;
             } else {
                 return SERVICE;
             }
         }
     }
-    return SERVICE;
+    return SECONDARY;
 }
+
+
+/* isFeatureOpen function
+ * - features are closed is first and last point are the same
+ * - determines if pt1(first) and pt2(last) are same
+ * 
+ * @param pt1 <LatLon> - first point of feature
+ * @param pt2 <LatLon> - last point of feature
+ * 
+ * @return <bool> - true is feature is open, false if closed
+ */
 
 bool populateData::isFeatureOpen(LatLon pt1, LatLon pt2){
     if((pt1.lat() == pt2.lat()) && (pt1.lon() == pt2.lon())){
@@ -259,19 +346,32 @@ bool populateData::isFeatureOpen(LatLon pt1, LatLon pt2){
     }
 }
 
+
+/* getOSMSubwayRelations function
+ * - fills the subway route info in info
+ * 
+ * @param info <infoStrucs> - object containing all needed map element information
+ * 
+ * @return void
+ */
+
 void populateData::getOSMSubwayRelations(infoStrucs &info){
     int subwayRouteType = 0; // 0 = no, 1 = subway , 2 = railway
     const OSMRelation* currentPtr;
     const OSMWay* wayPtr;
 
     info.SubwayInfo.clear();
+    
+    //search through all relations looking for subways and trains
     for(unsigned i=0 ; i< getNumberOfRelations(); i++){
         currentPtr = getRelationByIndex(i);
         subwayRouteType = checkIfSubwayRoute(currentPtr);
         
+        // if it is a train or subway
         if(subwayRouteType > 0){
             subwayRouteData newRoute;
             
+            // get useful message information
             newRoute.name = getOSMRelationInfo(currentPtr, "name");
             newRoute.operatorName = getOSMRelationInfo(currentPtr, "operator");
             
@@ -291,9 +391,12 @@ void populateData::getOSMSubwayRelations(infoStrucs &info){
                 }
             }
             
-            newRoute.clicked = false;
             newRoute.type = subwayRouteType;
             
+            // dont highlight on intial draw
+            newRoute.clicked = false;
+            
+            // prepare internal structures for filling
             newRoute.point.resize(newRoute.nodePoints.size());
             for(unsigned j=0 ; j<newRoute.nodePoints.size() ; j++){
                 newRoute.point.at(j).resize(newRoute.nodePoints.at(j).size());
@@ -304,23 +407,46 @@ void populateData::getOSMSubwayRelations(infoStrucs &info){
     }
 }
 
+
+/* checkIfSubwayRoute function
+ * - looks through all relations looking for tags that id a train or subway
+ * - returns 0 for no match, 1 for subway, 2 for train
+ * 
+ * @param relPtr <OSMRelation*> - pointer to relation with a lot of tags
+ * 
+ * @return <int> - type of route of relation relPtr
+ */
+
 int populateData::checkIfSubwayRoute(const OSMRelation* relPtr){
     if(relPtr == NULL){
         return 0;
     }
 
     if(checkOSMRelationTags(relPtr,"type","route")){
-        if(checkOSMRelationTags(relPtr,"route","subway")){
+        
+        if(checkOSMRelationTags(relPtr,"route","subway")){ //subway
             return 1;
-        } else if (checkOSMRelationTags(relPtr,"route","railway")){
+        } else if (checkOSMRelationTags(relPtr,"route","railway")){ //train
             return 2;
         } else {
             return 0;
         }
+        
     } else {
         return 0;
     }
 }
+
+
+/* checkIfSubwayRouteNode function
+ * - goes through all subway route info nodes and looks for nPtr node
+ * - adds all matches to routesHit and returns it
+ * 
+ * @param nPtr <OSMNode*> - pointer to node with a lot of tags
+ * @param info <infoStrucs> - global variable storage with all map information
+ * 
+ * @return routesHit <std::vector< unsigned >> - all routes that contain nPtr node
+ */
 
 std::vector< unsigned > populateData::checkIfSubwayRouteNode(const OSMNode* nPtr, infoStrucs &info){
     std::vector< unsigned > routesHit;
@@ -341,12 +467,33 @@ std::vector< unsigned > populateData::checkIfSubwayRouteNode(const OSMNode* nPtr
     return routesHit;
 }
 
+
+/* checkOSMRelationTags function
+ * - goes through all tags of relation and determines if k,v pair exists
+ * 
+ * @param relPtr <OSMRelation*> - pointer to relation with a lot of tags
+ * @param k <std::string> - key of tag
+ * @param v <std::string> - value of tag
+ * 
+ * @return <bool> - true if relPtr relation contains tag with k key and v value
+ */
+
 bool populateData::checkOSMRelationTags(const OSMRelation* relPtr, std::string k, std::string v){
     if(getOSMRelationInfo(relPtr,k) == v){
         return true;
     }
     return false;
 }
+
+
+/* getOSMRelationInfo function
+ * - goes through all tags of relation and returns value with key k
+ * 
+ * @param relPtr <OSMRelation*> - pointer to relation with a lot of tags
+ * @param k <std::string> - key of tag
+ * 
+ * @return value<std::string> - value within key,value pair in tag with key k 
+ */
 
 std::string populateData::getOSMRelationInfo(const OSMRelation* relPtr, std::string k){
     for(unsigned i=0 ; i < getTagCount(relPtr) ; i++){
