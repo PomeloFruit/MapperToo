@@ -25,7 +25,7 @@ public:
     
     // find item being searched, can be street/intersection/POI/Feature/subway
     // return message what was found or error if not found
-    std::string searchOnMap(infoStrucs &info, ezgl::application *&application);
+    std::string searchOnMap(infoStrucs &info);
     
     // find the nearest subway station to pt
     unsigned findNearestSubway(infoStrucs &info, LatLon pt);

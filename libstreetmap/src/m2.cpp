@@ -163,7 +163,7 @@ void pressFind(GtkWidget *widget, ezgl::application *application){
     info.textInput1 = name1;
     info.textInput2 = name2;
 
-    message = ck.searchOnMap(info, application);
+    message = ck.searchOnMap(info);
     
     if(info.corInput1 != ""){
         name1 = info.corInput1.c_str();
