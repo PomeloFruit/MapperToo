@@ -8,13 +8,17 @@
 #include "OSMDatabaseAPI.h"
 #include "OSMID.h"
 
-#include "ezgl/application.hpp"
 #include "ezgl/graphics.hpp"
 #include "ezgl/point.hpp"
 
-#include <iostream>
-#include <math.h>
-#include <limits>
+/* initialize function
+ * - calls essential map-elements populate functions so data is in info structures
+ * 
+ * @param xy <mapBoundary> - object of type mapBoundary with x,y/Lat,Lon conversions
+ * @param info <infoStrucs> - object containing all essential map information
+ * 
+ * @return void
+ */
 
 void populateData::initialize(infoStrucs &info, mapBoundary &xy){
     populateOSMWayInfo(info);
@@ -29,9 +33,28 @@ void populateData::initialize(infoStrucs &info, mapBoundary &xy){
     info.showRoute = 0;
 }
 
+
+/* loadAfterDraw function
+ * - calls non-essential map-elements populate functions so data in info structure
+ *   so user can add elements
+ * 
+ * @param info <infoStrucs> - object containing all essential map information
+ * 
+ * @return void
+ */
+
 void populateData::loadAfterDraw(infoStrucs &info){
     populateOSMSubwayInfo(info);
 }
+
+
+/* populateOSMWayInfo function
+ * - fills an ordered map of ways to be searched with by OSMID later
+ * 
+ * @param info <infoStrucs> - object containing all essential map information
+ * 
+ * @return void
+ */
 
 void populateData::populateOSMWayInfo(infoStrucs &info){
     info.WayMap.clear();
@@ -45,42 +68,14 @@ void populateData::populateOSMWayInfo(infoStrucs &info){
     }
 }
 
-int populateData::getRoadType(const OSMWay* wayPtr){
-    if(wayPtr == NULL){
-        return SERVICE;
-    }
-    
-    for(unsigned i=0 ; i < getTagCount(wayPtr) ; i++){
-        std::string key,value;
-        std::tie(key,value) = getTagPair(wayPtr,i);
-        std::transform(key.begin(), key.end(), key.begin(), ::tolower);
-        std::transform(value.begin(), value.end(), value.begin(), ::tolower);
-        
-        if(key == "highway"){
-            if(value == "motorway" || value == "motorway_link"){
-                return HIGHWAY;
-            } else if (value == "trunk" || value == "trunk_link" || value == "primary"){
-                return PRIMARY;
-            } else if (value == "secondary" || value == "tertiary"){
-                return SECONDARY;
-            }
-            else if (value == "residential"){
-                return RESIDENTIAL;
-            } else {
-                return SERVICE;
-            }
-        }
-    }
-    return SERVICE;
-}
 
-bool populateData::isFeatureOpen(LatLon pt1, LatLon pt2){
-    if((pt1.lat() == pt2.lat()) && (pt1.lon() == pt2.lon())){
-        return false;
-    } else {
-        return true;
-    }
-}
+/* populateOSMWayInfo function
+ * - fills an ordered map of ways to be searched with by OSMID later
+ * 
+ * @param info <infoStrucs> - object containing all essential map information
+ * 
+ * @return void
+ */
 
 void populateData::populateStreetSegInfo(infoStrucs &info){
     int numStreetSegments = getNumStreetSegments();
@@ -227,6 +222,42 @@ std::string populateData::getOSMNodeName(const OSMNode* nodePtr){
     return name;
 }
 
+int populateData::getRoadType(const OSMWay* wayPtr){
+    if(wayPtr == NULL){
+        return SERVICE;
+    }
+    
+    for(unsigned i=0 ; i < getTagCount(wayPtr) ; i++){
+        std::string key,value;
+        std::tie(key,value) = getTagPair(wayPtr,i);
+        std::transform(key.begin(), key.end(), key.begin(), ::tolower);
+        std::transform(value.begin(), value.end(), value.begin(), ::tolower);
+        
+        if(key == "highway"){
+            if(value == "motorway" || value == "motorway_link"){
+                return HIGHWAY;
+            } else if (value == "trunk" || value == "trunk_link" || value == "primary"){
+                return PRIMARY;
+            } else if (value == "secondary" || value == "tertiary"){
+                return SECONDARY;
+            }
+            else if (value == "residential"){
+                return RESIDENTIAL;
+            } else {
+                return SERVICE;
+            }
+        }
+    }
+    return SERVICE;
+}
+
+bool populateData::isFeatureOpen(LatLon pt1, LatLon pt2){
+    if((pt1.lat() == pt2.lat()) && (pt1.lon() == pt2.lon())){
+        return false;
+    } else {
+        return true;
+    }
+}
 
 void populateData::getOSMSubwayRelations(infoStrucs &info){
     int subwayRouteType = 0; // 0 = no, 1 = subway , 2 = railway

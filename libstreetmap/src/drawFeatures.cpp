@@ -18,9 +18,17 @@ std::vector<std::string> shops {"department_store", "general", "kiosk", "mall", 
     , "tattoo", "electrical", "florist", "antiques", "candles", "interior_decoration", "computer", "robot", "electronics", "mobile_phone", "radiotechnics" 
     , "fishing", "fuel", "outdoor", "scuba_diving", "ski", "sports", "swimming_pool", "art", "collector", "craft", "games", "model", "music", "musical_instrument"
     , "photo", "camera", "video", "video_games", "anime", "books", "gift", "stationery", "ticket", "cannabis", "e-cigarette", "tobacco", "toys", "travel_agency"};
-        
+
+    
+    
+const int POITOURIST = 1;
+const int POIFOOD = 2;
+const int POISHOPS = 3;
+const int POIUNDEF = 0;
+
 const double SUBWAYRAD = 0.0005;
 const double HIGHLIGHTRAD = 0.0015;   
+
 const int TRAINROUTE = 3;
 const int HIGHTRAINROUTE = 6;
 const int SUBWAYROUTE = 5;
@@ -69,37 +77,35 @@ void featureDrawing::setFeatureColour(int type, ezgl::renderer &g, bool special)
         }
     }
 }
- 
+
 
 int featureDrawing::classifyPOI(std::string type){
-    int poiType = 0; 
+    int poiType = POIUNDEF; 
     
     if(std::find(tourist.begin(), tourist.end(), type) != tourist.end()){
-        poiType = 1; 
+        poiType = POITOURIST; 
     } else if(std::find(foodDrink.begin(), foodDrink.end(), type) != foodDrink.end()){
-        poiType = 2;
+        poiType = POIFOOD;
     } else if(std::find(shops.begin(), shops.end(), type) != shops.end()){
-        poiType = 3; 
+        poiType = POISHOPS; 
     } else {
-        poiType = 0; 
+        poiType = POIUNDEF; 
     }
     
     return poiType; 
 }
 
 void featureDrawing::setPOIColour(int type, ezgl::renderer& g){
-    if(type == 1){
+    if(type == POITOURIST){
         g.set_color(255,71,113,191);
-    }else if (type == 2){
+    }else if (type == POIFOOD){
         g.set_color(255, 165, 54, 191);
-    }else if (type == 3){
+    }else if (type == POISHOPS){
         g.set_color(0, 112, 255, 191);
-    }
-    else{
+    } else { //POIUNDEF
         g.set_color(0,0,0,0);
     }
 }
-
 
 void featureDrawing::drawFeatures(int numFeatures, infoStrucs &info, ezgl::renderer &g){
     for(int s = 1; s <= 4; s++){        //drawing by priority number where 1 is the highest and 4 is the lowest (all open features are 4 automatically)

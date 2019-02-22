@@ -9,16 +9,14 @@
 
 class populateData{
 public:
-    
+    // calls  populate functions for critical map element structures
     void initialize(infoStrucs &info, mapBoundary &xy);
     
+    // calls  populate function for non-critical map elements
     void loadAfterDraw(infoStrucs &info);
     
+    // populates the waymap in info
     void populateOSMWayInfo(infoStrucs &info);
-    
-    int getRoadType(const OSMWay* wayPtr);
-    
-    bool isFeatureOpen(LatLon pt1, LatLon pt2);
     
     void populateStreetSegInfo(infoStrucs &info);
     
@@ -30,19 +28,22 @@ public:
     
     void populateOSMSubwayInfo(infoStrucs &info);
     
-    bool checkIfSubway(const OSMNode* nodePtr);
+    int checkIfSubwayRoute(const OSMRelation* relPtr);
     
-    std::string getOSMNodeName(const OSMNode* nodePtr);
+    int getRoadType(const OSMWay* wayPtr); 
+    
+    bool isFeatureOpen(LatLon pt1, LatLon pt2);
+    
+    bool checkIfSubway(const OSMNode* nodePtr);
+
+    bool checkOSMRelationTags(const OSMRelation* relPtr, std::string k, std::string v);
     
     void getOSMSubwayRelations(infoStrucs &info);
     
     std::vector< unsigned > checkIfSubwayRouteNode(const OSMNode*, infoStrucs &info);
     
-    int checkIfSubwayRoute(const OSMRelation* relPtr);
-    
-    bool checkOSMRelationTags(const OSMRelation* relPtr, std::string k, std::string v);
+    std::string getOSMNodeName(const OSMNode* nodePtr);
     
     std::string getOSMRelationInfo(const OSMRelation* relPtr, std::string k);
-
 };
 

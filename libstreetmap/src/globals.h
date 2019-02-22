@@ -1,4 +1,4 @@
-
+// prevents double includes
 #pragma once
 
 #include "StreetsDatabaseAPI.h"
@@ -10,6 +10,8 @@
 #include <iostream>
 #include <map>
 
+//============================== Constants ===================================
+
 #define ROADWIDTH 2
 #define PRIMWIDTH 4
 #define HIGHWAYWIDTH 5
@@ -20,9 +22,12 @@
 #define RESIDENTIAL 3
 #define SERVICE 4
 
+//============================== Structures ===================================
+
 struct intersectionData {
     LatLon position;
     std::string name;
+    
     bool clicked;
 };
 
@@ -30,13 +35,15 @@ struct streetSegData {
     unsigned fromIntersection;
     unsigned toIntersection;
     int numCurvePoints;
+    
     std::string name;
+    int type;
+    unsigned streetID;
     
     OSMID id;
     const OSMWay* wayPtr;
-    int type;
+    
     bool clicked;
-    unsigned streetID;
 };
 
 struct featureData {
@@ -46,62 +53,79 @@ struct featureData {
     
     OSMID id;
     bool isOpen;
+    
     bool clicked;
 };
 
 struct POIData {
     std::string name;
-    std::string type;
-    bool clicked;
+    std::string type; 
     
     OSMID id;
+    bool clicked;
 };
 
 struct subwayRouteData {
     std::string name;
     std::string operatorName;
+    
     std::vector< std::vector< LatLon > > point;
     std::vector< std::vector< OSMID > > nodePoints;
+    
     int type;
     bool clicked;
 };
 
 struct subwayData {
     std::string name;
-    LatLon point;
-    bool clicked;
-    OSMID id;
+    LatLon point; 
     std::vector< unsigned > routeNum;
     
     const OSMNode* nodePtr; 
+    OSMID id;
+    
+    bool clicked;
 };
 
+//============================== Class ===================================
+
+//infoStrucs holds its all, all the map features are held here
 class infoStrucs {
 public:
+    // organized map to quickly match OSMID with way points
     std::map<OSMID, const OSMWay*> WayMap;
 
+    // contains subway station data
     std::vector<subwayData> SubwayInfo;
     
+    // contains route (subway and train) data)
     std::vector<subwayRouteData> SubwayRouteInfo;
 
+    // contains intersection data
     std::vector<intersectionData> IntersectionInfo;
 
+    // contains street segment data
     std::vector<streetSegData> StreetSegInfo;
 
+    // contains features data
     std::vector<featureData> FeatureInfo;
 
+    // contains features xy coordinate points
     std::vector< std::vector<ezgl::point2d> > FeaturePointVec;
 
+    // contains poi data
     std::vector<POIData> POIInfo;
     
-    std::vector<unsigned> lastIntersection, lastPOI, lastSeg, lastFeature;
+    // contains the "last" highlighted indices
+    std::vector<unsigned> lastIntersection, lastPOI, lastSeg, lastFeature, lastSubway;
     
-    std::vector<unsigned> lastSubway;
-    
+    // contains the input from the text fields
     std::string textInput1, textInput2;
     
+    // contains the output to the text fields/ corrected names
     std::string corInput1, corInput2;
     
+    // contains whether or not to show 0-none/1-subways/2-trains/3-both
     int showRoute;
 };
 
