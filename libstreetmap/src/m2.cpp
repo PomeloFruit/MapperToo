@@ -158,7 +158,7 @@ void initial_setup(ezgl::application *application){
     
     application->create_button("Show Subways",8,showSubwayButton);
     application->create_button("Show Trains",9,showTrainsButton);
-    application->create_button("Show New York", 10, loadMapButton); 
+    //application->create_button("Show New York", 10, loadMapButton); 
 }
 
 
