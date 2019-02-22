@@ -145,9 +145,9 @@ void populateData::populateFeatureInfo(infoStrucs &info, mapBoundary &xy){
         // classify features by # of points
         if(info.FeatureInfo[i].isOpen) {
             info.FeatureInfo[i].priorityNum = 4;
-        } else if(numPoints < 5) {
+        }else if(numPoints < 50){
             info.FeatureInfo[i].priorityNum = 3; 
-        } else if (numPoints < 15) {
+        }else if (numPoints < 100){
             info.FeatureInfo[i].priorityNum = 2;
         } else {
             info.FeatureInfo[i].priorityNum = 1;

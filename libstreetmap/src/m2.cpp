@@ -120,15 +120,22 @@ void draw_main_canvas(ezgl::renderer &g){
 //    
 //    std::cout<<adjustmentFactor<<currentArea<<startArea<<'\n';
     
-    ft.drawFeatures(getNumFeatures(), info, g);
+    ft.drawFeatures(getNumFeatures(), info, g ,currentArea, startArea);
+    std::cout<<"FEATURES DONE"<<'\n';
     rd.drawStreetRoads(getNumStreetSegments(), xy, info, g, startArea, currentArea);
+    std::cout<<"ROADS DONE"<<'\n';
     rd.drawIntersections(getNumIntersections(), xy, info, g);
+    std::cout<<"INTERSECTIONS DONE"<<'\n';
     ft.drawPOI(getNumPointsOfInterest(), xy, info, g, screenRatio, currentArea);
+    std::cout<<"POI DONE"<<'\n';
     ft.drawSubways(info.showRoute, xy, info, g);
+    std::cout<<"SUBWAY DONE"<<'\n';
     rd.drawSpecialIntersections(xy,info,g);
+    std::cout<<"SPEC INTERSECIOTNS DONE"<<'\n';
 
 
     dt.createText(getNumStreetSegments(), getNumStreets(), xy, info, g);
+    std::cout<<"TEXT DONE"<<'\n';
  //   std::cout<<currentArea<<'\n';
 }
 

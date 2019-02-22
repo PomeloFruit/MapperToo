@@ -107,8 +107,22 @@ void featureDrawing::setPOIColour(int type, ezgl::renderer& g){
     }
 }
 
-void featureDrawing::drawFeatures(int numFeatures, infoStrucs &info, ezgl::renderer &g){
-    for(int s = 1; s <= 4; s++){        //drawing by priority number where 1 is the highest and 4 is the lowest (all open features are 4 automatically)
+void featureDrawing::drawFeatures(int numFeatures, infoStrucs &info, ezgl::renderer &g, double currentArea, double startArea){
+    int endDraw;
+    if((currentArea/startArea)>0.8){
+        endDraw=1;
+    }
+    else if((0.8>(currentArea/startArea))&&((currentArea/startArea)>0.3)){
+        endDraw=2;
+    }
+    else if((0.3>(currentArea/startArea))&&((currentArea/startArea)>0.1)){
+        endDraw=3;
+    }
+    else{
+        endDraw=4;
+    }
+    //std::cout<<endDraw<<'\n';
+    for(int s=1; s <= endDraw; s++){        //drawing by priority number where 1 is the highest and 4 is the lowest (all open features are 4 automatically)
         for(int i = 0; i < numFeatures; i++){
             if(info.FeatureInfo[i].priorityNum == s){
                 setFeatureColour(info.FeatureInfo[i].featureType, g, info.FeatureInfo[i].clicked);

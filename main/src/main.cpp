@@ -32,8 +32,8 @@ constexpr int ERROR_EXIT_CODE = 1;          //An error occured
 constexpr int BAD_ARGUMENTS_EXIT_CODE = 2;  //Invalid command-line usage
 
 //The default map to load if none is specified
-std::string default_map_path = "/cad2/ece297s/public/maps/toronto_canada.streets.bin";
-std::string default_map_path_osm = "/cad2/ece297s/public/maps/toronto_canada.osm.bin";
+std::string default_map_path = "/cad2/ece297s/public/maps/london_england.streets.bin";
+std::string default_map_path_osm = "/cad2/ece297s/public/maps/london_england.osm.bin";
 
 int main(int argc, char** argv) {
     

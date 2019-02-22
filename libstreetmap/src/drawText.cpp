@@ -164,3 +164,10 @@ bool drawText::inBounds(ezgl::rectangle& curBounds, LatLon& position, mapBoundar
 //if there are multiple street segments belonging to the same street present I should place it on the one that is geographically in the middle (but if it's a curvepoint thing just don't bother)
 //^^I think doing this would be pretty computationally intensive to the point where I really don't think it's a good idea
 //putting the names down is really just an endless black hole, I could keep doing this forever
+
+//OPTIMIZING LOADMAP:
+/*
+ * 
+ * 
+ * 
+ */

@@ -71,7 +71,6 @@ std::vector<double> streetLengthVector;
 std::vector<double> segTravelTimeVector;
 
 streetGrid streetBlock; 
-
 //========================= Function Implementations =========================
 
 /* load_map function
@@ -98,6 +97,8 @@ bool load_map(std::string path/*map_path*/) {
         path_osm = path.substr(0, path.size()-(STREETEXT.size()+1));
         path_osm = path_osm + OSMEXT;
         loadOSMDatabaseBIN(path_osm);
+        std::cout<<"OSM DONE"<<'\n';
+        std::vector<unsigned> collisionList(getNumIntersections(), 0);
         
         std::cout<<"loaded: "<<path_osm<<std::endl;
         //clears all global data structures before filling with new data
@@ -110,6 +111,8 @@ bool load_map(std::string path/*map_path*/) {
         segTravelTimeVector.clear();
         streetBlock.poiGrid.clear();
         streetBlock.intGrid.clear();
+        
+        std::cout<<"CLEARING STRUCTS DONE"<<'\n';
         
         //==== streetIDMap & segLengthVector & segTravelTimeVector ====
         int segStreetID;
@@ -131,7 +134,7 @@ bool load_map(std::string path/*map_path*/) {
             segLengthVector.push_back(find_street_segment_length_preload(i));
             segTravelTimeVector.push_back(find_street_segment_travel_time_preload(i));
         }
-        
+        std::cout<<"TRAVELTIME+IDMAP DONE"<<'\n';
         
         //==== partialStreetNameMap & streetLengthVector & streetIntersectionsVector ====
         std::string currentStreetName;
@@ -153,7 +156,9 @@ bool load_map(std::string path/*map_path*/) {
             
             
             //Creates the partialStreetNameMap and inserts all street segments 
-            //that contain the same partial street name 
+            //that contain the same partial street name
+            
+            
             for(int j = 1; j <= int(currentStreetName.length()); j++){
                 std::string temp = currentStreetName.substr(0, j); 
                 
@@ -163,6 +168,7 @@ bool load_map(std::string path/*map_path*/) {
                 }
                 partialStreetNameMap[temp].push_back(i); 
             }
+            
             
             streetLengthVector.push_back(find_street_length_preload(i));
             
@@ -174,23 +180,34 @@ bool load_map(std::string path/*map_path*/) {
                 intersectionID1 = getInfoStreetSegment(allSegments[j]).from;
                 intersectionID2 = getInfoStreetSegment(allSegments[j]).to; 
                 
-                intersectionIt = std::find(intersectionOnStreet.begin(), 
-                            intersectionOnStreet.end(), intersectionID1); 
-                if(intersectionIt == intersectionOnStreet.end()){
-                    intersectionOnStreet.push_back(intersectionID1); 
+                if(collisionList[intersectionID1]==0){
+                    intersectionOnStreet.push_back(intersectionID1);
+                    collisionList[intersectionID1]++;
                 }
-                
-                intersectionIt = std::find(intersectionOnStreet.begin(), 
-                            intersectionOnStreet.end(), intersectionID2); 
-                if(intersectionIt == intersectionOnStreet.end()){
-                    intersectionOnStreet.push_back(intersectionID2); 
+                if(collisionList[intersectionID2]==0){
+                    intersectionOnStreet.push_back(intersectionID2);
+                    collisionList[intersectionID2]++;
                 }
+////                intersectionIt = std::find(intersectionOnStreet.begin(), 
+////                            intersectionOnStreet.end(), intersectionID1); 
+////                if(intersectionIt == intersectionOnStreet.end()){
+////                    intersectionOnStreet.push_back(intersectionID1); 
+////                }
+////                
+////                intersectionIt = std::find(intersectionOnStreet.begin(), 
+////                            intersectionOnStreet.end(), intersectionID2); 
+////                if(intersectionIt == intersectionOnStreet.end()){
+////                    intersectionOnStreet.push_back(intersectionID2); 
+////                }
                 
+            }
+            for(int j=0;j<intersectionOnStreet.size();j++){
+                collisionList[intersectionOnStreet[j]]=0;
             }
             streetIntersectionsVector.push_back(intersectionOnStreet); 
         }
         
-        
+        std::cout<<"partialStreetNameMap & streetLengthVector & streetIntersectionsVector DONE"<<'\n';
         //====intersectionSegNameVector & intersectionSegIDVector====
         /* Here 2 vectors are created one to populate with street segment ID's 
          * and the other with street names both of those vectors are populated 
@@ -217,7 +234,8 @@ bool load_map(std::string path/*map_path*/) {
         }
         streetBlock.populateGrid(); 
     }    
-    
+            std::cout<<"intersectionSegNameVector & intersectionSegIDVector DONE"<<'\n';
+
     return load_successful;
 }
 

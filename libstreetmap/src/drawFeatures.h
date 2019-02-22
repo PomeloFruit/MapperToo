@@ -12,7 +12,7 @@ public:
     
     void setFeatureColour(int type, ezgl::renderer &g, bool special);
 
-    void drawFeatures(int numFeatures, infoStrucs &info, ezgl::renderer &g);
+    void drawFeatures(int numFeatures, infoStrucs &info, ezgl::renderer &g, double currentArea, double startArea);
 
     void drawPOI(int numPOI, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g, double adjustmentFactor, double currentArea);
 
