@@ -67,6 +67,12 @@ void initializeMap();
 
 double startArea; //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< this should really be in global.h
 
+std::vector<std::pair<std::string, std::string>> city {std::make_pair("beijing","china"), std::make_pair("cairo","egypt"), std::make_pair("cape-town","south-africa")
+, std::make_pair("golden-horseshoe","canada"), std::make_pair("hamilton","canada"), std::make_pair("hong-kong","china"), std::make_pair("iceland","")
+, std::make_pair("interlaken","switzerland"), std::make_pair("london","england"), std::make_pair("moscow","russia"), std::make_pair("new-delhi","india")
+, std::make_pair("new-york","usa"), std::make_pair("rio-de-janeiro","brazil"), std::make_pair("saint-helena",""), std::make_pair("singapore",""), std::make_pair("sydney","australia")
+, std::make_pair("tehran","iran"), std::make_pair("tokyo","japan"), std::make_pair("toronto","canada")};
+
 //=========================== Function Definitions ===========================
 
 /* draw_map function
@@ -213,27 +219,53 @@ void findButton(GtkWidget *widget, ezgl::application *application){
     const char *name1;
     const char *name2;
     std::string message;
+    std::string path_name; 
+    bool changeMap = false;
     
     // do the search
     application->get_input_text(name1, name2);
     
-    info.textInput1 = name1;
-    info.textInput2 = name2;
+    std::string potentialCityName = name1;
+    for(int i=0;i<potentialCityName.length();i++){
+        potentialCityName[i]=tolower(potentialCityName[i]);
+    }
+    
+    for(auto it = city.begin(); it != city.end(); it++){
+        if(it->first == potentialCityName && it->second.empty()){
+            changeMap = true; 
+            path_name = it->first;
 
-    message = ck.searchOnMap(info);
-    
-    // auto-correct the input
-    if(info.corInput1 != ""){
-        name1 = info.corInput1.c_str();
+            newMap(path_name, application);
+            break;
+        }else if (it->first == potentialCityName && !(it->second.empty())){
+            changeMap = true;
+            path_name = it->first + "_" + it->second; 
+            
+            newMap(path_name, application);
+            break;
+        } 
     }
-    if(info.corInput2 != ""){
-        name2 = info.corInput2.c_str();
-    }
-    application->set_input_text(name1, name2);
     
-    // reflect the changes
-    application->update_message(message);
-    application->refresh_drawing();
+    if(!changeMap){
+        info.textInput1 = name1;
+        info.textInput2 = name2;
+
+        message = ck.searchOnMap(info);
+
+        // auto-correct the input
+        if(info.corInput1 != ""){
+            name1 = info.corInput1.c_str();
+        }
+        if(info.corInput2 != ""){
+            name2 = info.corInput2.c_str();
+        }
+        application->set_input_text(name1, name2);
+
+        // reflect the changes
+        application->update_message(message);
+        application->refresh_drawing();
+    }
+    
 }
 
 /* loadSubwayButton function
@@ -368,7 +400,7 @@ void loadMapButton(GtkWidget *widget, ezgl::application *application){
 }
 
 void hideMapButton(GtkWidget *widget, ezgl::application *application){
-    std::string path = "/cad2/ece297s/public/maps/toronto_canada.streets.bin";
+    std::string path = "toronto_canada";
     application->destroy_button("Show Toronto"); 
     application->create_button("Show New York", 10, showMapButton);
     application->refresh_drawing(); 
@@ -377,15 +409,17 @@ void hideMapButton(GtkWidget *widget, ezgl::application *application){
 }
 
 void showMapButton(GtkWidget *widget, ezgl::application *application){
-    std::string path = "/cad2/ece297s/public/maps/cairo_egypt.streets.bin";
+    std::string path = "beijing_china";
     application->destroy_button("Show New York");
     application->create_button("Show Toronto", 10, hideMapButton); 
     application->refresh_drawing();
-    
+    std::cout<<"I DID GO TO NEWYORK"<<'\n';
     newMap(path, application);
 }
 
 void newMap(std::string path, ezgl::application *application){
+    path = "/cad2/ece297s/public/maps/" + path + ".streets.bin";
+    
     pop.clear(info);
     std::cout<<"clear info struct"<<std::endl;
     
@@ -403,20 +437,25 @@ void newMap(std::string path, ezgl::application *application){
     
     
     std::string canvasID = application->get_main_canvas_id(); 
+    std::cout<<"got main canvas ID"<<std::endl;
     ezgl::rectangle new_world({xy.xMin,xy.yMin},{xy.xMax,xy.yMax});
+    std::cout<<"set new world"<<std::endl;
     ezgl::canvas* myCanvas = application->get_canvas(canvasID);
-    
+    std::cout<<"created new canvas"<<std::endl;
     
     myCanvas->get_camera().set_m_screen(new_world);
+    std::cout<<"set new m screen"<<std::endl;
     myCanvas->get_camera().update_widget(myCanvas->width(), myCanvas->height());
+    std::cout<<"updated widget"<<std::endl;
     myCanvas->get_camera().set_world(new_world);
-    
+    std::cout<<"set world as new world"<<std::endl;
     myCanvas->get_camera().set_zoom_fit(new_world);
-    
-    if(info.SubwayInfo.size()==0){
-        pop.loadAfterDraw(info);
-    }
-    
+    std::cout<<"set zoom fit"<<std::endl;
+//    if(info.SubwayInfo.size()==0){
+//        std::cout<<"start to load subway"<<std::endl;
+//        pop.loadAfterDraw(info);
+//    }
+    std::cout<<"loaded subways"<<std::endl;
     //ezgl::camera myCamera = myCanvas->get_camera();
     //myCamera.set_world(new_world); 
     
