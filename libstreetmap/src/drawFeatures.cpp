@@ -97,18 +97,18 @@ int featureDrawing::classifyPOI(std::string type){
     
     return poiType; 
 }
-
-void featureDrawing::setPOIColour(int type, ezgl::renderer& g){
-    if(type == POITOURIST){
-        g.set_color(255,71,113,191);
-    }else if (type == POIFOOD){
-        g.set_color(255, 165, 54, 191);
-    }else if (type == POISHOPS){
-        g.set_color(0, 112, 255, 191);
-    } else { //POIUNDEF
-        g.set_color(0,0,0,0);
-    }
-}
+//
+//void featureDrawing::setPOIColour(int type, ezgl::renderer& g){
+//    if(type == POITOURIST){
+//        g.set_color(255,71,113,191);
+//    }else if (type == POIFOOD){
+//        g.set_color(255, 165, 54, 191);
+//    }else if (type == POISHOPS){
+//        g.set_color(0, 112, 255, 191);
+//    } else { //POIUNDEF
+//        g.set_color(0,0,0,0);
+//    }
+//}
 
 void featureDrawing::drawFeatures(int numFeatures, infoStrucs &info, ezgl::renderer &g, double currentArea, double startArea){
     foodDrinkPOICounter=0;
@@ -169,11 +169,11 @@ void featureDrawing::drawClickedPOI(mapBoundary &xy, infoStrucs &info, ezgl::ren
 
 void featureDrawing::drawOnePOI(int i, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g, double adjustmentFactor, double currentArea){
     const double HIGHLIGHTRADIUS = 0.0005;
-    const double NORMALRAD = 0.00015;
+    const double NORMALRAD = 0.00006;
     double areaForcer=sqrt(0.000073593*currentArea/M_PI)/NORMALRAD;//that first number is the average of two proportions of areas that were deemed to be desireable
     double areaForcerClick=sqrt(0.000432814*currentArea/M_PI)/HIGHLIGHTRADIUS;
-    double forcedRadius=areaForcer*NORMALRAD;
-    double forcedRadiusClick=areaForcerClick*HIGHLIGHTRADIUS;
+    //double forcedRadius=areaForcer*NORMALRAD;
+    //double forcedRadiusClick=areaForcerClick*HIGHLIGHTRADIUS;
     
     LatLon newPoint;
     double xNew, yNew, radius; 
@@ -191,27 +191,34 @@ void featureDrawing::drawOnePOI(int i, mapBoundary &xy, infoStrucs &info, ezgl::
     yNew = xy.yFromLat(newPoint.lat());
     
     if (info.POIInfo[i].clicked&&drawPOI) {
-        //highlight circle (pink)
-        radius = forcedRadiusClick;
-        g.set_color(255,77,190,125);
-        g.fill_elliptic_arc(ezgl::point2d(xNew,yNew),radius,radius,0,360);
-        
-        //inner circle (dark purple)
-        radius = forcedRadius;
-        g.set_color(79,0,79,255);
-        g.fill_elliptic_arc(ezgl::point2d(xNew,yNew),radius,radius,0,360);
-        //g.draw_surface(g.load_png("/homes/d/dujia3/ece297/work/mapper/libstreetmap/resources/POI_select.png"), ezgl::point2d(xNew, yNew));
+//        //highlight circle (pink)
+        radius = NORMALRAD;
+//        g.set_color(255,77,190,125);
+//        g.fill_elliptic_arc(ezgl::point2d(xNew,yNew),radius,radius,0,360);
+//        
+//        //inner circle (dark purple)
+//        radius = forcedRadius;
+//        g.set_color(79,0,79,255);
+//        g.fill_elliptic_arc(ezgl::point2d(xNew,yNew),radius,radius,0,360);
+        g.draw_surface(g.load_png("/homes/d/dujia3/ece297/work/mapper/libstreetmap/resources/POI_select.png"), ezgl::point2d(xNew-radius, yNew+radius));
+        foodDrinkPOICounter++;
 
     } else if(drawPOI){
         //regular POI (dark red)
-        int poiType=classifyPOI(info.POIInfo[i].type);
-        radius = forcedRadius;
-        setPOIColour(poiType, g);
-        if((poiType!=2)){
-            g.fill_elliptic_arc(ezgl::point2d(xNew,yNew),radius,radius,0,360);
+        info.POIInfo[i].poiNum = classifyPOI(info.POIInfo[i].type);
+        radius = NORMALRAD;
+//        setPOIColour(poiType, g);
+        if((info.POIInfo[i].poiNum!=2)){
+            if(info.POIInfo[i].poiNum == 1){
+                g.draw_surface(g.load_png("/homes/d/dujia3/ece297/work/mapper/libstreetmap/resources/tourist.png"), ezgl::point2d(xNew-radius, yNew+radius));
+            }else if (info.POIInfo[i].poiNum == 3){
+                g.draw_surface(g.load_png("/homes/d/dujia3/ece297/work/mapper/libstreetmap/resources/shop bag.png"), ezgl::point2d(xNew-radius, yNew+radius));
+            }
+            //g.fill_elliptic_arc(ezgl::point2d(xNew,yNew),radius,radius,0,360);
         }
         else if(foodDrinkPOICounter<50){
-            g.fill_elliptic_arc(ezgl::point2d(xNew,yNew),radius,radius,0,360);
+            g.draw_surface(g.load_png("/homes/d/dujia3/ece297/work/mapper/libstreetmap/resources/food.png"), ezgl::point2d(xNew-radius, yNew+radius));
+//            g.fill_elliptic_arc(ezgl::point2d(xNew,yNew),radius,radius,0,360);
             foodDrinkPOICounter++;
         }
             //g.draw_surface(g.load_png("/homes/d/dujia3/ece297/work/mapper/libstreetmap/resources/small_image.png"), ezgl::point2d(xNew, yNew));

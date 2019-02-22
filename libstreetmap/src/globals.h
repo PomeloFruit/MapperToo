@@ -63,6 +63,7 @@ struct featureData {
 struct POIData {
     std::string name;
     std::string type; 
+    int poiNum; 
     
     OSMID id;
     bool clicked;

@@ -99,7 +99,7 @@ void roadDrawing::drawSpecialIntersections(mapBoundary &xy, infoStrucs &info, ez
 }
 
 void roadDrawing::drawOneIntersection(int id, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g){
-    const float RADIUSHIGH = 0.0005;
+    const double NORMALRAD = 0.00015;
     const float RADIUSNORM = 0.00003;
     float x, y;
        
@@ -107,13 +107,14 @@ void roadDrawing::drawOneIntersection(int id, mapBoundary &xy, infoStrucs &info,
     y = xy.yFromLat(info.IntersectionInfo[id].position.lat());
 
     if(info.IntersectionInfo[id].clicked) {
-        //outer circle (turquoise)
-        g.set_color(110,236,209,125);
-        g.fill_elliptic_arc(ezgl::point2d(x,y),RADIUSHIGH,RADIUSHIGH,0,360);
-        
-        //inner circle (dark navy)
-        g.set_color(0,119,119,255);
-        g.fill_elliptic_arc(ezgl::point2d(x,y),RADIUSHIGH/5,RADIUSHIGH/5,0,360);
+        g.draw_surface(g.load_png("/homes/d/dujia3/ece297/work/mapper/libstreetmap/resources/intersection.png"), ezgl::point2d(x-2*RADIUSNORM, y+2*RADIUSNORM));
+//        //outer circle (turquoise)
+//        g.set_color(110,236,209,125);
+//        g.fill_elliptic_arc(ezgl::point2d(x,y),RADIUSHIGH,RADIUSHIGH,0,360);
+//        
+//        //inner circle (dark navy)
+//        g.set_color(0,119,119,255);
+//        g.fill_elliptic_arc(ezgl::point2d(x,y),RADIUSHIGH/5,RADIUSHIGH/5,0,360);
         
     } else {
         //regular intersection (white)
