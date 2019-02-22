@@ -23,12 +23,14 @@
 
 class drawText{
     public:
-        void initilize(int numStreetSegs, ezgl::rectangle& g, mapBoundary &xy, infoStrucs &info);
-        void createText(int numStreetSegs, int numStreets, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g);
+        mapBoundary xy; 
+        
+        void initilize();
+        void createText(int numStreetSegs, int numStreets, infoStrucs &info, ezgl::renderer &g);
     private:
-        std::pair<double, bool> findAngle(LatLon &initialPosition, LatLon &finalPosition, mapBoundary &xy);
-        int indexOfLargestGoodCurvepoint(int streetSegment, ezgl::rectangle& curBounds, mapBoundary &xy, infoStrucs &info);
-        bool inBounds(ezgl::rectangle& curBounds, LatLon &position, mapBoundary& xy);
+        std::pair<double, bool> findAngle(LatLon &initialPosition, LatLon &finalPosition);
+        int indexOfLargestGoodCurvepoint(int streetSegment, ezgl::rectangle& curBounds, infoStrucs &info);
+        bool inBounds(ezgl::rectangle& curBounds, LatLon &position);
 };
 //ok so I do angle then I set that and draw the text
 //and I gotta grab all the stret ids

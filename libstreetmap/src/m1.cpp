@@ -24,6 +24,7 @@
 #include "globals.h"
 #include "latLonToXY.h"
 #include "grid.h"
+#include "drawText.h"
 
 #include <map>
 #include <unordered_map>
@@ -232,7 +233,8 @@ bool load_map(std::string path/*map_path*/) {
             intersectionSegNameVector.push_back(segNames);
             intersectionSegIDVector.push_back(intersectionIds);
         }
-        streetBlock.populateGrid(); 
+        streetBlock.populateGrid();
+       // dt.initilize(getNumStreetSegments());
     }    
             std::cout<<"intersectionSegNameVector & intersectionSegIDVector DONE"<<'\n';
 

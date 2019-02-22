@@ -26,20 +26,26 @@
 
 std::vector<std::pair<double, bool>> anglesWithWay;
 double initialArea;
-void drawText::initilize(int numStreetSegs, ezgl::rectangle& startRectangle, mapBoundary &xy, infoStrucs &info){
-    initialArea=abs((startRectangle.right()-startRectangle.left())*(startRectangle.top()-startRectangle.bottom()));
-    anglesWithWay.resize(numStreetSegs);
-    for(int i=0;i<numStreetSegs;i++){
-        LatLon initialPosition=info.IntersectionInfo[info.StreetSegInfo[i].fromIntersection].position;
-        LatLon finalPosition=info.IntersectionInfo[info.StreetSegInfo[i].toIntersection].position;
-        //double slope=(xy.yFromLat(finalPosition.lat())-xy.yFromLat(initialPosition.lat()))/(xy.xFromLon(finalPosition.lon())-xy.xFromLon(initialPosition.lon()));
-        anglesWithWay[i]=findAngle(initialPosition, finalPosition, xy);
 
-    }
+void drawText::initilize(){
+    xy.initialize(); 
+//    ezgl::rectangle startRectangle({xy.xMin,xy.yMin},{xy.xMax,xy.yMax});
+//    double startArea=abs((startRectangle.right()-startRectangle.left())*(startRectangle.top()-startRectangle.bottom()));
+//    anglesWithWay.resize(numStreetSegs);
+//    for(int i=0;i<numStreetSegs;i++){
+//        LatLon initialPosition=getIntersectionPosition((getInfoStreetSegment(i).from));
+//        LatLon finalPosition=getIntersectionPosition((getInfoStreetSegment(i).to));
+//        
+//////        LatLon initialPosition=info.IntersectionInfo[info.StreetSegInfo[i].fromIntersection].position;
+//////        LatLon finalPosition=info.IntersectionInfo[info.StreetSegInfo[i].toIntersection].position;
+//        //double slope=(xy.yFromLat(finalPosition.lat())-xy.yFromLat(initialPosition.lat()))/(xy.xFromLon(finalPosition.lon())-xy.xFromLon(initialPosition.lon()));
+//        anglesWithWay[i]=findAngle(initialPosition, finalPosition);
+//
+//    }
 }
 
 
-void drawText::createText(int numStreetSegs, int numStreets, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g){
+void drawText::createText(int numStreetSegs, int numStreets, infoStrucs &info, ezgl::renderer &g){
     //for(int i=0;i<numStreets;i++){
         ezgl::rectangle currentRectangle=g.get_visible_world();
         std::vector<int> alreadyDrawnStreets;
@@ -47,6 +53,8 @@ void drawText::createText(int numStreetSegs, int numStreets, mapBoundary &xy, in
         alreadyDrawnStreets.clear();
         int maxCount=6;
         double currentArea=abs((currentRectangle.right()-currentRectangle.left())*(currentRectangle.top()-currentRectangle.bottom()));
+        ezgl::rectangle startRectangle({xy.xMin,xy.yMin},{xy.xMax,xy.yMax});
+        initialArea=abs((startRectangle.right()-startRectangle.left())*(startRectangle.top()-startRectangle.bottom()));
         bool drawHighway=(true);//but make it a bool so I can change it later
         bool drawPrimary=((currentArea/initialArea)<.20);
         bool drawSecondary=((currentArea/initialArea)<.007);
@@ -71,28 +79,28 @@ void drawText::createText(int numStreetSegs, int numStreets, mapBoundary &xy, in
                 //getting intial and final positions 
                 LatLon initialPosition=info.IntersectionInfo[info.StreetSegInfo[i].fromIntersection].position;
                 LatLon finalPosition=info.IntersectionInfo[info.StreetSegInfo[i].toIntersection].position;
-                std::pair<double, bool> angleToUse=anglesWithWay[i];
-                if(info.StreetSegInfo[i].numCurvePoints>0){
-                    int bestCurvePoint=indexOfLargestGoodCurvepoint(i, currentRectangle, xy, info);
-                    if(bestCurvePoint==0){
-                        initialPosition=info.IntersectionInfo[info.StreetSegInfo[i].fromIntersection].position;
-                        finalPosition=getStreetSegmentCurvePoint(0, i);
-                    }
-                    else if(info.StreetSegInfo[i].numCurvePoints==bestCurvePoint){
-                        initialPosition=getStreetSegmentCurvePoint(bestCurvePoint, i);
-                        finalPosition=info.IntersectionInfo[info.StreetSegInfo[i].toIntersection].position;
-                    }
-                    else{
-                        initialPosition=getStreetSegmentCurvePoint(bestCurvePoint-1, i);
-                        finalPosition=getStreetSegmentCurvePoint(bestCurvePoint, i);
-                    }
-                    angleToUse=findAngle(initialPosition, finalPosition, xy);
-                }
+                std::pair<double, bool> angleToUse=findAngle(initialPosition, finalPosition);
+////                if(info.StreetSegInfo[i].numCurvePoints>0){
+////                    int bestCurvePoint=indexOfLargestGoodCurvepoint(i, currentRectangle, info);
+////                    if(bestCurvePoint==0){
+////                        initialPosition=info.IntersectionInfo[info.StreetSegInfo[i].fromIntersection].position;
+////                        finalPosition=getStreetSegmentCurvePoint(0, i);
+////                    }
+////                    else if(info.StreetSegInfo[i].numCurvePoints==bestCurvePoint){
+////                        initialPosition=getStreetSegmentCurvePoint(bestCurvePoint, i);
+////                        finalPosition=info.IntersectionInfo[info.StreetSegInfo[i].toIntersection].position;
+////                    }
+////                    else{
+////                        initialPosition=getStreetSegmentCurvePoint(bestCurvePoint-1, i);
+////                        finalPosition=getStreetSegmentCurvePoint(bestCurvePoint, i);
+////                    }
+////                    angleToUse=findAngle(initialPosition, finalPosition);
+////                }
                 
                 
                 g.set_color(0, 0, 0, 255);//for now but I think if I don't wnt to draw things/draw things on different levels I can either: make the size 0 or make it transparent
-                bool inBoundsInitial=inBounds(currentRectangle, initialPosition, xy);
-                bool inBoundsFinal=inBounds(currentRectangle, finalPosition, xy);
+                bool inBoundsInitial=inBounds(currentRectangle, initialPosition);
+                bool inBoundsFinal=inBounds(currentRectangle, finalPosition);
                 if((numRoadsDrawn<maxCount)&&(alreadyDrawnStreets[info.StreetSegInfo[i].streetID]<1)&&(inBoundsInitial)&&(inBoundsFinal)
                         &&(((((currentArea/initialArea)*4000<find_distance_between_two_points(initialPosition, finalPosition))||(info.StreetSegInfo[i].type==1))&&(info.StreetSegInfo[i].numCurvePoints==0))
                         ||(((currentArea/initialArea)*4000<find_distance_between_two_points(initialPosition, finalPosition))&&(info.StreetSegInfo[i].numCurvePoints>0)))
@@ -104,7 +112,7 @@ void drawText::createText(int numStreetSegs, int numStreets, mapBoundary &xy, in
                             (drawService&&(info.StreetSegInfo[i].type==4)&&p==4)){
                         std::string stringToDraw=info.StreetSegInfo[i].name;
                         if(getInfoStreetSegment(i).oneWay){
-                            if(anglesWithWay[i].second){
+                            if(angleToUse.second){
                                 stringToDraw=info.StreetSegInfo[i].name+"=>";
                             }
                             else{
@@ -126,7 +134,7 @@ void drawText::createText(int numStreetSegs, int numStreets, mapBoundary &xy, in
 }
 
 
-std::pair<double, bool> drawText::findAngle(LatLon &initialPosition, LatLon &finalPosition, mapBoundary &xy){
+std::pair<double, bool> drawText::findAngle(LatLon &initialPosition, LatLon &finalPosition){
     double angle=atan2(xy.yFromLat(finalPosition.lat())-xy.yFromLat(initialPosition.lat()), (xy.xFromLon(finalPosition.lon())-xy.xFromLon(initialPosition.lon())));
     bool right=true;
     if(angle<(-M_PI/2)){
@@ -141,13 +149,13 @@ std::pair<double, bool> drawText::findAngle(LatLon &initialPosition, LatLon &fin
     //so basically if I had to add pi at any point the arrow should appear on the left side instead of the right 
 }
 
-int drawText::indexOfLargestGoodCurvepoint(int streetSegment, ezgl::rectangle& curBounds, mapBoundary& xy, infoStrucs &info){
+int drawText::indexOfLargestGoodCurvepoint(int streetSegment, ezgl::rectangle& curBounds, infoStrucs &info){
     int bestCurvePoint=0;
     double distance=0;
     LatLon prevLocation=info.IntersectionInfo[info.StreetSegInfo[streetSegment].fromIntersection].position;
     for(int x=0;x<info.StreetSegInfo[streetSegment].numCurvePoints;x++){
         LatLon curLocation=getStreetSegmentCurvePoint(x, streetSegment);
-        if(inBounds(curBounds, prevLocation, xy)&&inBounds(curBounds, curLocation, xy)&&(find_distance_between_two_points(curLocation, prevLocation)>distance))
+        if(inBounds(curBounds, prevLocation)&&inBounds(curBounds, curLocation)&&(find_distance_between_two_points(curLocation, prevLocation)>distance))
             bestCurvePoint=x;//->meaning from curvepoint i-1 to curvepoint i
         prevLocation=curLocation;
     }
@@ -155,7 +163,7 @@ int drawText::indexOfLargestGoodCurvepoint(int streetSegment, ezgl::rectangle& c
 }
 //3 cases->i=0 (best curve is from start to i), i!=0&&i!=end(best curve is from i-1 to i), i=end(best curve is from i to end))
 
-bool drawText::inBounds(ezgl::rectangle& curBounds, LatLon& position, mapBoundary& xy){
+bool drawText::inBounds(ezgl::rectangle& curBounds, LatLon& position){
     return (xy.yFromLat(position.lat())<curBounds.top())&&(xy.yFromLat(position.lat())>curBounds.bottom())&&(xy.xFromLon(position.lon())>curBounds.left())&&(xy.xFromLon(position.lon())<curBounds.right());
 }
 

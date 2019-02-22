@@ -11,6 +11,8 @@
 #include <iostream>
 #include <map>
 
+//drawText dt;
+
 //============================== Constants ===================================
 
 #define ROADWIDTH 2

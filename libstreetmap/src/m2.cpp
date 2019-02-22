@@ -54,6 +54,7 @@ void loadMapButton(GtkWidget *widget, ezgl::application *application);
 void hideMapButton(GtkWidget *widget, ezgl::application *application);
 void showMapButton(GtkWidget *widget, ezgl::application *application);
 void newMap(ezgl::application *application);
+void initializeMap(); 
 // Callback functions for event handling
 
 
@@ -76,27 +77,24 @@ double startArea; //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
  * @return void
  */
 
-void draw_map(){
+void initializeMap(){
+    xy.initialize();
+    pop.initialize(info, xy);
+    dt.initilize();
+}
+
+void draw_map(){   
     ezgl::application::settings settings;
     settings.main_ui_resource = "libstreetmap/resources/main.ui";
     settings.window_identifier = "MainWindow";
     settings.canvas_identifier = "MainCanvas";
+    
+    initializeMap(); 
+    
     ezgl::application application(settings);
-    
-    //see if we can move this stuff away to another function for change map
-    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    xy.initialize();
-    pop.initialize(info, xy);
-
     ezgl::rectangle initial_world({xy.xMin,xy.yMin},{xy.xMax,xy.yMax});
-        
-    startArea=abs((initial_world.right()-initial_world.left())*(initial_world.top()-initial_world.bottom()));
-    
-    dt.initilize(getNumStreetSegments(), initial_world, xy, info);
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     
     application.add_canvas("MainCanvas",draw_main_canvas,initial_world);
-
     application.run(initial_setup, act_on_mouse_press, NULL, NULL);
 }
 
@@ -112,7 +110,8 @@ void draw_map(){
 void draw_main_canvas(ezgl::renderer &g){
     g.set_color(219,219,219,255); //light gray for background
     g.fill_rectangle(g.get_visible_world());
-    
+    ezgl::rectangle startRectangle({xy.xMin,xy.yMin},{xy.xMax,xy.yMax});
+    startArea=abs((startRectangle.right()-startRectangle.left())*(startRectangle.top()-startRectangle.bottom()));
     ezgl::rectangle currentRectangle=g.get_visible_world();
     double currentArea=abs((currentRectangle.right()-currentRectangle.left())*(currentRectangle.top()-currentRectangle.bottom()));
     double adjustmentFactor=1/(currentArea/startArea);//for some reason it's not letting me take in the visible screen stuff, so I'm just going to do it here
@@ -132,10 +131,10 @@ void draw_main_canvas(ezgl::renderer &g){
     std::cout<<"SUBWAY DONE"<<'\n';
     rd.drawSpecialIntersections(xy,info,g);
     std::cout<<"SPEC INTERSECIOTNS DONE"<<'\n';
-
-
-    dt.createText(getNumStreetSegments(), getNumStreets(), xy, info, g);
+    dt.createText(getNumStreetSegments(), getNumStreets(), info, g);
     std::cout<<"TEXT DONE"<<'\n';
+
+    
  //   std::cout<<currentArea<<'\n';
 }
 
@@ -384,6 +383,9 @@ void newMap(ezgl::application *application){
 
     load_map(path); 
     std::cout<<"loaded map"<<std::endl;
+    
+    initializeMap();
+    std::cout<<"map initialized"<<std::endl;
     
     application->refresh_drawing(); 
     std::cout<<"refreshed"<<std::endl;
