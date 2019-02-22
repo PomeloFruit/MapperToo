@@ -27,6 +27,7 @@ void populateData::initialize(infoStrucs &info, mapBoundary &xy){
     populateIntersectionInfo(info);
     populateFeatureInfo(info, xy);
     populatePOIInfo(info);
+    populateOSMSubwayInfo(info);
     
     info.lastIntersection.clear();
     info.lastPOI.clear();
@@ -405,7 +406,7 @@ void populateData::getOSMSubwayRelations(infoStrucs &info){
                     tempVec.push_back(tempOSM);
                     newRoute.nodePoints.push_back(tempVec);
                     
-                } else { //if not a node, then it must be a way
+                } else if(currentPtr->members().at(j).tid.type() == 2) { // only want ways, no relations
                     
                     wayPtr = info.WayMap[OSMID(currentPtr->members().at(j).tid)];
                     newRoute.nodePoints.push_back(wayPtr->ndrefs());                    
