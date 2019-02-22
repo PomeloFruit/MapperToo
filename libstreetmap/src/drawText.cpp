@@ -60,15 +60,15 @@ void drawText::createText(int numStreetSegs, int numStreets, infoStrucs &info, e
         bool drawSecondary=((currentArea/initialArea)<.007);
         bool drawResidential=((currentArea/initialArea)<.005);
         bool drawService=((currentArea/initialArea)<.0009);
-        bool charCapOff=((currentArea/initialArea)<.00009);
+        bool charCapOff=((currentArea/initialArea)<.005);
 
         int numRoadsDrawn=0;
         int roadTypes=5;
         if(drawPrimary){
-            maxCount=maxCount+5;
+            maxCount=maxCount+2;
         }
         if(drawSecondary){
-            maxCount=maxCount+3;
+            maxCount=maxCount+2;
         }
         if(drawResidential){
             maxCount=maxCount+0;
@@ -79,23 +79,24 @@ void drawText::createText(int numStreetSegs, int numStreets, infoStrucs &info, e
                 //getting intial and final positions 
                 LatLon initialPosition=info.IntersectionInfo[info.StreetSegInfo[i].fromIntersection].position;
                 LatLon finalPosition=info.IntersectionInfo[info.StreetSegInfo[i].toIntersection].position;
+                
                 std::pair<double, bool> angleToUse=findAngle(initialPosition, finalPosition);
-////                if(info.StreetSegInfo[i].numCurvePoints>0){
-////                    int bestCurvePoint=indexOfLargestGoodCurvepoint(i, currentRectangle, info);
-////                    if(bestCurvePoint==0){
-////                        initialPosition=info.IntersectionInfo[info.StreetSegInfo[i].fromIntersection].position;
-////                        finalPosition=getStreetSegmentCurvePoint(0, i);
-////                    }
-////                    else if(info.StreetSegInfo[i].numCurvePoints==bestCurvePoint){
-////                        initialPosition=getStreetSegmentCurvePoint(bestCurvePoint, i);
-////                        finalPosition=info.IntersectionInfo[info.StreetSegInfo[i].toIntersection].position;
-////                    }
-////                    else{
-////                        initialPosition=getStreetSegmentCurvePoint(bestCurvePoint-1, i);
-////                        finalPosition=getStreetSegmentCurvePoint(bestCurvePoint, i);
-////                    }
-////                    angleToUse=findAngle(initialPosition, finalPosition);
-////                }
+                if(info.StreetSegInfo[i].numCurvePoints>0){
+                    int bestCurvePoint=indexOfLargestGoodCurvepoint(i, currentRectangle, info);
+                    if(bestCurvePoint==0){
+                        initialPosition=info.IntersectionInfo[info.StreetSegInfo[i].fromIntersection].position;
+                        finalPosition=getStreetSegmentCurvePoint(0, i);
+                    }
+                    else if(info.StreetSegInfo[i].numCurvePoints==bestCurvePoint){
+                        initialPosition=getStreetSegmentCurvePoint(bestCurvePoint, i);
+                        finalPosition=info.IntersectionInfo[info.StreetSegInfo[i].toIntersection].position;
+                    }
+                    else{
+                        initialPosition=getStreetSegmentCurvePoint(bestCurvePoint-1, i);
+                        finalPosition=getStreetSegmentCurvePoint(bestCurvePoint, i);
+                    }
+                    angleToUse=findAngle(initialPosition, finalPosition);
+                }
                 
                 
                 g.set_color(0, 0, 0, 255);//for now but I think if I don't wnt to draw things/draw things on different levels I can either: make the size 0 or make it transparent
@@ -121,7 +122,7 @@ void drawText::createText(int numStreetSegs, int numStreets, infoStrucs &info, e
                         }
                         double xPlace=xy.xFromLon(initialPosition.lon())+((xy.xFromLon((finalPosition.lon()))-xy.xFromLon(initialPosition.lon()))/2);
                         double yPlace=xy.yFromLat(initialPosition.lat()+((finalPosition.lat()-initialPosition.lat())/2));
-                        g.format_font("sans serif", ezgl::font_slant::normal, ezgl::font_weight::normal, 8);
+                        g.format_font("sans serif", ezgl::font_slant::normal, ezgl::font_weight::normal, 11);
                         g.set_text_rotation(angleToUse.first);
                         //g.draw_text({xPlace, yPlace}, info.StreetSegInfo[i].name, xy.xFromLon(finalPosition.lon()-initialPosition.lon()), xy.yFromLat(finalPosition.lat()-initialPosition.lat()));
                         g.draw_text({xPlace, yPlace}, stringToDraw);

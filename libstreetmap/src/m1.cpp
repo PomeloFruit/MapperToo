@@ -202,7 +202,7 @@ bool load_map(std::string path/*map_path*/) {
 ////                }
                 
             }
-            for(int j=0;j<intersectionOnStreet.size();j++){
+            for(unsigned j=0;j<intersectionOnStreet.size();j++){
                 collisionList[intersectionOnStreet[j]]=0;
             }
             streetIntersectionsVector.push_back(intersectionOnStreet); 

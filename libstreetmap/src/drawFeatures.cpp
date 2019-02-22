@@ -12,6 +12,7 @@ std::vector<std::string> tourist {"aquarium", "artwork", "attraction", "gallery"
     
 std::vector<std::string> foodDrink {"alcohol", "bakery", "beverages", "coffee", "confectionery", "convenience", "ice_cream","pastry", "seafood", "bar", "bbq", "cafe", 
     "food_court", "pub", "restaurant"}; 
+    //food drink more like only show 50
     //note: i don't have "fast_food" in here because there are too many foodDrink POIs
 std::vector<std::string> shops {"department_store", "general", "kiosk", "mall", "supermarket", "wholesale", "bag", "boutique", "clothes" , "jewelry", "leather"
     , "shoes", "watches", "variety", "second_hand", "beauty", "cosmetics", "erotic", "hairdresser", "herbalist", "massage", "medical_supply", "perfumery"
@@ -33,6 +34,8 @@ const int TRAINROUTE = 3;
 const int HIGHTRAINROUTE = 6;
 const int SUBWAYROUTE = 5;
 const int HIGHSUBWAYROUTE = 10;
+
+int foodDrinkPOICounter;
     
 void featureDrawing::setFeatureColour(int type, ezgl::renderer &g, bool special){
     if(special){
@@ -108,6 +111,7 @@ void featureDrawing::setPOIColour(int type, ezgl::renderer& g){
 }
 
 void featureDrawing::drawFeatures(int numFeatures, infoStrucs &info, ezgl::renderer &g, double currentArea, double startArea){
+    foodDrinkPOICounter=0;
     int endDraw=1;
     if((currentArea/startArea)>0.8){
         endDraw=2;
@@ -164,21 +168,29 @@ void featureDrawing::drawClickedPOI(mapBoundary &xy, infoStrucs &info, ezgl::ren
 }
 
 void featureDrawing::drawOnePOI(int i, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g, double adjustmentFactor, double currentArea){
-    const double HIGHLIGHTRAD = 0.0005;
+    const double HIGHLIGHTRADIUS = 0.0005;
     const double NORMALRAD = 0.00015;
     double areaForcer=sqrt(0.000073593*currentArea/M_PI)/NORMALRAD;//that first number is the average of two proportions of areas that were deemed to be desireable
-    double areaForcerClick=sqrt(0.000432814*currentArea/M_PI)/HIGHLIGHTRAD;
+    double areaForcerClick=sqrt(0.000432814*currentArea/M_PI)/HIGHLIGHTRADIUS;
     double forcedRadius=areaForcer*NORMALRAD;
-    double forcedRadiusClick=areaForcerClick*HIGHLIGHTRAD;
+    double forcedRadiusClick=areaForcerClick*HIGHLIGHTRADIUS;
     
     LatLon newPoint;
     double xNew, yNew, radius; 
     
-    newPoint = getPointOfInterestPosition(i);       
+    newPoint = getPointOfInterestPosition(i);
+    
+    ezgl::rectangle curBounds=g.get_visible_world();
+    bool drawPOI=
+            (xy.yFromLat(newPoint.lat())<curBounds.top())
+            &&(xy.yFromLat(newPoint.lat())>curBounds.bottom())
+            &&(xy.xFromLon(newPoint.lon())>curBounds.left())
+            &&(xy.xFromLon(newPoint.lon())<curBounds.right());
+
     xNew = xy.xFromLon(newPoint.lon());
     yNew = xy.yFromLat(newPoint.lat());
     
-    if (info.POIInfo[i].clicked) {
+    if (info.POIInfo[i].clicked&&drawPOI) {
         //highlight circle (pink)
         radius = forcedRadiusClick;
         g.set_color(255,77,190,125);
@@ -190,12 +202,19 @@ void featureDrawing::drawOnePOI(int i, mapBoundary &xy, infoStrucs &info, ezgl::
         g.fill_elliptic_arc(ezgl::point2d(xNew,yNew),radius,radius,0,360);
         //g.draw_surface(g.load_png("/homes/d/dujia3/ece297/work/mapper/libstreetmap/resources/POI_select.png"), ezgl::point2d(xNew, yNew));
 
-    } else {
+    } else if(drawPOI){
         //regular POI (dark red)
+        int poiType=classifyPOI(info.POIInfo[i].type);
         radius = forcedRadius;
-        setPOIColour(classifyPOI(info.POIInfo[i].type), g); 
-        g.fill_elliptic_arc(ezgl::point2d(xNew,yNew),radius,radius,0,360);
-        //g.draw_surface(g.load_png("/homes/d/dujia3/ece297/work/mapper/libstreetmap/resources/small_image.png"), ezgl::point2d(xNew, yNew));
+        setPOIColour(poiType, g);
+        if((poiType!=2)){
+            g.fill_elliptic_arc(ezgl::point2d(xNew,yNew),radius,radius,0,360);
+        }
+        else if(foodDrinkPOICounter<50){
+            g.fill_elliptic_arc(ezgl::point2d(xNew,yNew),radius,radius,0,360);
+            foodDrinkPOICounter++;
+        }
+            //g.draw_surface(g.load_png("/homes/d/dujia3/ece297/work/mapper/libstreetmap/resources/small_image.png"), ezgl::point2d(xNew, yNew));
         //radius = NORMALRAD;
         //setPOIColour(classifyPOI(info.POIInfo[i].type), g);  
         //g.fill_elliptic_arc(ezgl::point2d(xNew,yNew),radius,radius,0,360);

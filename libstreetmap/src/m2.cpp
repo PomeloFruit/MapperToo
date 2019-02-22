@@ -120,7 +120,7 @@ void draw_main_canvas(ezgl::renderer &g){
     startArea=abs((startRectangle.right()-startRectangle.left())*(startRectangle.top()-startRectangle.bottom()));
     ezgl::rectangle currentRectangle=g.get_visible_world();
     double currentArea=abs((currentRectangle.right()-currentRectangle.left())*(currentRectangle.top()-currentRectangle.bottom()));
-    double adjustmentFactor=1/(currentArea/startArea);//for some reason it's not letting me take in the visible screen stuff, so I'm just going to do it here
+    //double adjustmentFactor=1/(currentArea/startArea);//for some reason it's not letting me take in the visible screen stuff, so I'm just going to do it here
     double screenRatio=(currentArea/startArea);
 //    
 //    std::cout<<adjustmentFactor<<currentArea<<startArea<<'\n';
@@ -226,7 +226,7 @@ void findButton(GtkWidget *widget, ezgl::application *application){
     application->get_input_text(name1, name2);
     
     std::string potentialCityName = name1;
-    for(int i=0;i<potentialCityName.length();i++){
+    for(unsigned i=0;i<potentialCityName.length();i++){
         potentialCityName[i]=tolower(potentialCityName[i]);
     }
     
