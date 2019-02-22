@@ -10,6 +10,9 @@
 // class contains all functions needed to fill global.h info data structures
 class populateData{
 public:
+    const unsigned MAXLOADNODES = 100000;
+    const unsigned MAXNODES = 6000000;
+    
     // calls  populate functions for critical map element structures
     void initialize(infoStrucs &info, mapBoundary &xy);
     

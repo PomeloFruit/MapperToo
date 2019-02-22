@@ -42,10 +42,9 @@ void draw_main_canvas(ezgl::renderer &g);
 void initial_setup(ezgl::application *application);
 void act_on_mouse_press(ezgl::application *application, GdkEventButton *event, double x, double y);
 void findButton(GtkWidget *widget, ezgl::application *application);
-void loadSubwayButton(GtkWidget *widget, ezgl::application *application);
+
 void hideSubwayButton(GtkWidget *widget, ezgl::application *application);
 void showSubwayButton(GtkWidget *widget, ezgl::application *application);
-void loadTrainsButton(GtkWidget *widget, ezgl::application *application);
 void hideTrainsButton(GtkWidget *widget, ezgl::application *application);
 void showTrainsButton(GtkWidget *widget, ezgl::application *application);
 
@@ -157,8 +156,8 @@ void initial_setup(ezgl::application *application){
     application->update_message("Left-click for Points of Interest | Right-click for Intersections | <ctrl> + Left-click for Subways ");
     application->connect_feature(findButton);
     
-    application->create_button("Show Subways",8,loadSubwayButton);
-    application->create_button("Show Trains",9,loadTrainsButton);
+    application->create_button("Show Subways",8,showSubwayButton);
+    application->create_button("Show Trains",9,showTrainsButton);
     application->create_button("Show New York", 10, loadMapButton); 
 }
 
@@ -222,7 +221,7 @@ void findButton(GtkWidget *widget, ezgl::application *application){
     std::string path_name; 
     bool changeMap = false;
     
-    // do the search
+    // get the user input(s))
     application->get_input_text(name1, name2);
     
     std::string potentialCityName = name1;
@@ -268,23 +267,6 @@ void findButton(GtkWidget *widget, ezgl::application *application){
     
 }
 
-/* loadSubwayButton function
- * - calls for the population of the subway structures (if not already populated)
- * - calls another function to switch button to "hide subway"
- * 
- * @param widget <GtkWidget> -event object to determine mouse action
- * @param application <ezgl::application> - application object to access window elements
- * 
- * @return void
- */
-void loadSubwayButton(GtkWidget *widget, ezgl::application *application){
-    if(info.SubwayInfo.size()==0){
-        pop.loadAfterDraw(info);
-    }
-    
-    showSubwayButton(widget, application);
-}
-
 
 /* hideSubwayButton function
  * - calls to change button from hide to show
@@ -319,6 +301,9 @@ void hideSubwayButton(GtkWidget *widget, ezgl::application *application){
  */
 
 void showSubwayButton(GtkWidget *widget, ezgl::application *application){
+    if(info.SubwayInfo.size()==0){
+        pop.loadAfterDraw(info);
+    }
     
     //cancels warning / not needed at all
     widget->parent_instance.ref_count;
@@ -329,24 +314,6 @@ void showSubwayButton(GtkWidget *widget, ezgl::application *application){
     application->create_button("Hide Subways",8,hideSubwayButton);
         
     application->refresh_drawing();
-}
-
-
-/* loadTrainsButton function
- * - calls for the population of the subway structures (if not already populated)
- * - calls another function to switch button to "hide trains"
- * 
- * @param widget <GtkWidget> -event object to determine mouse action
- * @param application <ezgl::application> - application object to access window elements
- * 
- * @return void
- */
-
-void loadTrainsButton(GtkWidget *widget, ezgl::application *application){
-    if(info.SubwayInfo.size()==0){
-        pop.loadAfterDraw(info);
-    }
-    showTrainsButton(widget, application);
 }
 
 
@@ -383,7 +350,9 @@ void hideTrainsButton(GtkWidget *widget, ezgl::application *application){
  */
 
 void showTrainsButton(GtkWidget *widget, ezgl::application *application){
-    
+    if(info.SubwayInfo.size()==0){
+        pop.loadAfterDraw(info);
+    }
     //cancels warning / not needed at all
     widget->parent_instance.ref_count;
         
@@ -394,6 +363,7 @@ void showTrainsButton(GtkWidget *widget, ezgl::application *application){
         
     application->refresh_drawing();
 }
+
 
 void loadMapButton(GtkWidget *widget, ezgl::application *application){
     showMapButton(widget, application);
@@ -421,20 +391,16 @@ void newMap(std::string path, ezgl::application *application){
     path = "/cad2/ece297s/public/maps/" + path + ".streets.bin";
     
     pop.clear(info);
-    std::cout<<"clear info struct"<<std::endl;
+    std::cout<< "clear old info structs" << std::endl;
     
     close_map(); 
-    std::cout<<"closed map"<<std::endl; 
+    std::cout<< "closed map" << std::endl; 
 
     load_map(path); 
-    std::cout<<"loaded map"<<std::endl;
+    std::cout<< "loaded new map at " << path << std::endl;
     
     initializeMap();
-    std::cout<<"map initialized"<<std::endl;
-    
-    application->refresh_drawing(); 
-    std::cout<<"refreshed"<<std::endl;
-    
+    std::cout << "map initialized" << std::endl;
     
     std::string canvasID = application->get_main_canvas_id(); 
     std::cout<<"got main canvas ID"<<std::endl;
@@ -458,6 +424,9 @@ void newMap(std::string path, ezgl::application *application){
     std::cout<<"loaded subways"<<std::endl;
     //ezgl::camera myCamera = myCanvas->get_camera();
     //myCamera.set_world(new_world); 
+    
+    application->refresh_drawing(); 
+    std::cout<<"Now showing new map"<<std::endl;
     
 }
 

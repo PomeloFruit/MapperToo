@@ -275,13 +275,14 @@ void featureDrawing::drawSubwayRoute(int draw, mapBoundary &xy, infoStrucs &info
 
  void featureDrawing::drawOneSubwayRoute(unsigned r, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g, int t){
     LatLon from, to;
+    unsigned start = 0;
     subwayRouteData &temp = info.SubwayRouteInfo.at(r);
     
     for(unsigned i=0 ; i<temp.point.size() ; i++){
-        
-        from = temp.point[i][0];
-        
-        for(unsigned j=0 ; j<temp.point[i].size() ; j++){
+
+        from = temp.point[i][start];
+            
+        for(unsigned j=start ; j<temp.point[i].size() ; j++){
             to = temp.point[i][j];
             drawStraightSubwaySection(from, to, xy, g, temp.clicked, t);
             from = to;
@@ -291,7 +292,6 @@ void featureDrawing::drawSubwayRoute(int draw, mapBoundary &xy, infoStrucs &info
 
 void featureDrawing::drawStraightSubwaySection(LatLon &pt1, LatLon &pt2, mapBoundary &xy, ezgl::renderer &g, bool high, int t){
     float xInitial, yInitial, xFinal, yFinal;
-
     
     xInitial = xy.xFromLon(pt1.lon());
     yInitial = xy.yFromLat(pt1.lat());

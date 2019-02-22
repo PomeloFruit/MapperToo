@@ -27,7 +27,12 @@ void populateData::initialize(infoStrucs &info, mapBoundary &xy){
     populateIntersectionInfo(info);
     populateFeatureInfo(info, xy);
     populatePOIInfo(info);
-    populateOSMSubwayInfo(info);
+    
+    if(getNumberOfNodes() < MAXLOADNODES){
+        populateOSMSubwayInfo(info);
+    } else {
+        std::cout << "Skipped subway load, # of nodes: " << getNumberOfNodes() << std::endl;
+    }
     
     info.lastIntersection.clear();
     info.lastPOI.clear();
@@ -232,12 +237,21 @@ void populateData::populateOSMSubwayInfo(infoStrucs &info){
     // fill the subway routes structure
     getOSMSubwayRelations(info);
     
-    for(unsigned i=0 ; i< getNumberOfNodes(); i++){
+    std::cout << getNumberOfNodes() << std::endl;
+    // if too much information, we are not displaying routes
+    if(getNumberOfNodes() > MAXNODES){
+        info.SubwayRouteInfo.clear();
+    }
+    
+    for(unsigned i=0 ; i< getNumberOfNodes() && i < MAXNODES ; i++){
+                
+
         currentPtr = getNodeByIndex(i);
         routeVec = checkIfSubwayRouteNode(currentPtr, info);  
-        
+
         isSubway = checkIfSubway(currentPtr);
         if(isSubway){
+
             subwayData newStop;
             
             // adds "station" to end of name if it does not have it
@@ -383,7 +397,7 @@ void populateData::getOSMSubwayRelations(infoStrucs &info){
     const OSMWay* wayPtr;
 
     info.SubwayInfo.clear();
-    
+        
     //search through all relations looking for subways and trains
     for(unsigned i=0 ; i< getNumberOfRelations(); i++){
         currentPtr = getRelationByIndex(i);
@@ -396,11 +410,12 @@ void populateData::getOSMSubwayRelations(infoStrucs &info){
             // get useful message information
             newRoute.name = getOSMRelationInfo(currentPtr, "name");
             newRoute.operatorName = getOSMRelationInfo(currentPtr, "operator");
-            
+                     
             //get all node IDs within relationship
             for(unsigned j=0 ; j<currentPtr->members().size() ; j++){ //many node/ways within relationship
 
                 if(currentPtr->members().at(j).tid.type() == 1){ // id is of node type
+
                     OSMID tempOSM = static_cast< OSMID >(currentPtr->members().at(j).tid);
                     std::vector< OSMID > tempVec;
                     tempVec.push_back(tempOSM);
@@ -409,7 +424,8 @@ void populateData::getOSMSubwayRelations(infoStrucs &info){
                 } else if(currentPtr->members().at(j).tid.type() == 2) { // only want ways, no relations
                     
                     wayPtr = info.WayMap[OSMID(currentPtr->members().at(j).tid)];
-                    newRoute.nodePoints.push_back(wayPtr->ndrefs());                    
+                    newRoute.nodePoints.push_back(wayPtr->ndrefs());
+                    
                 }
             }
             
