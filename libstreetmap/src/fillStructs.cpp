@@ -3,6 +3,7 @@
 #include "globals.h"
 #include "latLonToXY.h"
 #include "LatLon.h"
+#include "grid.h"
 
 #include "StreetsDatabaseAPI.h"
 #include "OSMDatabaseAPI.h"

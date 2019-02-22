@@ -35,7 +35,6 @@ constexpr int BAD_ARGUMENTS_EXIT_CODE = 2;  //Invalid command-line usage
 std::string default_map_path = "/cad2/ece297s/public/maps/toronto_canada.streets.bin";
 std::string default_map_path_osm = "/cad2/ece297s/public/maps/toronto_canada.osm.bin";
 
-
 int main(int argc, char** argv) {
     
     std::string map_path;
@@ -59,7 +58,7 @@ int main(int argc, char** argv) {
         std::cerr << "Failed to load map '" << map_path << "'\n";
         return ERROR_EXIT_CODE;
     }
-
+    
     std::cout << "Successfully loaded map '" << map_path << "'\n";
             
     //You can now do something with the map data

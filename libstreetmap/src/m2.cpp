@@ -9,6 +9,7 @@
 #include "drawRoads.h"
 #include "clickActions.h"
 #include "drawText.h"
+#include "grid.h"
 
 #include "StreetsDatabaseAPI.h"
 #include "OSMDatabaseAPI.h"
@@ -216,6 +217,13 @@ void findButton(GtkWidget *widget, ezgl::application *application){
 }
 
 
+
+void loadMapButton(GtkWidget *widget, ezgl::application *application){
+    const char *map_name; 
+    
+    
+}
+
 /* loadSubwayButton function
  * - calls for the population of the subway structures (if not already populated)
  * - calls another function to switch button to "hide subway"
@@ -225,7 +233,6 @@ void findButton(GtkWidget *widget, ezgl::application *application){
  * 
  * @return void
  */
-
 void loadSubwayButton(GtkWidget *widget, ezgl::application *application){
     if(info.SubwayInfo.size()==0){
         pop.loadAfterDraw(info);

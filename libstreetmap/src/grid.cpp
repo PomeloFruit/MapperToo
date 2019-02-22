@@ -3,22 +3,27 @@
 
 #include <algorithm>
 
-void streetGrid::populateGrid(mapBoundary coord){
+void streetGrid::populateGrid(){
+    coord.initialize(); 
+    
     dLat = (coord.maxLat - coord.minLat)/100.0; 
     dLon = (coord.maxLon - coord.minLon)/100.0; 
     
     int xIndex, yIndex; 
     
     double latPOI, lonPOI, latInt, lonInt; 
-    
+
     for(int i = 0; i < 101; i++){
-        std::vector<std::vector<unsigned>> temp; 
+        std::vector<std::vector<unsigned>> temp1; 
+        std::vector<std::vector<unsigned>> temp2; 
         for(int j = 0; j < 101; j++){
-            std::vector<unsigned> temp2;  
-            temp.push_back(temp2); 
+            temp1.push_back(std::vector<unsigned>());
+            temp2.push_back(std::vector<unsigned>()); 
         }
-        poiGrid.push_back(temp); 
-        intGrid.push_back(temp);  
+        poiGrid.push_back(temp1);
+        intGrid.push_back(temp2);
+        temp1.clear();
+        temp2.clear(); 
     }
     
     for(int i = 0; i < getNumPointsOfInterest(); i++){
@@ -27,6 +32,18 @@ void streetGrid::populateGrid(mapBoundary coord){
         
         xIndex = int((lonPOI - coord.minLon)/dLon); 
         yIndex = int((latPOI - coord.minLat)/dLat);
+        
+        if(xIndex < 0){
+            xIndex = 0;
+        } else if (xIndex > 100){
+            xIndex = 100; 
+        }
+        
+        if(yIndex < 0){
+            yIndex = 0;
+        } else if (yIndex > 100){
+            yIndex = 100; 
+        }
         poiGrid[xIndex][yIndex].push_back(i); 
     }
     
@@ -37,17 +54,21 @@ void streetGrid::populateGrid(mapBoundary coord){
         xIndex = int((lonInt - coord.minLon)/dLon); 
         yIndex = int((latInt - coord.minLat)/dLat);
         
-        //std::cout << "xIndex: " << xIndex << " yIndex: " << yIndex << std::endl; 
+        if(xIndex < 0){
+            xIndex = 0;
+        } else if (xIndex > 100){
+            xIndex = 100; 
+        }
+        
+        if(yIndex < 0){
+            yIndex = 0;
+        } else if (yIndex > 100){
+            yIndex = 100; 
+        }
+        
         intGrid[xIndex][yIndex].push_back(i); 
     }
     
-//    for(int i = 0; i < 100; i++){
-//        for(int j = 0; j < 100; j++){
-//            for(unsigned k = 0; k < poiGrid[i][j].size(); k++){
-//                std::cout<<poiGrid[i][j][k]<<std::endl;
-//            }
-//        }
-//    }
 }
 
 
@@ -89,18 +110,20 @@ void streetGrid::findMinimumInt(LatLon position, int &Int, int xIndex, int yInde
 }
 
 
-int streetGrid::findNearestPOI(LatLon position, mapBoundary coord){
+int streetGrid::findNearestPOI(LatLon position){
     int nearestPOIIndex = 0; 
     
     int xIndex = int((position.lon()-coord.minLon)/dLon);
     int yIndex = int((position.lat()-coord.minLat)/dLat);
     
-    int count = 0; 
+    //int count = 0; 
     //std::cout<<"POI xIndex: "<<xIndex<<" POI yIndex: "<<yIndex<<std::endl;
     
     int tempX, tempY; 
     int radius = 1; 
-    for(int t = 0; t < 2; t++){
+    int limit = 2;
+    bool extraSearch = false; 
+    for(int t = 0; t < limit; t++){
         do{
             for(int i = xIndex-radius; i<=xIndex+radius; i++){
                 if(i < 0){
@@ -119,7 +142,6 @@ int streetGrid::findNearestPOI(LatLon position, mapBoundary coord){
                     }else{
                         tempY = j; 
                     }
-                    count++;
                     //std::cout<<"tempX: " <<tempX<<" tempY: "<<tempY<<std::endl;
                     bool found = false;
                     for(auto it = check.begin(); it != check.end(); it++){
@@ -130,6 +152,7 @@ int streetGrid::findNearestPOI(LatLon position, mapBoundary coord){
                         }
                     }
                     if(!found){
+                        //count++;
                         findMinimumPOI(position, nearestPOIIndex, tempX, tempY); 
                     }
                     //std::cout<<"STOP RIGHT HERE"<<std::endl;
@@ -138,6 +161,10 @@ int streetGrid::findNearestPOI(LatLon position, mapBoundary coord){
             radius++;
             //std::cout<<"radius: "<<radius<<std::endl;
         } while(!isFullPOI);
+        if(!extraSearch){
+            limit = int(ceil(double(radius)*1.5))-radius;
+            extraSearch = true;
+        }
     }
     
     isFullPOI = false; 
@@ -146,18 +173,20 @@ int streetGrid::findNearestPOI(LatLon position, mapBoundary coord){
     return nearestPOIIndex; 
 }
 
-int streetGrid::findNearestInt(LatLon position, mapBoundary coord){
+int streetGrid::findNearestInt(LatLon position){
     int nearestIntIndex = 0; 
     
     int xIndex = int((position.lon()-coord.minLon)/dLon);
     int yIndex = int((position.lat()-coord.minLat)/dLat);
     
-    int count = 0; 
+    //int count = 0; 
     //std::cout<<"INT xIndex: "<<xIndex<<" INT yIndex: "<<yIndex<<std::endl;
     
     int tempX, tempY; 
     int radius = 1;  
-    for(int t = 0; t < 2; t++){
+    int limit = 2;
+    bool extraSearch = false; 
+    for(int t = 0; t < limit; t++){
         do{
             for(int i = xIndex-radius; i<=xIndex+radius; i++){
                 if(i < 0){
@@ -176,7 +205,6 @@ int streetGrid::findNearestInt(LatLon position, mapBoundary coord){
                     }else{
                         tempY = j; 
                     }
-                    count++;
                     bool found = false;
                     //std::cout<<"tempX: " <<tempX<<" tempY: "<<tempY<<std::endl;
                     for(auto it = check.begin(); it != check.end(); it++){
@@ -188,6 +216,7 @@ int streetGrid::findNearestInt(LatLon position, mapBoundary coord){
                     }
 
                     if(!found){
+                        //count++;
                         findMinimumInt(position, nearestIntIndex, tempX, tempY); 
 
                     }
@@ -198,6 +227,10 @@ int streetGrid::findNearestInt(LatLon position, mapBoundary coord){
             radius++;
             //std::cout<<"radius: "<<radius<<std::endl;
         } while(!isFullInt);
+        if(!extraSearch){
+            limit = int(ceil(double(radius)*1.5))-radius;
+            extraSearch = true;
+        }
     }
     
     isFullInt = false;

@@ -69,7 +69,6 @@ std::vector<double> streetLengthVector;
 //vector of street segment travel times indexed on segment ID
 std::vector<double> segTravelTimeVector;
 
-mapBoundary coordinates; 
 streetGrid streetBlock; 
 
 //========================= Function Implementations =========================
@@ -81,6 +80,7 @@ streetGrid streetBlock;
  * @param path <string> - file path for map
  * @return load_successful<boolean> - whether the map has loaded successfully
  */
+
 bool load_map(std::string path/*map_path*/) {
     bool load_successful = false; 
     std::string path_osm;
@@ -105,7 +105,7 @@ bool load_map(std::string path/*map_path*/) {
         segLengthVector.clear();
         streetLengthVector.clear();
         segTravelTimeVector.clear();
-        streetBlock.poiGrid.clear(); 
+        streetBlock.poiGrid.clear();
         streetBlock.intGrid.clear();
         
         //==== streetIDMap & segLengthVector & segTravelTimeVector ====
@@ -212,11 +212,7 @@ bool load_map(std::string path/*map_path*/) {
             intersectionSegNameVector.push_back(segNames);
             intersectionSegIDVector.push_back(intersectionIds);
         }
-        
-        coordinates.initialize();
-        streetBlock.populateGrid(coordinates); 
-        
-        
+        streetBlock.populateGrid(); 
     }    
     
     return load_successful;
@@ -239,8 +235,8 @@ void close_map() {
     segLengthVector.clear();
     streetLengthVector.clear();
     segTravelTimeVector.clear();
-    streetBlock.poiGrid.clear(); 
-    streetBlock.intGrid.clear();
+    streetBlock.poiGrid.clear();
+    streetBlock.intGrid.clear(); 
     closeStreetDatabase();
     closeOSMDatabase();
 }
@@ -647,12 +643,12 @@ unsigned find_closest_point_of_interest(LatLon my_position){
 //        double temp = find_distance_between_two_points(my_position, getPointOfInterestPosition(i));
 //        if(temp <= min){
 //            min = temp;
-//            nearestPOIIndex = i;
+//            nearestPOIIndex = i;  
 //        }
 //    }
 //    std::cout<<"POI:" << nearestPOIIndex<<std::endl;
 //    return unsigned(nearestPOIIndex); 
-    int poi = streetBlock.findNearestPOI(my_position, coordinates);
+    int poi = streetBlock.findNearestPOI(my_position);
     return unsigned(poi); 
 }
 
@@ -678,7 +674,7 @@ unsigned find_closest_intersection(LatLon my_position){
 //    std::cout<<"INT:" << nearestIntIndex<<std::endl;
 //    return unsigned(nearestIntIndex); 
     
-    int intersection = streetBlock.findNearestInt(my_position, coordinates);  
+    int intersection = streetBlock.findNearestInt(my_position);  
     return unsigned(intersection); 
 }
 

@@ -5,6 +5,7 @@
 #include "OSMDatabaseAPI.h"
 #include "OSMID.h"
 #include "ezgl/point.hpp"
+#include "grid.h"
 
 #include <string>
 #include <iostream>
