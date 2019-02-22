@@ -13,6 +13,8 @@ public:
     // calls  populate functions for critical map element structures
     void initialize(infoStrucs &info, mapBoundary &xy);
     
+    void clear(infoStrucs &info); 
+    
     // calls  populate function for non-critical map elements
     void loadAfterDraw(infoStrucs &info);
     

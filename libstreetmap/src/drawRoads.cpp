@@ -47,6 +47,7 @@ void roadDrawing::setRoadColourSize(int type, bool highlight, ezgl::renderer &g,
     }
     
     g.set_line_width(width);
+    g.set_line_cap (ezgl::line_cap::round);
 }
 //y = (280930.9-(2586289/1221110)) + (2.117982 - 280930.9)/(1 + (x/17546410000)^0.7331144)
  void roadDrawing::drawStreetRoads(int numSegs, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g, double startArea, double currentArea){

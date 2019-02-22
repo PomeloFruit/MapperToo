@@ -38,6 +38,14 @@ static rectangle maintain_aspect_ratio(rectangle const &view, double widget_widt
   return {{x_start, y_start}, new_width, new_height};
 }
 
+
+void camera::set_zoom_fit(rectangle new_world){
+    m_initial_world = new_world; 
+}
+void camera::set_m_screen(rectangle new_world){
+    m_screen=new_world;
+}
+
 camera::camera(rectangle bounds) : m_world(bounds), m_screen(bounds), m_initial_world(bounds)
 {
 }

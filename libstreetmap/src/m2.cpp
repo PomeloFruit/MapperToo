@@ -53,7 +53,7 @@ void showTrainsButton(GtkWidget *widget, ezgl::application *application);
 void loadMapButton(GtkWidget *widget, ezgl::application *application);
 void hideMapButton(GtkWidget *widget, ezgl::application *application);
 void showMapButton(GtkWidget *widget, ezgl::application *application);
-void newMap(ezgl::application *application);
+void newMap(std::string path, ezgl::application *application);
 void initializeMap(); 
 // Callback functions for event handling
 
@@ -367,17 +367,28 @@ void loadMapButton(GtkWidget *widget, ezgl::application *application){
     showMapButton(widget, application);
 }
 
-void showMapButton(GtkWidget *widget, ezgl::application *application){
+void hideMapButton(GtkWidget *widget, ezgl::application *application){
+    std::string path = "/cad2/ece297s/public/maps/toronto_canada.streets.bin";
+    application->destroy_button("Show Toronto"); 
+    application->create_button("Show New York", 10, showMapButton);
+    application->refresh_drawing(); 
     
-    application->destroy_button("Show New York");
-    
-    application->refresh_drawing();
-    
-    newMap(application);
+    newMap(path, application);
 }
 
-void newMap(ezgl::application *application){
+void showMapButton(GtkWidget *widget, ezgl::application *application){
     std::string path = "/cad2/ece297s/public/maps/cairo_egypt.streets.bin";
+    application->destroy_button("Show New York");
+    application->create_button("Show Toronto", 10, hideMapButton); 
+    application->refresh_drawing();
+    
+    newMap(path, application);
+}
+
+void newMap(std::string path, ezgl::application *application){
+    pop.clear(info);
+    std::cout<<"clear info struct"<<std::endl;
+    
     close_map(); 
     std::cout<<"closed map"<<std::endl; 
 
@@ -389,4 +400,25 @@ void newMap(ezgl::application *application){
     
     application->refresh_drawing(); 
     std::cout<<"refreshed"<<std::endl;
+    
+    
+    std::string canvasID = application->get_main_canvas_id(); 
+    ezgl::rectangle new_world({xy.xMin,xy.yMin},{xy.xMax,xy.yMax});
+    ezgl::canvas* myCanvas = application->get_canvas(canvasID);
+    
+    
+    myCanvas->get_camera().set_m_screen(new_world);
+    myCanvas->get_camera().update_widget(myCanvas->width(), myCanvas->height());
+    myCanvas->get_camera().set_world(new_world);
+    
+    myCanvas->get_camera().set_zoom_fit(new_world);
+    
+    if(info.SubwayInfo.size()==0){
+        pop.loadAfterDraw(info);
+    }
+    
+    //ezgl::camera myCamera = myCanvas->get_camera();
+    //myCamera.set_world(new_world); 
+    
 }
+

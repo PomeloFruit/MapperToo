@@ -35,6 +35,23 @@ void populateData::initialize(infoStrucs &info, mapBoundary &xy){
 }
 
 
+void populateData::clear(infoStrucs &info){
+    info.FeatureInfo.clear();
+    info.FeaturePointVec.clear();
+    info.IntersectionInfo.clear();
+    info.POIInfo.clear();
+    info.StreetSegInfo.clear(); 
+    info.SubwayInfo.clear(); 
+    info.SubwayRouteInfo.clear();
+    info.WayMap.clear();
+    info.lastFeature.clear();
+    info.lastIntersection.clear();
+    info.lastPOI.clear();
+    info.lastSeg.clear();
+    info.lastSubway.clear();
+}
+
+
 /* loadAfterDraw function
  * - calls non-essential map-elements populate functions so data in info structure
  *   so user can add elements

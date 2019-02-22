@@ -65,6 +65,10 @@ public:
    */
   void set_world(rectangle new_world);
 
+  //?????????????????????????????????
+  void set_zoom_fit(rectangle new_world); 
+  
+  
   /**
    * Get the screen to world scaling factor.
    */
@@ -72,6 +76,17 @@ public:
   {
     return m_screen_to_world;
   }
+  
+  /**
+   * Update the dimensions of the widget.
+   *
+   * This will change the screen where the world is projected. The screen will maintain the aspect ratio of the world's
+   * coordinate system while being centered within the screen.
+   *
+   * @see canvas::configure_event
+   */
+  void update_widget(int width, int height);
+  void set_m_screen(rectangle new_world);
 
 protected:
   // Only an ezgl::canvas can create a camera.
@@ -83,16 +98,6 @@ protected:
    * @param bounds The initial bounds of the coordinate system.
    */
   explicit camera(rectangle bounds);
-
-  /**
-   * Update the dimensions of the widget.
-   *
-   * This will change the screen where the world is projected. The screen will maintain the aspect ratio of the world's
-   * coordinate system while being centered within the screen.
-   *
-   * @see canvas::configure_event
-   */
-  void update_widget(int width, int height);
 
   /**
    * Update the scaling factors.
@@ -110,7 +115,7 @@ private:
   rectangle m_screen;
 
   // The dimensions of the initial world (user-defined bounding box). Needed for zoom_fit
-  const rectangle m_initial_world;
+  rectangle m_initial_world;
 
   // The x and y scaling factors.
   point2d m_world_to_widget = {1.0, 1.0};
