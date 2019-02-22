@@ -209,6 +209,7 @@
               <object class="GtkEntry" id="FindStreet1">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
+                <property name="shadow_type">etched-out</property>
               </object>
               <packing>
                 <property name="left_attach">0</property>
@@ -219,6 +220,7 @@
               <object class="GtkEntry" id="FindStreet2">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
+                <property name="shadow_type">etched-out</property>
               </object>
               <packing>
                 <property name="left_attach">1</property>
@@ -229,7 +231,7 @@
               <object class="GtkLabel">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">Name of Street 1 /  Map Element</property>
+                <property name="label" translatable="yes">Name of Street | POI | Feature | Subway || City Name (to Change Map) </property>
               </object>
               <packing>
                 <property name="left_attach">0</property>
@@ -240,7 +242,7 @@
               <object class="GtkLabel">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">Name of Street 2 (if needed)</property>
+                <property name="label" translatable="yes">Name of Street 2 (for Intersection Search)</property>
               </object>
               <packing>
                 <property name="left_attach">1</property>
@@ -277,12 +279,6 @@
             <property name="left_attach">0</property>
             <property name="top_attach">2</property>
           </packing>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
         </child>
         <child>
           <placeholder/>
