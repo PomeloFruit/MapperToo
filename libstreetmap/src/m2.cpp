@@ -103,6 +103,7 @@ void draw_map(){
     
     ezgl::application application(settings);
     ezgl::rectangle initial_world({xy.xMin,xy.yMin},{xy.xMax,xy.yMax});
+
     
     application.add_canvas("MainCanvas",draw_main_canvas,initial_world);
     application.run(initial_setup, act_on_mouse_press, NULL, NULL);

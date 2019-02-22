@@ -204,6 +204,7 @@ void populateData::populateFeatureInfo(infoStrucs &info, mapBoundary &xy){
         numPoints = getFeaturePointCount(i);
         
         // classify features by # of points
+
         if(info.FeatureInfo[i].featureType==3){
             info.FeatureInfo[i].priorityNum=1;
         }

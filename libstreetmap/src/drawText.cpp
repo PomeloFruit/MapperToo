@@ -28,20 +28,7 @@ std::vector<std::pair<double, bool>> anglesWithWay;
 double initialArea;
 
 void drawText::initilize(){
-    xy.initialize(); 
-//    ezgl::rectangle startRectangle({xy.xMin,xy.yMin},{xy.xMax,xy.yMax});
-//    double startArea=abs((startRectangle.right()-startRectangle.left())*(startRectangle.top()-startRectangle.bottom()));
-//    anglesWithWay.resize(numStreetSegs);
-//    for(int i=0;i<numStreetSegs;i++){
-//        LatLon initialPosition=getIntersectionPosition((getInfoStreetSegment(i).from));
-//        LatLon finalPosition=getIntersectionPosition((getInfoStreetSegment(i).to));
-//        
-//////        LatLon initialPosition=info.IntersectionInfo[info.StreetSegInfo[i].fromIntersection].position;
-//////        LatLon finalPosition=info.IntersectionInfo[info.StreetSegInfo[i].toIntersection].position;
-//        //double slope=(xy.yFromLat(finalPosition.lat())-xy.yFromLat(initialPosition.lat()))/(xy.xFromLon(finalPosition.lon())-xy.xFromLon(initialPosition.lon()));
-//        anglesWithWay[i]=findAngle(initialPosition, finalPosition);
-//
-//    }
+    xy.initialize();
 }
 
 
@@ -52,9 +39,9 @@ void drawText::createText(int numStreetSegs, int numStreets, infoStrucs &info, e
         alreadyDrawnStreets.resize(numStreets);
         alreadyDrawnStreets.clear();
         int maxCount=7;
+        ezgl::rectangle initial_world({xy.xMin,xy.yMin},{xy.xMax,xy.yMax});
+        initialArea=abs((initial_world.right()-initial_world.left())*(initial_world.top()-initial_world.bottom()));
         double currentArea=abs((currentRectangle.right()-currentRectangle.left())*(currentRectangle.top()-currentRectangle.bottom()));
-        ezgl::rectangle startRectangle({xy.xMin,xy.yMin},{xy.xMax,xy.yMax});
-        initialArea=abs((startRectangle.right()-startRectangle.left())*(startRectangle.top()-startRectangle.bottom()));
         bool drawHighway=(true);//but make it a bool so I can change it later
         bool drawPrimary=((currentArea/initialArea)<.20);
         bool drawSecondary=((currentArea/initialArea)<.05);
@@ -102,6 +89,7 @@ void drawText::createText(int numStreetSegs, int numStreets, infoStrucs &info, e
                     }
                     angleToUse=findAngle(initialPosition, finalPosition);
                 }
+
                 
                 
                 g.set_color(0, 0, 0, 255);//for now but I think if I don't wnt to draw things/draw things on different levels I can either: make the size 0 or make it transparent

@@ -13,8 +13,6 @@
 #pragma once
 #include "drawText.h"
 
-#include "drawText.h"
-
 #include "globals.h"
 #include "latLonToXY.h"
 #include "LatLon.h"
@@ -23,8 +21,7 @@
 
 class drawText{
     public:
-        mapBoundary xy; 
-        
+        mapBoundary xy;
         void initilize();
         void createText(int numStreetSegs, int numStreets, infoStrucs &info, ezgl::renderer &g);
     private:
