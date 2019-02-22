@@ -1,3 +1,4 @@
+// class clickActions definition file
 #include "clickActions.h"
 
 #include "ezgl/application.hpp"
@@ -7,6 +8,33 @@
 #include "globals.h"
 #include "latLonToXY.h"
 #include <string>
+
+
+/* clickedOnIntersection function
+ * - determines which intersection was clicked
+ * - calls for said intersection to be highlighted
+ * - returns message about it
+ * 
+ * @param x <double> - x coordinate of click in screen coordinates
+ * @param y <double> - y coordinate of click in screen coordinates
+ * @param xy <mapBoundary> - object of type mapBoundary with x,y/Lat,Lon conversions
+ * @param info <infoStrucs> - object containing all essential map information
+ * @return displayName <std::string > - message with information about intersection
+ */
+
+std::string clickActions::clickedOnIntersection(double x, double y, mapBoundary &xy, infoStrucs &info){
+    LatLon clickPos;
+    unsigned clickedID = 0;
+    std::string displayName = "Intersection Clicked: ";
+    
+    clickPos = xy.LatLonFromXY(x,y);
+    clickedID = find_closest_intersection(clickPos);
+    displayName += info.IntersectionInfo[clickedID].name;
+    
+    highlightIntersection(info, clickedID);
+    
+    return displayName;
+}
 
 std::string clickActions::clickedOnPOI(double x, double y, mapBoundary &xy, infoStrucs &info){
     LatLon clickPos;
@@ -22,20 +50,6 @@ std::string clickActions::clickedOnPOI(double x, double y, mapBoundary &xy, info
     displayName += info.IntersectionInfo[nearestIntID].name;
     
     highlightPOI(info, clickedID);
-    
-    return displayName;
-}
-
-std::string clickActions::clickedOnIntersection(double x, double y, mapBoundary &xy, infoStrucs &info){
-    LatLon clickPos;
-    unsigned clickedID = 0;
-    std::string displayName = "Intersection Clicked: ";
-    
-    clickPos = xy.LatLonFromXY(x,y);
-    clickedID = find_closest_intersection(clickPos);
-    displayName += info.IntersectionInfo[clickedID].name;
-    
-    highlightIntersection(info, clickedID);
     
     return displayName;
 }
@@ -59,20 +73,6 @@ std::string clickActions::clickedOnSubway(double x, double y, mapBoundary &xy, i
     highlightSubway(info, clickedID);
             
     return displayName;
-}
-
-unsigned clickActions::findNearestSubway(infoStrucs &info, LatLon pt){
-    double min = EARTH_RADIUS_IN_METERS;
-    unsigned nearestIndex = 0; 
-
-    for(unsigned i = 0; i < info.SubwayInfo.size(); i++){
-        double temp = find_distance_between_two_points(info.SubwayInfo[i].point, pt);
-        if(temp <= min){
-            min = temp;
-            nearestIndex = i;
-        }
-    }
-    return nearestIndex; 
 }
 
 std::string clickActions::searchOnMap(infoStrucs &info, ezgl::application *&application){
@@ -197,11 +197,137 @@ std::string clickActions::searchOnMap(infoStrucs &info, ezgl::application *&appl
     return displayMessage;
 }
 
+unsigned clickActions::findNearestSubway(infoStrucs &info, LatLon pt){
+    double min = EARTH_RADIUS_IN_METERS;
+    unsigned nearestIndex = 0; 
+
+    for(unsigned i = 0; i < info.SubwayInfo.size(); i++){
+        double temp = find_distance_between_two_points(info.SubwayInfo[i].point, pt);
+        if(temp <= min){
+            min = temp;
+            nearestIndex = i;
+        }
+    }
+    return nearestIndex; 
+}
+
+// -1 for no input, 0 for no match, >0 for number of matches, -2 for POI, -3 for Subway, -4 for feature 
+int clickActions::findMatches(std::vector<unsigned> &streetID, std::string userInput, infoStrucs &info){
+    int match = -1, numMatches = 0;
+    std::transform(userInput.begin(), userInput.end(), userInput.begin(), ::tolower);
+    std::string station = "station";
+    
+    if(userInput != ""){
+        streetID = find_street_ids_from_partial_street_name(userInput);        
+        numMatches = streetID.size();
+        if(userInput.size()>station.size() && userInput.compare(userInput.size()-(station.size()), station.size(), station)==0){
+            findSubwaysByName(streetID, userInput, info);
+            numMatches = streetID.size();
+            if(numMatches > 0){
+                match = -3;
+            }                
+        } else {
+            if(numMatches == 0){
+                match = 0;
+
+                findPOIByName(streetID, userInput, info);
+                numMatches = streetID.size();
+                
+                if(numMatches > 0){
+                    match = -2;
+                } else {
+                    findFeaturesByName(streetID, userInput, info);
+                    numMatches = streetID.size();
+                    if(numMatches > 0){
+                        match = -4;
+                    }
+                }
+                
+            } else if(numMatches == 1){
+                match = 1;
+            } else { //if(numMatches > 1)
+                match = numMatches+5;
+            }
+        }
+    }
+    return match;
+}
+
+void clickActions::findPOIByName(std::vector<unsigned> &streetID, std::string userInput, infoStrucs &info){
+    std::string temp;
+    int sim;
+    
+    for(unsigned i=0 ; i<info.POIInfo.size() ; i++){
+        temp = info.POIInfo[i].name;
+        std::transform(temp.begin(), temp.end(), temp.begin(), ::tolower);
+        sim = temp.compare(0, userInput.size(), userInput);
+        if(sim == 0){
+            streetID.push_back(i);
+        }
+    }
+}
+
+void clickActions::findSubwaysByName(std::vector<unsigned> &streetID, std::string userInput, infoStrucs &info){
+    std::string temp;
+    int sim = 0;
+
+    for(unsigned i=0 ; i<info.SubwayInfo.size() ; i++){
+        
+        temp = info.SubwayInfo[i].name;
+        std::transform(temp.begin(), temp.end(), temp.begin(), ::tolower);
+        
+        if(temp.size() >= userInput.size()){
+            sim = temp.compare(0, userInput.size(), userInput);
+        }
+        
+        if(sim == 0){
+            streetID.push_back(i);
+        }
+    }
+}
+
+void clickActions::findFeaturesByName(std::vector<unsigned> &streetID, std::string userInput, infoStrucs &info){
+    std::string temp;
+    int sim;
+    
+    for(unsigned i=0 ; i<info.FeatureInfo.size() ; i++){
+        temp = info.FeatureInfo[i].name;
+        std::transform(temp.begin(), temp.end(), temp.begin(), ::tolower);
+        sim = temp.compare(0, userInput.size(), userInput);
+        if(sim == 0){
+            streetID.push_back(i);
+        }
+    }
+}
+
+std::string clickActions::getMessagesFromMatches(int match1, int match2){
+    std::string displayMessage = "";
+    
+    if(match1 == -1){ //no input in field 1
+        displayMessage = "Please try again <input 1 - no names detected>!";
+    } else if(match1 == 0 || match1 >= 5){ //no match, too many matches found for field 1
+        if(match2 == 0 || match2 >= 5){
+            displayMessage = "Please try again | ";
+            displayMessage += std::to_string(match1) + " matches found for name 1 | ";
+            displayMessage += std::to_string(match2) + " matches found for name 2";
+        } else if((match2 == 1) || (match2 == -1)) {
+            displayMessage = "Please try again | ";
+            displayMessage += std::to_string(match1) + " matches found for name 1.";
+        }
+    } else if(match1 == 1){  //unique match for field 1
+        if(match2 == 0 || match2 >= 5){ // no match or too many matches
+            displayMessage = "Please try again | ";
+            displayMessage += std::to_string(match2) + " matches found for name 2.";
+        }
+    }
+    return displayMessage;
+}
+
 void clickActions::highlightStreet(infoStrucs &info, unsigned highID){
     std::vector<unsigned> highIDinVec;
     highIDinVec.clear();
     highIDinVec.push_back(highID);
-    highlightStreet(info, highIDinVec);
+    highlightPOI(info, highIDinVec);
 }
 
 void clickActions::highlightStreet(infoStrucs &info, std::vector<unsigned> highID){
@@ -329,116 +455,4 @@ void clickActions::clearPreviousHighlights(infoStrucs &info){
         info.FeatureInfo[currentIndex].clicked = false;
     }
     info.lastFeature.clear();
-}
-
-// -1 for no input, 0 for no match, >0 for number of matches, -2 for POI, -3 for Subway, -4 for feature 
-int clickActions::findMatches(std::vector<unsigned> &streetID, std::string userInput, infoStrucs &info){
-    int match = -1, numMatches = 0;
-    std::transform(userInput.begin(), userInput.end(), userInput.begin(), ::tolower);
-    std::string station = "station";
-    
-    if(userInput != ""){
-        streetID = find_street_ids_from_partial_street_name(userInput);        
-        numMatches = streetID.size();
-        if(userInput.size()>station.size() && userInput.compare(userInput.size()-(station.size()), station.size(), station)==0){
-            findSubwaysByName(streetID, userInput, info);
-            numMatches = streetID.size();
-            if(numMatches > 0){
-                match = -3;
-            }                
-        } else {
-            if(numMatches == 0){
-                match = 0;
-
-                findPOIByName(streetID, userInput, info);
-                numMatches = streetID.size();
-                
-                if(numMatches > 0){
-                    match = -2;
-                } else {
-                    findFeaturesByName(streetID, userInput, info);
-                    numMatches = streetID.size();
-                    if(numMatches > 0){
-                        match = -4;
-                    }
-                }
-                
-            } else if(numMatches == 1){
-                match = 1;
-            } else { //if(numMatches > 1)
-                match = numMatches+5;
-            }
-        }
-    }
-    return match;
-}
-
-void clickActions::findPOIByName(std::vector<unsigned> &streetID, std::string userInput, infoStrucs &info){
-    std::string temp;
-    int sim;
-    
-    for(unsigned i=0 ; i<info.POIInfo.size() ; i++){
-        temp = info.POIInfo[i].name;
-        std::transform(temp.begin(), temp.end(), temp.begin(), ::tolower);
-        sim = temp.compare(0, userInput.size(), userInput);
-        if(sim == 0){
-            streetID.push_back(i);
-        }
-    }
-}
-
-void clickActions::findSubwaysByName(std::vector<unsigned> &streetID, std::string userInput, infoStrucs &info){
-    std::string temp;
-    int sim = 0;
-
-    for(unsigned i=0 ; i<info.SubwayInfo.size() ; i++){
-        
-        temp = info.SubwayInfo[i].name;
-        std::transform(temp.begin(), temp.end(), temp.begin(), ::tolower);
-        
-        if(temp.size() >= userInput.size()){
-            sim = temp.compare(0, userInput.size(), userInput);
-        }
-        
-        if(sim == 0){
-            streetID.push_back(i);
-        }
-    }
-}
-
-void clickActions::findFeaturesByName(std::vector<unsigned> &streetID, std::string userInput, infoStrucs &info){
-    std::string temp;
-    int sim;
-    
-    for(unsigned i=0 ; i<info.FeatureInfo.size() ; i++){
-        temp = info.FeatureInfo[i].name;
-        std::transform(temp.begin(), temp.end(), temp.begin(), ::tolower);
-        sim = temp.compare(0, userInput.size(), userInput);
-        if(sim == 0){
-            streetID.push_back(i);
-        }
-    }
-}
-
-std::string clickActions::getMessagesFromMatches(int match1, int match2){
-    std::string displayMessage = "";
-    
-    if(match1 == -1){ //no input in field 1
-        displayMessage = "Please try again <input 1 - no names detected>!";
-    } else if(match1 == 0 || match1 >= 5){ //no match, too many matches found for field 1
-        if(match2 == 0 || match2 >= 5){
-            displayMessage = "Please try again | ";
-            displayMessage += std::to_string(match1) + " matches found for name 1 | ";
-            displayMessage += std::to_string(match2) + " matches found for name 2";
-        } else if((match2 == 1) || (match2 == -1)) {
-            displayMessage = "Please try again | ";
-            displayMessage += std::to_string(match1) + " matches found for name 1.";
-        }
-    } else if(match1 == 1){  //unique match for field 1
-        if(match2 == 0 || match2 >= 5){ // no match or too many matches
-            displayMessage = "Please try again | ";
-            displayMessage += std::to_string(match2) + " matches found for name 2.";
-        }
-    }
-    return displayMessage;
 }

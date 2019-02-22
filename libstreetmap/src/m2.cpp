@@ -62,7 +62,13 @@ double startArea;
 
 //=========================== Function Definitions ===========================
 
-
+/* draw_map function
+ * - loads the settings for the application window
+ * - calls for initialization of everything needed to draw
+ * 
+ * @param none
+ * @return void
+ */
 void draw_map(){
     ezgl::application::settings settings;
     settings.main_ui_resource = "libstreetmap/resources/main.ui";
@@ -70,7 +76,8 @@ void draw_map(){
     settings.canvas_identifier = "MainCanvas";
     ezgl::application application(settings);
     
-    
+    //see if we can move this stuff away to another function for change map
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     xy.initialize();
     pop.initialize(info, xy);
 
@@ -79,13 +86,11 @@ void draw_map(){
     startArea=abs((initial_world.right()-initial_world.left())*(initial_world.top()-initial_world.bottom()));
     
     dt.initilize(getNumStreetSegments(), initial_world, xy, info);
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     
     application.add_canvas("MainCanvas",draw_main_canvas,initial_world);
 
     application.run(initial_setup, act_on_mouse_press, NULL, NULL);
-    
-    //application.run(initial_setup, act_on_mouse_press, act_on_mouse_move, act_on_key_press);
-    
 }
 
 void draw_main_canvas(ezgl::renderer &g){
