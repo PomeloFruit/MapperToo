@@ -49,6 +49,18 @@ void loadTrainsButton(GtkWidget *widget, ezgl::application *application);
 void hideTrainsButton(GtkWidget *widget, ezgl::application *application);
 void showTrainsButton(GtkWidget *widget, ezgl::application *application);
 
+
+void loadMapButton(GtkWidget *widget, ezgl::application *application);
+void hideMapButton(GtkWidget *widget, ezgl::application *application);
+void showMapButton(GtkWidget *widget, ezgl::application *application);
+// Callback functions for event handling
+
+
+//void act_on_mouse_move(ezgl::application *application, GdkEventButton *event, double x, double y);
+//void act_on_key_press(ezgl::application *application, GdkEventKey *event, char *key_name);
+
+///////
+
 //=========================== Global Variables ===========================
 
 double startArea; //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< this should really be in global.h
@@ -134,6 +146,7 @@ void initial_setup(ezgl::application *application){
     
     application->create_button("Show Subways",8,loadSubwayButton);
     application->create_button("Show Trains",9,loadTrainsButton);
+    application->create_button("Show New York", 10, loadMapButton); 
 }
 
 
@@ -214,14 +227,6 @@ void findButton(GtkWidget *widget, ezgl::application *application){
     // reflect the changes
     application->update_message(message);
     application->refresh_drawing();
-}
-
-
-
-void loadMapButton(GtkWidget *widget, ezgl::application *application){
-    const char *map_name; 
-    
-    
 }
 
 /* loadSubwayButton function
@@ -348,5 +353,33 @@ void showTrainsButton(GtkWidget *widget, ezgl::application *application){
     application->destroy_button("Show Trains");
     application->create_button("Hide Trains",9,hideTrainsButton);
         
+    application->refresh_drawing();
+}
+
+void loadMapButton(GtkWidget *widget, ezgl::application *application){
+    showMapButton(widget, application);
+}
+
+void hideMapButton(GtkWidget *widget, ezgl::application *application){
+    std::string path = "/cad2/ece297s/public/maps/toronto_canada.streets.bin";
+    close_map(); 
+    load_map(path); 
+    draw_map(); 
+    
+    application->destroy_button("Show Toronto"); 
+    application->create_button("Show New York", 10, showMapButton); 
+    
+    application->refresh_drawing();
+}
+
+void showMapButton(GtkWidget *widget, ezgl::application *application){
+    std::string path = "/cad2/ece297s/public/maps/new-delhi_india.streets.bin";
+    close_map(); 
+    load_map(path); 
+    draw_map(); 
+    
+    application->destroy_button("Show New York");
+    application->create_button("Show Toronto", 10, hideMapButton);
+    
     application->refresh_drawing();
 }
