@@ -53,6 +53,7 @@ void showTrainsButton(GtkWidget *widget, ezgl::application *application);
 void loadMapButton(GtkWidget *widget, ezgl::application *application);
 void hideMapButton(GtkWidget *widget, ezgl::application *application);
 void showMapButton(GtkWidget *widget, ezgl::application *application);
+void newMap(ezgl::application *application);
 // Callback functions for event handling
 
 
@@ -360,26 +361,23 @@ void loadMapButton(GtkWidget *widget, ezgl::application *application){
     showMapButton(widget, application);
 }
 
-void hideMapButton(GtkWidget *widget, ezgl::application *application){
-    std::string path = "/cad2/ece297s/public/maps/toronto_canada.streets.bin";
-    close_map(); 
-    load_map(path); 
-    draw_map(); 
-    
-    application->destroy_button("Show Toronto"); 
-    application->create_button("Show New York", 10, showMapButton); 
-    
-    application->refresh_drawing();
-}
-
 void showMapButton(GtkWidget *widget, ezgl::application *application){
-    std::string path = "/cad2/ece297s/public/maps/new-delhi_india.streets.bin";
-    close_map(); 
-    load_map(path); 
-    draw_map(); 
     
     application->destroy_button("Show New York");
-    application->create_button("Show Toronto", 10, hideMapButton);
     
     application->refresh_drawing();
+    
+    newMap(application);
+}
+
+void newMap(ezgl::application *application){
+    std::string path = "/cad2/ece297s/public/maps/cairo_egypt.streets.bin";
+    close_map(); 
+    std::cout<<"closed map"<<std::endl; 
+
+    load_map(path); 
+    std::cout<<"loaded map"<<std::endl;
+    
+    application->refresh_drawing(); 
+    std::cout<<"refreshed"<<std::endl;
 }
