@@ -19,7 +19,11 @@ void roadDrawing::setRoadColourSize(int type, bool highlight, ezgl::renderer &g,
     switch(type){
         case HIGHWAY: // yellowish
             width =HIGHWAYWIDTH+adjustingAdd;
-            g.set_color(255,238,41,200);
+            g.set_color(250,215,56,200);
+            break;
+        case TRUNK:
+            width = PRIMWIDTH+adjustingAdd;
+            g.set_color(255,255,255,255);
             break;
         case PRIMARY: // white and thick
             width = PRIMWIDTH+adjustingAdd;
@@ -101,13 +105,14 @@ void roadDrawing::drawSpecialIntersections(mapBoundary &xy, infoStrucs &info, ez
 void roadDrawing::drawOneIntersection(int id, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g){
     const double NORMALRAD = 0.00015;
     const float RADIUSNORM = 0.00003;
+    const double radius = g.get_visible_world().width()*0.009;
     float x, y;
        
     x = xy.xFromLon(info.IntersectionInfo[id].position.lon());
     y = xy.yFromLat(info.IntersectionInfo[id].position.lat());
 
     if(info.IntersectionInfo[id].clicked) {
-        g.draw_surface(g.load_png("/homes/d/dujia3/ece297/work/mapper/libstreetmap/resources/intersection.png"), ezgl::point2d(x-2*RADIUSNORM, y+2*RADIUSNORM));
+        g.draw_surface(g.load_png("/homes/d/dujia3/ece297/work/mapper/libstreetmap/resources/intersection.png"), ezgl::point2d(x-2*radius, y+2*radius));
 //        //outer circle (turquoise)
 //        g.set_color(110,236,209,125);
 //        g.fill_elliptic_arc(ezgl::point2d(x,y),RADIUSHIGH,RADIUSHIGH,0,360);

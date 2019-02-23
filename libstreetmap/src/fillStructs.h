@@ -18,6 +18,10 @@ public:
     
     void clear(infoStrucs &info); 
     
+    void classifyStreetType(int i, infoStrucs &info);
+    
+    void streetTypeArray(infoStrucs &info);
+    
     // calls  populate function for non-critical map elements
     void loadAfterDraw(infoStrucs &info);
     

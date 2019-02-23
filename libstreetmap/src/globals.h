@@ -5,7 +5,6 @@
 #include "OSMDatabaseAPI.h"
 #include "OSMID.h"
 #include "ezgl/point.hpp"
-#include "grid.h"
 
 #include <string>
 #include <iostream>
@@ -19,6 +18,7 @@
 #define PRIMWIDTH 4
 #define HIGHWAYWIDTH 5
 
+#define TRUNK 5
 #define HIGHWAY 0
 #define PRIMARY 1
 #define SECONDARY 2
@@ -110,7 +110,7 @@ public:
 
     // contains street segment data
     std::vector<streetSegData> StreetSegInfo;
-
+    
     // contains features data
     std::vector<featureData> FeatureInfo;
 
@@ -131,5 +131,11 @@ public:
     
     // contains whether or not to show 0-none/1-subways/2-trains/3-both
     int showRoute;
+   
+    int numStreetType [6];
+    std::vector<std::pair<unsigned, int>> streetType;
+    
+    //shows which button is on (0 means don't show, 1 means show)
+    int poiButtonStatus [4]; 
 };
 

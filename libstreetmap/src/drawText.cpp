@@ -51,30 +51,34 @@ void drawText::createText(int numStreetSegs, int numStreets, infoStrucs &info, e
         std::vector<int> alreadyDrawnStreets;
         alreadyDrawnStreets.resize(numStreets);
         alreadyDrawnStreets.clear();
-        int maxCount=6;
+        int maxCount=7;
         double currentArea=abs((currentRectangle.right()-currentRectangle.left())*(currentRectangle.top()-currentRectangle.bottom()));
         ezgl::rectangle startRectangle({xy.xMin,xy.yMin},{xy.xMax,xy.yMax});
         initialArea=abs((startRectangle.right()-startRectangle.left())*(startRectangle.top()-startRectangle.bottom()));
         bool drawHighway=(true);//but make it a bool so I can change it later
         bool drawPrimary=((currentArea/initialArea)<.20);
-        bool drawSecondary=((currentArea/initialArea)<.007);
+        bool drawSecondary=((currentArea/initialArea)<.05);
         bool drawResidential=((currentArea/initialArea)<.005);
         bool drawService=((currentArea/initialArea)<.0009);
         bool charCapOff=((currentArea/initialArea)<.005);
-
+        int space; 
+        
         int numRoadsDrawn=0;
         int roadTypes=5;
         if(drawPrimary){
-            maxCount=maxCount+2;
+            maxCount=maxCount+3;
+            space = 10;
         }
         if(drawSecondary){
-            maxCount=maxCount+2;
+            maxCount=maxCount+3;
+            space = 10;
         }
         if(drawResidential){
             maxCount=maxCount+0;
+            space = 5;
         }
         for(int p=0;p<roadTypes;p++){
-            for(int i=0;i<numStreetSegs;i++){
+            for(int i=0;i<numStreetSegs;i=i+space){
                 alreadyDrawnStreets.clear();
                 //getting intial and final positions 
                 LatLon initialPosition=info.IntersectionInfo[info.StreetSegInfo[i].fromIntersection].position;

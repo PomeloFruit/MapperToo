@@ -47,11 +47,19 @@ void hideSubwayButton(GtkWidget *widget, ezgl::application *application);
 void showSubwayButton(GtkWidget *widget, ezgl::application *application);
 void hideTrainsButton(GtkWidget *widget, ezgl::application *application);
 void showTrainsButton(GtkWidget *widget, ezgl::application *application);
+void loadTouristButton(GtkWidget *widget, ezgl::application *application);
+void hideTouristButton(GtkWidget *widget, ezgl::application *application);
+void showTouristButton(GtkWidget *widget, ezgl::application *application);
+void loadFDButton(GtkWidget *widget, ezgl::application *application);
+void hideFDButton(GtkWidget *widget, ezgl::application *application);
+void showFDButton(GtkWidget *widget, ezgl::application *application);
+void loadShopsButton(GtkWidget *widget, ezgl::application *application);
+void hideShopsButton(GtkWidget *widget, ezgl::application *application);
+void showShopsButton(GtkWidget *widget, ezgl::application *application);
+void loadAllButton(GtkWidget *widget, ezgl::application *application);
+void hideAllButton(GtkWidget *widget, ezgl::application *application);
+void showAllButton(GtkWidget *widget, ezgl::application *application);
 
-
-void loadMapButton(GtkWidget *widget, ezgl::application *application);
-void hideMapButton(GtkWidget *widget, ezgl::application *application);
-void showMapButton(GtkWidget *widget, ezgl::application *application);
 void newMap(std::string path, ezgl::application *application);
 void initializeMap(); 
 // Callback functions for event handling
@@ -158,7 +166,9 @@ void initial_setup(ezgl::application *application){
     
     application->create_button("Show Subways",8,showSubwayButton);
     application->create_button("Show Trains",9,showTrainsButton);
-    //application->create_button("Show New York", 10, loadMapButton); 
+    application->create_button("Show Tourist POIs", 10, loadTouristButton); 
+    application->create_button("Show Food/Drink POIs", 11, loadFDButton); 
+    application->create_button("Show Shopping POIs", 12, loadShopsButton); 
 }
 
 
@@ -365,26 +375,64 @@ void showTrainsButton(GtkWidget *widget, ezgl::application *application){
 }
 
 
-void loadMapButton(GtkWidget *widget, ezgl::application *application){
-    showMapButton(widget, application);
+void loadTouristButton(GtkWidget *widget, ezgl::application *application){
+    showTouristButton(widget, application);
 }
 
-void hideMapButton(GtkWidget *widget, ezgl::application *application){
-    std::string path = "toronto_canada";
-    application->destroy_button("Show Toronto"); 
-    application->create_button("Show New York", 10, showMapButton);
-    application->refresh_drawing(); 
+void hideTouristButton(GtkWidget *widget, ezgl::application *application){
+    info.poiButtonStatus[0] = 0;
     
-    newMap(path, application);
+    application->destroy_button("Hide Tourist POIs"); 
+    application->create_button("Show Tourist POIs", 10, showTouristButton);
+    application->refresh_drawing(); 
 }
 
-void showMapButton(GtkWidget *widget, ezgl::application *application){
-    std::string path = "beijing_china";
-    application->destroy_button("Show New York");
-    application->create_button("Show Toronto", 10, hideMapButton); 
+void showTouristButton(GtkWidget *widget, ezgl::application *application){
+    info.poiButtonStatus[0] = 1;
+    
+    application->destroy_button("Show Tourist POIs");
+    application->create_button("Hide Tourist POIs", 10, hideTouristButton); 
     application->refresh_drawing();
-    std::cout<<"I DID GO TO NEWYORK"<<'\n';
-    newMap(path, application);
+}
+
+void loadFDButton(GtkWidget *widget, ezgl::application *application){
+    showFDButton(widget, application);
+}
+
+void hideFDButton(GtkWidget *widget, ezgl::application *application){
+    info.poiButtonStatus[1] = 0;
+    
+    application->destroy_button("Hide Food/Drink POIs"); 
+    application->create_button("Show Food/Drink POIs", 11, showFDButton);
+    application->refresh_drawing(); 
+}
+
+void showFDButton(GtkWidget *widget, ezgl::application *application){
+    info.poiButtonStatus[1] = 1;
+    
+    application->destroy_button("Show Food/Drink POIs");
+    application->create_button("Hide Food/Drink POIs", 11, hideFDButton); 
+    application->refresh_drawing();
+}
+
+void loadShopsButton(GtkWidget *widget, ezgl::application *application){
+    showShopsButton(widget, application);
+}
+
+void hideShopsButton(GtkWidget *widget, ezgl::application *application){
+    info.poiButtonStatus[2] = 0;
+    
+    application->destroy_button("Hide Shopping POIs"); 
+    application->create_button("Show Shopping POIs", 12, showShopsButton);
+    application->refresh_drawing(); 
+}
+
+void showShopsButton(GtkWidget *widget, ezgl::application *application){
+    info.poiButtonStatus[2] = 1;
+    
+    application->destroy_button("Show Shopping POIs");
+    application->create_button("Hide Shopping POIs", 12, hideShopsButton); 
+    application->refresh_drawing();
 }
 
 void newMap(std::string path, ezgl::application *application){
@@ -421,12 +469,15 @@ void newMap(std::string path, ezgl::application *application){
 //        std::cout<<"start to load subway"<<std::endl;
 //        pop.loadAfterDraw(info);
 //    }
-    std::cout<<"loaded subways"<<std::endl;
     //ezgl::camera myCamera = myCanvas->get_camera();
     //myCamera.set_world(new_world); 
     
     application->refresh_drawing(); 
     std::cout<<"Now showing new map"<<std::endl;
     
+    std::cout<<"Number of Trunks: "<<info.numStreetType[5]<<std::endl;
+    std::cout<<"Number of Primary Roads: "<<info.numStreetType[1]<<std::endl;
+    std::cout<<"Number of Secondary Roads: "<<info.numStreetType[2]<<std::endl;
+    //std::cout<<"Max Lat: "<<xy.maxLat<<" Min Lat: "<<xy.minLat<<" Max Lon: "<<xy.maxLon<<" Min Lon: "<<xy.minLon<<std::endl;
 }
 

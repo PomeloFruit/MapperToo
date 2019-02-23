@@ -35,7 +35,13 @@ const int HIGHTRAINROUTE = 6;
 const int SUBWAYROUTE = 5;
 const int HIGHSUBWAYROUTE = 10;
 
+int foodDrinkLimit;
+int touristLimit; 
+int shopsLimit;
+
 int foodDrinkPOICounter;
+int touristPOICounter;
+int shopsPOICounter; 
     
 void featureDrawing::setFeatureColour(int type, ezgl::renderer &g, bool special){
     if(special){
@@ -112,6 +118,9 @@ int featureDrawing::classifyPOI(std::string type){
 
 void featureDrawing::drawFeatures(int numFeatures, infoStrucs &info, ezgl::renderer &g, double currentArea, double startArea){
     foodDrinkPOICounter=0;
+    touristPOICounter=0;
+    shopsPOICounter=0; 
+    
     int endDraw=1;
     if((currentArea/startArea)>0.8){
         endDraw=2;
@@ -151,13 +160,27 @@ void featureDrawing::drawFeatures(int numFeatures, infoStrucs &info, ezgl::rende
 
 // draw all
 void featureDrawing::drawPOI(int numPOI, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g, double adjustmentFactor, double currentArea){
-    bool sufficentlyZoomed=(adjustmentFactor)<0.01;
-    if(sufficentlyZoomed){
-        for(int i=0 ; i<numPOI ; i++){   
-            drawOnePOI(i, xy, info, g, adjustmentFactor, currentArea);
-        }
-        drawClickedPOI(xy, info, g, adjustmentFactor, currentArea);
+    bool zoom1=(adjustmentFactor)<0.5;
+    bool zoom2=(adjustmentFactor)<0.01;
+    
+    if(zoom2){
+        foodDrinkLimit = 40; 
+        touristLimit = 40;
+        shopsLimit = 40;
+    }else if (zoom1){
+        foodDrinkLimit = 20;
+        touristLimit = 20;
+        shopsLimit = 20;
+    }else{
+        foodDrinkLimit = 10;
+        touristLimit = 10;
+        shopsLimit = 10;
     }
+    
+    for(int i=0 ; i<numPOI ; i++){   
+        drawOnePOI(i, xy, info, g, adjustmentFactor, currentArea);
+    }
+    drawClickedPOI(xy, info, g, adjustmentFactor, currentArea);
 }
 
 // make sure last clicked is on top of others
@@ -169,14 +192,14 @@ void featureDrawing::drawClickedPOI(mapBoundary &xy, infoStrucs &info, ezgl::ren
 
 void featureDrawing::drawOnePOI(int i, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g, double adjustmentFactor, double currentArea){
     const double HIGHLIGHTRADIUS = 0.0005;
-    const double NORMALRAD = 0.00006;
-    double areaForcer=sqrt(0.000073593*currentArea/M_PI)/NORMALRAD;//that first number is the average of two proportions of areas that were deemed to be desireable
-    double areaForcerClick=sqrt(0.000432814*currentArea/M_PI)/HIGHLIGHTRADIUS;
+    const double radius = g.get_visible_world().width()*0.009;
+    //double areaForcer=sqrt(0.000073593*currentArea/M_PI)/NORMALRAD;//that first number is the average of two proportions of areas that were deemed to be desireable
+    //double areaForcerClick=sqrt(0.000432814*currentArea/M_PI)/HIGHLIGHTRADIUS;
     //double forcedRadius=areaForcer*NORMALRAD;
     //double forcedRadiusClick=areaForcerClick*HIGHLIGHTRADIUS;
     
     LatLon newPoint;
-    double xNew, yNew, radius; 
+    double xNew, yNew;
     
     newPoint = getPointOfInterestPosition(i);
     
@@ -192,7 +215,6 @@ void featureDrawing::drawOnePOI(int i, mapBoundary &xy, infoStrucs &info, ezgl::
     
     if (info.POIInfo[i].clicked&&drawPOI) {
 //        //highlight circle (pink)
-        radius = NORMALRAD;
 //        g.set_color(255,77,190,125);
 //        g.fill_elliptic_arc(ezgl::point2d(xNew,yNew),radius,radius,0,360);
 //        
@@ -200,31 +222,46 @@ void featureDrawing::drawOnePOI(int i, mapBoundary &xy, infoStrucs &info, ezgl::
 //        radius = forcedRadius;
 //        g.set_color(79,0,79,255);
 //        g.fill_elliptic_arc(ezgl::point2d(xNew,yNew),radius,radius,0,360);
+        
         g.draw_surface(g.load_png("/homes/d/dujia3/ece297/work/mapper/libstreetmap/resources/POI_select.png"), ezgl::point2d(xNew-radius, yNew+radius));
-        foodDrinkPOICounter++;
-
+        if(info.POIInfo[i].poiNum == 1 && info.poiButtonStatus[0] == 1){
+            touristPOICounter++;
+        }else if(info.POIInfo[i].poiNum == 2 && info.poiButtonStatus[1] == 1){
+            foodDrinkPOICounter++;
+        }else if (info.POIInfo[i].poiNum == 3 && info.poiButtonStatus[2] == 1){
+            shopsPOICounter++;
+        }
     } else if(drawPOI){
         //regular POI (dark red)
         info.POIInfo[i].poiNum = classifyPOI(info.POIInfo[i].type);
-        radius = NORMALRAD;
 //        setPOIColour(poiType, g);
-        if((info.POIInfo[i].poiNum!=2)){
-            if(info.POIInfo[i].poiNum == 1){
-                g.draw_surface(g.load_png("/homes/d/dujia3/ece297/work/mapper/libstreetmap/resources/tourist.png"), ezgl::point2d(xNew-radius, yNew+radius));
-            }else if (info.POIInfo[i].poiNum == 3){
-                g.draw_surface(g.load_png("/homes/d/dujia3/ece297/work/mapper/libstreetmap/resources/shop bag.png"), ezgl::point2d(xNew-radius, yNew+radius));
-            }
-            //g.fill_elliptic_arc(ezgl::point2d(xNew,yNew),radius,radius,0,360);
-        }
-        else if(foodDrinkPOICounter<50){
+        if(info.POIInfo[i].poiNum == 1 && touristPOICounter < touristLimit && info.poiButtonStatus[0] == 1){
+            g.draw_surface(g.load_png("/homes/d/dujia3/ece297/work/mapper/libstreetmap/resources/tourist.png"), ezgl::point2d(xNew-radius, yNew+radius));
+            touristPOICounter++;
+        } else if (info.POIInfo[i].poiNum == 2 && foodDrinkPOICounter < foodDrinkLimit && info.poiButtonStatus[1] == 1){
             g.draw_surface(g.load_png("/homes/d/dujia3/ece297/work/mapper/libstreetmap/resources/food.png"), ezgl::point2d(xNew-radius, yNew+radius));
-//            g.fill_elliptic_arc(ezgl::point2d(xNew,yNew),radius,radius,0,360);
             foodDrinkPOICounter++;
+        } else if (info.POIInfo[i].poiNum == 3 && shopsPOICounter < shopsLimit && info.poiButtonStatus[2] == 1){
+            g.draw_surface(g.load_png("/homes/d/dujia3/ece297/work/mapper/libstreetmap/resources/shop bag.png"), ezgl::point2d(xNew-radius, yNew+radius));
+            shopsPOICounter++;
         }
-            //g.draw_surface(g.load_png("/homes/d/dujia3/ece297/work/mapper/libstreetmap/resources/small_image.png"), ezgl::point2d(xNew, yNew));
-        //radius = NORMALRAD;
-        //setPOIColour(classifyPOI(info.POIInfo[i].type), g);  
-        //g.fill_elliptic_arc(ezgl::point2d(xNew,yNew),radius,radius,0,360);
+//        if((info.POIInfo[i].poiNum!=2)){
+//            if(info.POIInfo[i].poiNum == 1){
+//                g.draw_surface(g.load_png("/homes/d/dujia3/ece297/work/mapper/libstreetmap/resources/tourist.png"), ezgl::point2d(xNew-radius, yNew+radius));
+//            }else if (info.POIInfo[i].poiNum == 3){
+//                g.draw_surface(g.load_png("/homes/d/dujia3/ece297/work/mapper/libstreetmap/resources/shop bag.png"), ezgl::point2d(xNew-radius, yNew+radius));
+//            }
+//            //g.fill_elliptic_arc(ezgl::point2d(xNew,yNew),radius,radius,0,360);
+//        }
+//        else if(foodDrinkPOICounter<50){
+//            g.draw_surface(g.load_png("/homes/d/dujia3/ece297/work/mapper/libstreetmap/resources/food.png"), ezgl::point2d(xNew-radius, yNew+radius));
+////            g.fill_elliptic_arc(ezgl::point2d(xNew,yNew),radius,radius,0,360);
+//            foodDrinkPOICounter++;
+//        }
+//            //g.draw_surface(g.load_png("/homes/d/dujia3/ece297/work/mapper/libstreetmap/resources/small_image.png"), ezgl::point2d(xNew, yNew));
+//        //radius = NORMALRAD;
+//        //setPOIColour(classifyPOI(info.POIInfo[i].type), g);  
+//        //g.fill_elliptic_arc(ezgl::point2d(xNew,yNew),radius,radius,0,360);
     }
 }
 
@@ -239,6 +276,7 @@ void featureDrawing::drawSubways(int draw, mapBoundary &xy, infoStrucs &info, ez
 }
 
 void featureDrawing::drawOneSubway(unsigned i, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g){
+    const double radius = g.get_visible_world().width()*0.009;
     double xNew, yNew;
     LatLon drawPoint;
     
@@ -249,14 +287,16 @@ void featureDrawing::drawOneSubway(unsigned i, mapBoundary &xy, infoStrucs &info
     yNew = xy.yFromLat(drawPoint.lat());
     
     if(info.SubwayInfo[i].clicked){
-        g.set_color(64,255,194,255);
-        g.fill_elliptic_arc(ezgl::point2d(xNew,yNew),SUBWAYRAD,SUBWAYRAD,0,360);
-        g.set_color(255,155,36,150);
-        g.fill_elliptic_arc(ezgl::point2d(xNew,yNew),HIGHLIGHTRAD,HIGHLIGHTRAD,0,360);
+//        g.set_color(64,255,194,255);
+//        g.fill_elliptic_arc(ezgl::point2d(xNew,yNew),SUBWAYRAD,SUBWAYRAD,0,360);
+//        g.set_color(255,155,36,150);
+//        g.fill_elliptic_arc(ezgl::point2d(xNew,yNew),HIGHLIGHTRAD,HIGHLIGHTRAD,0,360);
+        g.draw_surface(g.load_png("/homes/d/dujia3/ece297/work/mapper/libstreetmap/resources/train_click.png"), ezgl::point2d(xNew-radius, yNew+radius));
         return;
     }
-    
-    g.fill_elliptic_arc(ezgl::point2d(xNew,yNew),SUBWAYRAD,SUBWAYRAD,0,360);
+//    g.fill_elliptic_arc(ezgl::point2d(xNew,yNew),SUBWAYRAD,SUBWAYRAD,0,360);
+    g.draw_surface(g.load_png("/homes/d/dujia3/ece297/work/mapper/libstreetmap/resources/train.png"), ezgl::point2d(xNew-radius, yNew+radius));
+
 }
 
 void featureDrawing::drawSubwayRoute(int draw, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g){
@@ -302,17 +342,17 @@ void featureDrawing::drawStraightSubwaySection(LatLon &pt1, LatLon &pt2, mapBoun
         g.set_color(255,153,0,255);
         g.set_line_width(SUBWAYROUTE);
     } else if (t==2) {
-        g.set_color(75,75,75,255);
+        g.set_color(0,34,157,179);
         g.set_line_width(TRAINROUTE);
     }
     g.draw_line({xInitial, yInitial},{xFinal, yFinal});
     
     if(high){
         if (t==1) { 
-            g.set_color(51,102,255,150);
+            g.set_color(23,186,189,179);
             g.set_line_width(HIGHSUBWAYROUTE);
         } else if (t==2) { 
-            g.set_color(8,157,24,150);
+            g.set_color(23,186,189,179);
             g.set_line_width(HIGHTRAINROUTE);
         }
         g.draw_line({xInitial, yInitial},{xFinal, yFinal});

@@ -55,6 +55,10 @@ void populateData::clear(infoStrucs &info){
     info.lastPOI.clear();
     info.lastSeg.clear();
     info.lastSubway.clear();
+    info.streetType.clear();
+    for(int i = 0; i < 6; i++){
+        info.numStreetType[i] = 0;
+    }
 }
 
 
@@ -112,12 +116,46 @@ void populateData::populateStreetSegInfo(infoStrucs &info){
         info.StreetSegInfo[i].id = getInfoStreetSegment(i).wayOSMID;//is the OSMID unique?
         info.StreetSegInfo[i].wayPtr = info.WayMap[info.StreetSegInfo[i].id];
         info.StreetSegInfo[i].type = getRoadType(info.StreetSegInfo[i].wayPtr);
+        classifyStreetType(i, info);
         info.StreetSegInfo[i].name = getStreetName((getInfoStreetSegment(i).streetID));//gives the name of the street segment (for use in putting the names))
         info.StreetSegInfo[i].streetID=getInfoStreetSegment(i).streetID;
         info.StreetSegInfo[i].clicked = false;
     }
+    streetTypeArray(info);
 }
 
+void populateData::classifyStreetType(int i, infoStrucs &info){
+    bool found = false;
+    unsigned ID = getInfoStreetSegment(i).streetID;
+    int type = getRoadType(info.StreetSegInfo[i].wayPtr);
+    
+    for(auto it = info.streetType.begin(); it != info.streetType.end(); it++){
+        if(it->first == ID){
+            found = true;
+        }
+    }
+    if(!found){
+        info.streetType.push_back(std::make_pair(ID, type));
+    }
+}
+
+void populateData::streetTypeArray(infoStrucs &info){
+    for(auto it = info.streetType.begin(); it != info.streetType.end(); it++){
+        if(it->second == HIGHWAY){
+            info.numStreetType[0]++;
+        }else if (it->second == PRIMARY){
+            info.numStreetType[1]++;
+        }else if (it->second == SECONDARY){
+            info.numStreetType[2]++;
+        }else if (it->second == RESIDENTIAL){
+            info.numStreetType[3]++;
+        }else if (it->second == SERVICE){
+            info.numStreetType[4]++;
+        }else if (it->second == TRUNK){
+            info.numStreetType[5]++;
+        }
+    }
+}
 
 /* populateIntersectionInfo function
  * - fills the intersection vector in info 
@@ -349,13 +387,15 @@ int populateData::getRoadType(const OSMWay* wayPtr){
         if(key == "highway"){
             if(value == "motorway" || value == "motorway_link"){
                 return HIGHWAY;
-            } else if (value == "trunk" || value == "trunk_link" || value == "primary"){
+            } else if (value == "primary"){
                 return PRIMARY;
             } else if (value == "secondary" || value == "tertiary"){
                 return SECONDARY;
             } else if (value == "residential"){
                 return RESIDENTIAL;
-            } else {
+            } else if (value == "trunk" || value == "trunk_link"){
+                return TRUNK; 
+            }else {
                 return SERVICE;
             }
         }
