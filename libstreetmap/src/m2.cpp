@@ -132,7 +132,7 @@ void draw_main_canvas(ezgl::renderer &g){
     
     ft.drawFeatures(getNumFeatures(), info, g ,currentArea, startArea);
     std::cout<<"FEATURES DONE"<<'\n';
-    rd.drawStreetRoads(getNumStreetSegments(), xy, info, g, startArea, currentArea);
+    rd.drawStreetRoads(getNumStreetSegments(), xy, info, g, startArea, currentArea, currentRectangle);
     std::cout<<"ROADS DONE"<<'\n';
     rd.drawIntersections(getNumIntersections(), xy, info, g);
     std::cout<<"INTERSECTIONS DONE"<<'\n';
