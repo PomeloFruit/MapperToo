@@ -42,7 +42,10 @@ int shopsLimit;
 int foodDrinkPOICounter;
 int touristPOICounter;
 int shopsPOICounter; 
-    
+
+std::vector<std::pair<ezgl::point2d, int>> drawnPOIs;
+//std::vector<ezgl::point2d> drawnPOIs;
+
 void featureDrawing::setFeatureColour(int type, ezgl::renderer &g, bool special){
     if(special){
         g.set_color(0,0,0,150);
@@ -120,15 +123,14 @@ void featureDrawing::drawFeatures(int numFeatures, infoStrucs &info, ezgl::rende
     foodDrinkPOICounter=0;
     touristPOICounter=0;
     shopsPOICounter=0; 
-    
     int endDraw=1;
-    if((currentArea/startArea)>0.8){
+    if((currentArea/startArea)>0.7){
         endDraw=2;
     }
-    else if((0.8>(currentArea/startArea))&&((currentArea/startArea)>0.3)){
+    else if((0.8>(currentArea/startArea))&&((currentArea/startArea)>0.2)){
         endDraw=3;
     }
-    else if((0.3>(currentArea/startArea))&&((currentArea/startArea)>0.1)){
+    else if((0.3>(currentArea/startArea))&&((currentArea/startArea)>0.01)){
         endDraw=4;
     }
     else{
@@ -162,6 +164,8 @@ void featureDrawing::drawFeatures(int numFeatures, infoStrucs &info, ezgl::rende
 void featureDrawing::drawPOI(int numPOI, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g, double adjustmentFactor){
     bool zoom1=(adjustmentFactor)<0.5;
     bool zoom2=(adjustmentFactor)<0.01;
+    
+    drawnPOIs.clear();
     
     if(zoom2){
         foodDrinkLimit = 40; 
@@ -226,11 +230,15 @@ void featureDrawing::drawOnePOI(int i, mapBoundary &xy, infoStrucs &info, ezgl::
         g.draw_surface(g.load_png("/homes/d/dujia3/ece297/work/mapper/libstreetmap/resources/POI_select.png"), ezgl::point2d(xNew-radius, yNew+radius));
         if(info.POIInfo[i].poiNum == 1 && info.poiButtonStatus[0] == 1){
             touristPOICounter++;
+            drawnPOIs.push_back(std::make_pair(ezgl::point2d(xNew-radius, yNew+radius), i));
         }else if(info.POIInfo[i].poiNum == 2 && info.poiButtonStatus[1] == 1){
             foodDrinkPOICounter++;
+            drawnPOIs.push_back(std::make_pair(ezgl::point2d(xNew-radius, yNew+radius), i));
         }else if (info.POIInfo[i].poiNum == 3 && info.poiButtonStatus[2] == 1){
             shopsPOICounter++;
+            drawnPOIs.push_back(std::make_pair(ezgl::point2d(xNew-radius, yNew+radius), i));
         }
+        //drawnPOIs.push_back(ezgl::point2d(xNew-radius, yNew+radius));
     } else if(drawPOI){
         //regular POI (dark red)
         info.POIInfo[i].poiNum = classifyPOI(info.POIInfo[i].type);
@@ -238,13 +246,18 @@ void featureDrawing::drawOnePOI(int i, mapBoundary &xy, infoStrucs &info, ezgl::
         if(info.POIInfo[i].poiNum == 1 && touristPOICounter < touristLimit && info.poiButtonStatus[0] == 1){
             g.draw_surface(g.load_png("/homes/d/dujia3/ece297/work/mapper/libstreetmap/resources/tourist.png"), ezgl::point2d(xNew-radius, yNew+radius));
             touristPOICounter++;
+            drawnPOIs.push_back(std::make_pair(ezgl::point2d(xNew-radius, yNew+radius), i));
         } else if (info.POIInfo[i].poiNum == 2 && foodDrinkPOICounter < foodDrinkLimit && info.poiButtonStatus[1] == 1){
             g.draw_surface(g.load_png("/homes/d/dujia3/ece297/work/mapper/libstreetmap/resources/food.png"), ezgl::point2d(xNew-radius, yNew+radius));
             foodDrinkPOICounter++;
+            drawnPOIs.push_back(std::make_pair(ezgl::point2d(xNew-radius, yNew+radius), i));
         } else if (info.POIInfo[i].poiNum == 3 && shopsPOICounter < shopsLimit && info.poiButtonStatus[2] == 1){
             g.draw_surface(g.load_png("/homes/d/dujia3/ece297/work/mapper/libstreetmap/resources/shop bag.png"), ezgl::point2d(xNew-radius, yNew+radius));
             shopsPOICounter++;
+            drawnPOIs.push_back(std::make_pair(ezgl::point2d(xNew-radius, yNew+radius), i));
         }
+        
+        //drawnPOIs.push_back(ezgl::point2d(xNew-radius, yNew+radius));
 //        if((info.POIInfo[i].poiNum!=2)){
 //            if(info.POIInfo[i].poiNum == 1){
 //                g.draw_surface(g.load_png("/homes/d/dujia3/ece297/work/mapper/libstreetmap/resources/tourist.png"), ezgl::point2d(xNew-radius, yNew+radius));
@@ -358,3 +371,17 @@ void featureDrawing::drawStraightSubwaySection(LatLon &pt1, LatLon &pt2, mapBoun
         g.draw_line({xInitial, yInitial},{xFinal, yFinal});
     }
 }
+
+void featureDrawing::drawTextOnPOI(ezgl::renderer &g, infoStrucs &info){
+    int namesToBeDrawn=drawnPOIs.size();
+    g.set_text_rotation(0);
+    //probably set a character limit somewhere around here
+    for(int i=0;i<namesToBeDrawn;i++){
+        g.draw_text(drawnPOIs[i].first, info.POIInfo[drawnPOIs[i].second].name);
+    }
+    
+}
+//drawn features==>literally just do push_back id or whaetever, clear each time different poi's are drawn, draw horizontally I guess
+//it seems like google maps really doesn't care where it draws the text but they also seems to keep track of where text is placed <== this is doable but I think it would take more time and effort than I think it's worth
+//so basically I'm just gonna put the text just like somewhere around the poi and horizontal
+//also currently (the 24th) no warnings

@@ -29,4 +29,6 @@ public:
     void drawOneSubwayRoute(unsigned r, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g, int t);
     
     void drawStraightSubwaySection(LatLon &pt1, LatLon &pt2, mapBoundary &xy, ezgl::renderer &g, bool high, int t);
+    
+    void drawTextOnPOI(ezgl::renderer &g, infoStrucs &info);
 };

@@ -144,6 +144,8 @@ void draw_main_canvas(ezgl::renderer &g){
     std::cout<<"SPEC INTERSECIOTNS DONE"<<'\n';
     dt.createText(getNumStreetSegments(), getNumStreets(), info, g);
     std::cout<<"TEXT DONE"<<'\n';
+    ft.drawTextOnPOI(g, info);
+    std::cout<<"TEXT ON POI DONE"<<'\n';
 
     
  //   std::cout<<currentArea<<'\n';
