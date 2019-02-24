@@ -197,19 +197,25 @@ std::string clickActions::searchOnMap(infoStrucs &info){
             }
         }
         
-        // add full name of streets into search field
-        info.corInput1=getStreetName(street1ID[correct1]);
-        info.corInput2=getStreetName(street2ID[correct2]);
+        if(resultID.size() > 0){ // if intersection found
         
-        // call for the intersection to be highlighted
-        highlightIntersection(info, resultID);
-        
-        // create a message about the intersection found
-        displayMessage = "Intersection(s) Found: ";
-        for(unsigned i=0 ; i<resultID.size()-1 ; i++){
-            displayMessage += getIntersectionName(resultID[i]) + " | ";
-        }        
-        displayMessage += getIntersectionName(resultID[resultID.size()-1]);
+            // add full name of streets into search field
+            info.corInput1=getStreetName(street1ID[correct1]);
+            info.corInput2=getStreetName(street2ID[correct2]);
+
+            // call for the intersection to be highlighted
+            highlightIntersection(info, resultID);
+
+            // create a message about the intersection found
+            displayMessage = "Intersection(s) Found: ";
+            for(unsigned i=0 ; i<resultID.size()-1 ; i++){
+                displayMessage += getIntersectionName(resultID[i]) + " | ";
+            }        
+            displayMessage += getIntersectionName(resultID[resultID.size()-1]);
+            
+        } else { // no intersection found
+            displayMessage = "No intersections found, please double-check the street names.";
+        }
     
     // find street from input 1
     } else if(match1 > RESULTNONE) { 
@@ -223,6 +229,8 @@ std::string clickActions::searchOnMap(infoStrucs &info){
         if(resultID.size()>1){
             displayMessage += " (1 of " + std::to_string(resultID.size()) + ")"; 
         }
+        
+        highlightStreet(info, resultID[0]);
 
     // find street from input 2
     } else if(match2 > RESULTNONE) { 
@@ -529,7 +537,7 @@ void clickActions::highlightStreet(infoStrucs &info, unsigned highID){
     std::vector<unsigned> highIDinVec;
     highIDinVec.clear();
     highIDinVec.push_back(highID);
-    highlightPOI(info, highIDinVec);
+    highlightStreet(info, highIDinVec);
 }
 
 
