@@ -158,7 +158,7 @@
             </child>
             <child>
               <object class="GtkButton" id="ProceedButton">
-                <property name="label" translatable="yes">Proceed</property>
+                <property name="label" translatable="yes">Exit Map</property>
                 <property name="use_action_appearance">False</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>

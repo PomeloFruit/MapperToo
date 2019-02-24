@@ -214,7 +214,7 @@ std::string clickActions::searchOnMap(infoStrucs &info){
             displayMessage += getIntersectionName(resultID[resultID.size()-1]);
             
         } else { // no intersection found
-            displayMessage = "No intersections found, please double-check the street names.";
+            displayMessage = "No intersections found.";
         }
     
     // find street from input 1
