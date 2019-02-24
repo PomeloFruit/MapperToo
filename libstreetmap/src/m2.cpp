@@ -42,6 +42,8 @@ void draw_main_canvas(ezgl::renderer &g);
 void initial_setup(ezgl::application *application);
 void act_on_mouse_press(ezgl::application *application, GdkEventButton *event, double x, double y);
 void findButton(GtkWidget *widget, ezgl::application *application);
+void dialog_box(GtkWidget *widget, ezgl::application *application, std::string message);
+void on_dialog_response(GtkDialog *dialog, gint response_id, gpointer user_data);
 
 void hideSubwayButton(GtkWidget *widget, ezgl::application *application);
 void showSubwayButton(GtkWidget *widget, ezgl::application *application);
@@ -274,7 +276,37 @@ void findButton(GtkWidget *widget, ezgl::application *application){
         application->update_message(message);
         application->refresh_drawing();
     }
+    dialog_box(widget, application, message);
+}
+
+void dialog_box(GtkWidget *widget, ezgl::application *application, std::string message){
+    GObject *window; // the parent window over which to add the dialog
+    GtkWidget *content_area; // the content area of the dialog (i.e. where to put stuff in the dialog)
+    GtkWidget *label; // the label we will create to display a message in the content area
+    GtkWidget *dialog; // the dialog box we will create
     
+    // get a pointer to the main application window
+    window = application->get_object(application->get_main_window_id().c_str());
+    
+    // Create the dialog window. Modal windows prevent interaction with other windows in the same application
+    dialog = gtk_dialog_new_with_buttons("Test Dialog",(GtkWindow*) window, GTK_DIALOG_MODAL, ("OK"), 
+                                    GTK_RESPONSE_ACCEPT, ("CANCEL"), GTK_RESPONSE_REJECT, NULL);
+    
+    // Create a label and attach it to the content area of the dialog
+    content_area = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
+    label = gtk_label_new(message.c_str());
+    gtk_container_add(GTK_CONTAINER(content_area), label);
+    
+    // The main purpose of this is to show dialog’s child widget, label
+    gtk_widget_show_all(dialog);
+    
+    // Connecting the "response" signal from the user to the associated callback function
+    g_signal_connect(GTK_DIALOG(dialog), "response", G_CALLBACK(on_dialog_response), NULL);
+    
+}
+
+void on_dialog_response(GtkDialog *dialog, gint response_id, gpointer user_data){
+    gtk_widget_destroy(GTK_WIDGET (dialog));
 }
 
 
