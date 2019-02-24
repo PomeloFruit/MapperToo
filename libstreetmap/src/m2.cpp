@@ -58,6 +58,7 @@ void hideShopsButton(GtkWidget *widget, ezgl::application *application);
 void showShopsButton(GtkWidget *widget, ezgl::application *application);
 void hideAllButton(GtkWidget *widget, ezgl::application *application);
 void showAllButton(GtkWidget *widget, ezgl::application *application);
+void helpButton(GtkWidget *widget, ezgl::application *application);
 
 void newMap(std::string path, ezgl::application *application);
 void initializeMap(); 
@@ -123,9 +124,11 @@ void draw_map(){
 void draw_main_canvas(ezgl::renderer &g){
     g.set_color(219,219,219,255); //light gray for background
     g.fill_rectangle(g.get_visible_world());
+    
     ezgl::rectangle startRectangle({xy.xMin,xy.yMin},{xy.xMax,xy.yMax});
     startArea=abs((startRectangle.right()-startRectangle.left())*(startRectangle.top()-startRectangle.bottom()));
     ezgl::rectangle currentRectangle=g.get_visible_world();
+    
     double currentArea=abs((currentRectangle.right()-currentRectangle.left())*(currentRectangle.top()-currentRectangle.bottom()));
     //double adjustmentFactor=1/(currentArea/startArea);//for some reason it's not letting me take in the visible screen stuff, so I'm just going to do it here
     double screenRatio=(currentArea/startArea);
@@ -133,24 +136,13 @@ void draw_main_canvas(ezgl::renderer &g){
 //    std::cout<<adjustmentFactor<<currentArea<<startArea<<'\n';
     
     ft.drawFeatures(getNumFeatures(), info, g ,currentArea, startArea);
-    std::cout<<"FEATURES DONE"<<'\n';
     rd.drawStreetRoads(getNumStreetSegments(), xy, info, g, startArea, currentArea, currentRectangle);
-    std::cout<<"ROADS DONE"<<'\n';
     rd.drawIntersections(getNumIntersections(), xy, info, g);
-    std::cout<<"INTERSECTIONS DONE"<<'\n';
     ft.drawPOI(getNumPointsOfInterest(), xy, info, g, screenRatio);
-    std::cout<<"POI DONE"<<'\n';
     ft.drawSubways(info.showRoute, xy, info, g);
-    std::cout<<"SUBWAY DONE"<<'\n';
     rd.drawSpecialIntersections(xy,info,g);
-    std::cout<<"SPEC INTERSECIOTNS DONE"<<'\n';
     dt.createText(getNumStreetSegments(), getNumStreets(), info, g);
-    std::cout<<"TEXT DONE"<<'\n';
     ft.drawTextOnPOI(g, info);
-    std::cout<<"TEXT ON POI DONE"<<'\n';
-
-    
- //   std::cout<<currentArea<<'\n';
 }
 
 
@@ -170,7 +162,8 @@ void initial_setup(ezgl::application *application){
     application->create_button("Show Trains",9,showTrainsButton);
     application->create_button("Show Tourist POIs", 10, showTouristButton); 
     application->create_button("Show Food/Drink POIs", 11, showFDButton); 
-    application->create_button("Show Shopping POIs", 12, showShopsButton); 
+    application->create_button("Show Shopping POIs", 12, showShopsButton);
+    application->create_button("Help", 13, helpButton);
 }
 
 
@@ -276,7 +269,7 @@ void findButton(GtkWidget *widget, ezgl::application *application){
         application->update_message(message);
         application->refresh_drawing();
     }
-    dialog_box(widget, application, message);
+   // dialog_box(widget, application, message);
 }
 
 void dialog_box(GtkWidget *widget, ezgl::application *application, std::string message){
@@ -289,8 +282,8 @@ void dialog_box(GtkWidget *widget, ezgl::application *application, std::string m
     window = application->get_object(application->get_main_window_id().c_str());
     
     // Create the dialog window. Modal windows prevent interaction with other windows in the same application
-    dialog = gtk_dialog_new_with_buttons("Test Dialog",(GtkWindow*) window, GTK_DIALOG_MODAL, ("OK"), 
-                                    GTK_RESPONSE_ACCEPT, ("CANCEL"), GTK_RESPONSE_REJECT, NULL);
+    dialog = gtk_dialog_new_with_buttons("MapperToo",(GtkWindow*) window, GTK_DIALOG_MODAL, ("OK"), 
+                                    GTK_RESPONSE_ACCEPT, NULL);
     
     // Create a label and attach it to the content area of the dialog
     content_area = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
@@ -506,4 +499,29 @@ void newMap(std::string path, ezgl::application *application){
     std::cout<<"Number of Secondary Roads: "<<info.numStreetType[2]<<std::endl;
     //std::cout<<"Max Lat: "<<xy.maxLat<<" Min Lat: "<<xy.minLat<<" Max Lon: "<<xy.maxLon<<" Min Lon: "<<xy.minLon<<std::endl;
 }
+
+void helpButton(GtkWidget *widget, ezgl::application *application){
+    std::string message;
+    
+    message = "Welcome to MapperToo - The GIS of magic\n"
+            "\n"
+            "The search bar at the top can be used to find intersections, streets, POI, Features, and Subways.\n"
+            "To search for:\n"
+            " - intersections > enter the name of street 1 on the left search box, and name of street 2 in the right search box\n"
+            " - streets, POI, Features > enter name in the left search box\n"
+            " - subway stations, \n"
+            "\t  - ensure 'show subways' or 'show trains' button has been clicked\n"
+            "\t  - enter the station name in the left search box, ensuring the name ends with 'station'\n"
+            "Make sure to hit the 'Find' button after entering the names!\n"
+            "\n"
+            " As well, you can access more information by: \n"
+            " - left-clicking on POI, where a red marker will be placed\n"
+            " - right-clicking on intersections, where a green figure will be placed\n"
+            " - left-click while holding the <ctrl> key, to inquire subway stations\n"
+            "\n"
+            "To change maps, simply enter the city name, and hit find.\n";
+            
+    dialog_box(widget, application, message.c_str());
+}
+
 
