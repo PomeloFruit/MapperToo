@@ -64,7 +64,7 @@ void roadDrawing::setRoadColourSize(int type, bool highlight, ezgl::renderer &g,
         from = info.IntersectionInfo[info.StreetSegInfo[i].fromIntersection].position;
         
         sufficentlyZoomed=(currentArea/startArea)<0.25;
-        sufficentlyBig=(info.StreetSegInfo[i].type==0||info.StreetSegInfo[i].type==1||info.StreetSegInfo[i].type==5);
+        sufficentlyBig=(info.StreetSegInfo[i].type==0||info.StreetSegInfo[i].type==1||info.StreetSegInfo[i].type==2);
         
         
         

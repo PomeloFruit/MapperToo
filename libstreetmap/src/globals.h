@@ -132,6 +132,7 @@ public:
     // contains whether or not to show 0-none/1-subways/2-trains/3-both
     int showRoute;
    
+    //0 is highway ... 4 is service, 5 is trunk 
     int numStreetType [6];
     std::vector<std::pair<unsigned, int>> streetType;
     
