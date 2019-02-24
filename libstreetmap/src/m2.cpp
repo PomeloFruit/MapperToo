@@ -238,13 +238,15 @@ void findButton(GtkWidget *widget, ezgl::application *application){
         if(it->first == potentialCityName && it->second.empty()){
             changeMap = true; 
             path_name = it->first;
-
+            
+            application->update_message("New map loaded");
             newMap(path_name, application);
             break;
-        }else if (it->first == potentialCityName && !(it->second.empty())){
+        } else if (it->first == potentialCityName && !(it->second.empty())){
             changeMap = true;
             path_name = it->first + "_" + it->second; 
             
+            application->update_message("New map loaded");
             newMap(path_name, application);
             break;
         } 
@@ -269,7 +271,6 @@ void findButton(GtkWidget *widget, ezgl::application *application){
         application->update_message(message);
         application->refresh_drawing();
     }
-   // dialog_box(widget, application, message);
 }
 
 void dialog_box(GtkWidget *widget, ezgl::application *application, std::string message){
@@ -277,6 +278,9 @@ void dialog_box(GtkWidget *widget, ezgl::application *application, std::string m
     GtkWidget *content_area; // the content area of the dialog (i.e. where to put stuff in the dialog)
     GtkWidget *label; // the label we will create to display a message in the content area
     GtkWidget *dialog; // the dialog box we will create
+    
+    //cancels warning / not needed at all
+    widget->parent_instance.ref_count;
     
     // get a pointer to the main application window
     window = application->get_object(application->get_main_window_id().c_str());
@@ -298,6 +302,7 @@ void dialog_box(GtkWidget *widget, ezgl::application *application, std::string m
     
 }
 
+// couldnt suppress these warnings
 void on_dialog_response(GtkDialog *dialog, gint response_id, gpointer user_data){
     gtk_widget_destroy(GTK_WIDGET (dialog));
 }
@@ -507,12 +512,16 @@ void helpButton(GtkWidget *widget, ezgl::application *application){
             "\n"
             "The search bar at the top can be used to find intersections, streets, POI, Features, and Subways.\n"
             "To search for:\n"
-            " - intersections > enter the name of street 1 on the left search box, and name of street 2 in the right search box\n"
-            " - streets, POI, Features > enter name in the left search box\n"
+            " - intersections,\n"
+            "\t - enter the name of street 1 on the left search box and\n"
+            "\t - name of street 2 in the right search box\n"
+            " - streets, POI, Features,\n"
+            "\t - enter name in the left search box\n"
             " - subway stations, \n"
             "\t  - ensure 'show subways' or 'show trains' button has been clicked\n"
             "\t  - enter the station name in the left search box, ensuring the name ends with 'station'\n"
-            "Make sure to hit the 'Find' button after entering the names!\n"
+            "\n"
+            "***** Make sure to hit the 'Find' button after entering the names! *****\n"
             "\n"
             " As well, you can access more information by: \n"
             " - left-clicking on POI, where a red marker will be placed\n"

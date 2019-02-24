@@ -227,7 +227,7 @@ std::string clickActions::searchOnMap(infoStrucs &info){
         
         // if multiple results, tell user which option they are seeing
         if(resultID.size()>1){
-            displayMessage += " (1 of " + std::to_string(resultID.size()) + ")"; 
+            displayMessage += " (Displaying 1 of " + std::to_string(resultID.size()) + " found)"; 
         }
         
         highlightStreet(info, resultID[0]);
@@ -241,7 +241,7 @@ std::string clickActions::searchOnMap(infoStrucs &info){
         info.corInput2 = getStreetName(resultID[0]);
         
         if(resultID.size()>1){
-            displayMessage += " (1 of " + std::to_string(resultID.size()) + ")"; 
+            displayMessage += " (Displaying 1 of " + std::to_string(resultID.size()) + " found)"; 
         }
         
         highlightStreet(info, resultID[0]);
@@ -255,7 +255,7 @@ std::string clickActions::searchOnMap(infoStrucs &info){
         info.corInput1 = info.POIInfo[resultID[0]].name;
         
         if(resultID.size()>1){
-            displayMessage += " (1 of " + std::to_string(resultID.size()) + ")"; 
+            displayMessage += " (Displaying 1 of " + std::to_string(resultID.size()) + " found)"; 
         }
         
         highlightPOI(info, resultID);
@@ -269,7 +269,7 @@ std::string clickActions::searchOnMap(infoStrucs &info){
         info.corInput1 = info.SubwayInfo[resultID[0]].name;
         
         if(resultID.size()>1){
-            displayMessage += " (1 of " + std::to_string(resultID.size()) + ")"; 
+            displayMessage += " (Displaying 1 of " + std::to_string(resultID.size()) + " found)"; 
         }
         
         highlightSubway(info, resultID);
@@ -285,7 +285,7 @@ std::string clickActions::searchOnMap(infoStrucs &info){
         info.corInput1 = info.FeatureInfo[resultID[0]].name;
         
         if(resultID.size()>1){
-            displayMessage += " (1 of " + std::to_string(resultID.size()) + ")"; 
+            displayMessage += " (Displaying 1 of " + std::to_string(resultID.size()) + " found)"; 
         }
         
         highlightFeature(info, resultID[0]);
