@@ -65,13 +65,14 @@ void drawText::createText(int numStreetSegs, int numStreets, infoStrucs &info, e
         
         int numRoadsDrawn=0;
         int roadTypes=5;
+        //add something for trunks
         if(drawPrimary){
             maxCount=maxCount+3;
-            space = 10;
+            space = 5;
         }
         if(drawSecondary){
             maxCount=maxCount+3;
-            space = 10;
+            space = 50;
         }
         if(drawResidential){
             maxCount=maxCount+0;

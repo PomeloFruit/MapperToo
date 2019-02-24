@@ -50,13 +50,10 @@ void showTrainsButton(GtkWidget *widget, ezgl::application *application);
 void loadTouristButton(GtkWidget *widget, ezgl::application *application);
 void hideTouristButton(GtkWidget *widget, ezgl::application *application);
 void showTouristButton(GtkWidget *widget, ezgl::application *application);
-void loadFDButton(GtkWidget *widget, ezgl::application *application);
 void hideFDButton(GtkWidget *widget, ezgl::application *application);
 void showFDButton(GtkWidget *widget, ezgl::application *application);
-void loadShopsButton(GtkWidget *widget, ezgl::application *application);
 void hideShopsButton(GtkWidget *widget, ezgl::application *application);
 void showShopsButton(GtkWidget *widget, ezgl::application *application);
-void loadAllButton(GtkWidget *widget, ezgl::application *application);
 void hideAllButton(GtkWidget *widget, ezgl::application *application);
 void showAllButton(GtkWidget *widget, ezgl::application *application);
 
@@ -138,7 +135,7 @@ void draw_main_canvas(ezgl::renderer &g){
     std::cout<<"ROADS DONE"<<'\n';
     rd.drawIntersections(getNumIntersections(), xy, info, g);
     std::cout<<"INTERSECTIONS DONE"<<'\n';
-    ft.drawPOI(getNumPointsOfInterest(), xy, info, g, screenRatio, currentArea);
+    ft.drawPOI(getNumPointsOfInterest(), xy, info, g, screenRatio);
     std::cout<<"POI DONE"<<'\n';
     ft.drawSubways(info.showRoute, xy, info, g);
     std::cout<<"SUBWAY DONE"<<'\n';
@@ -166,9 +163,9 @@ void initial_setup(ezgl::application *application){
     
     application->create_button("Show Subways",8,showSubwayButton);
     application->create_button("Show Trains",9,showTrainsButton);
-    application->create_button("Show Tourist POIs", 10, loadTouristButton); 
-    application->create_button("Show Food/Drink POIs", 11, loadFDButton); 
-    application->create_button("Show Shopping POIs", 12, loadShopsButton); 
+    application->create_button("Show Tourist POIs", 10, showTouristButton); 
+    application->create_button("Show Food/Drink POIs", 11, showFDButton); 
+    application->create_button("Show Shopping POIs", 12, showShopsButton); 
 }
 
 
@@ -322,7 +319,7 @@ void showSubwayButton(GtkWidget *widget, ezgl::application *application){
     
     application->destroy_button("Show Subways");
     application->create_button("Hide Subways",8,hideSubwayButton);
-        
+    
     application->refresh_drawing();
 }
 
@@ -370,17 +367,13 @@ void showTrainsButton(GtkWidget *widget, ezgl::application *application){
     
     application->destroy_button("Show Trains");
     application->create_button("Hide Trains",9,hideTrainsButton);
-        
+    
     application->refresh_drawing();
-}
-
-
-void loadTouristButton(GtkWidget *widget, ezgl::application *application){
-    showTouristButton(widget, application);
 }
 
 void hideTouristButton(GtkWidget *widget, ezgl::application *application){
     info.poiButtonStatus[0] = 0;
+    widget->parent_instance.ref_count;
     
     application->destroy_button("Hide Tourist POIs"); 
     application->create_button("Show Tourist POIs", 10, showTouristButton);
@@ -389,18 +382,16 @@ void hideTouristButton(GtkWidget *widget, ezgl::application *application){
 
 void showTouristButton(GtkWidget *widget, ezgl::application *application){
     info.poiButtonStatus[0] = 1;
+    widget->parent_instance.ref_count;
     
     application->destroy_button("Show Tourist POIs");
     application->create_button("Hide Tourist POIs", 10, hideTouristButton); 
     application->refresh_drawing();
 }
 
-void loadFDButton(GtkWidget *widget, ezgl::application *application){
-    showFDButton(widget, application);
-}
-
 void hideFDButton(GtkWidget *widget, ezgl::application *application){
     info.poiButtonStatus[1] = 0;
+    widget->parent_instance.ref_count;
     
     application->destroy_button("Hide Food/Drink POIs"); 
     application->create_button("Show Food/Drink POIs", 11, showFDButton);
@@ -409,18 +400,16 @@ void hideFDButton(GtkWidget *widget, ezgl::application *application){
 
 void showFDButton(GtkWidget *widget, ezgl::application *application){
     info.poiButtonStatus[1] = 1;
+    widget->parent_instance.ref_count;
     
     application->destroy_button("Show Food/Drink POIs");
     application->create_button("Hide Food/Drink POIs", 11, hideFDButton); 
     application->refresh_drawing();
 }
 
-void loadShopsButton(GtkWidget *widget, ezgl::application *application){
-    showShopsButton(widget, application);
-}
-
 void hideShopsButton(GtkWidget *widget, ezgl::application *application){
     info.poiButtonStatus[2] = 0;
+    widget->parent_instance.ref_count;
     
     application->destroy_button("Hide Shopping POIs"); 
     application->create_button("Show Shopping POIs", 12, showShopsButton);
@@ -429,9 +418,11 @@ void hideShopsButton(GtkWidget *widget, ezgl::application *application){
 
 void showShopsButton(GtkWidget *widget, ezgl::application *application){
     info.poiButtonStatus[2] = 1;
+    widget->parent_instance.ref_count;
     
     application->destroy_button("Show Shopping POIs");
     application->create_button("Hide Shopping POIs", 12, hideShopsButton); 
+    
     application->refresh_drawing();
 }
 

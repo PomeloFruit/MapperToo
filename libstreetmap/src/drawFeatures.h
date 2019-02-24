@@ -14,13 +14,11 @@ public:
 
     void drawFeatures(int numFeatures, infoStrucs &info, ezgl::renderer &g, double currentArea, double startArea);
 
-    void drawPOI(int numPOI, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g, double adjustmentFactor, double currentArea);
-
-    void drawOnePOI(int i, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g, double adjustmentFactor, double currentArea); /////////why are their duplicates???
+    void drawPOI(int numPOI, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g, double adjustmentFactor);
     
     void drawOnePOI(int i, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g);
     
-    void drawClickedPOI(mapBoundary &xy, infoStrucs &info, ezgl::renderer &g, double adjustmentFactor, double currentArea);
+    void drawClickedPOI(mapBoundary &xy, infoStrucs &info, ezgl::renderer &g);
     
     void drawSubways(int draw, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g);
     

@@ -159,7 +159,7 @@ void featureDrawing::drawFeatures(int numFeatures, infoStrucs &info, ezgl::rende
 
 
 // draw all
-void featureDrawing::drawPOI(int numPOI, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g, double adjustmentFactor, double currentArea){
+void featureDrawing::drawPOI(int numPOI, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g, double adjustmentFactor){
     bool zoom1=(adjustmentFactor)<0.5;
     bool zoom2=(adjustmentFactor)<0.01;
     
@@ -178,20 +178,20 @@ void featureDrawing::drawPOI(int numPOI, mapBoundary &xy, infoStrucs &info, ezgl
     }
     
     for(int i=0 ; i<numPOI ; i++){   
-        drawOnePOI(i, xy, info, g, adjustmentFactor, currentArea);
+        drawOnePOI(i, xy, info, g);
     }
-    drawClickedPOI(xy, info, g, adjustmentFactor, currentArea);
+    drawClickedPOI(xy, info, g);
 }
 
 // make sure last clicked is on top of others
-void featureDrawing::drawClickedPOI(mapBoundary &xy, infoStrucs &info, ezgl::renderer &g, double adjustmentFactor, double currentArea){
+void featureDrawing::drawClickedPOI(mapBoundary &xy, infoStrucs &info, ezgl::renderer &g){
     for(unsigned i=0 ; i<info.lastPOI.size() ; i++){
-        drawOnePOI(info.lastPOI[i], xy, info, g, adjustmentFactor, currentArea);
+        drawOnePOI(info.lastPOI[i], xy, info, g);
     }
 }
 
-void featureDrawing::drawOnePOI(int i, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g, double adjustmentFactor, double currentArea){
-    const double HIGHLIGHTRADIUS = 0.0005;
+void featureDrawing::drawOnePOI(int i, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g){
+    //const double HIGHLIGHTRADIUS = 0.0005;
     const double radius = g.get_visible_world().width()*0.009;
     //double areaForcer=sqrt(0.000073593*currentArea/M_PI)/NORMALRAD;//that first number is the average of two proportions of areas that were deemed to be desireable
     //double areaForcerClick=sqrt(0.000432814*currentArea/M_PI)/HIGHLIGHTRADIUS;

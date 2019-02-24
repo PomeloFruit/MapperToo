@@ -64,7 +64,11 @@ void roadDrawing::setRoadColourSize(int type, bool highlight, ezgl::renderer &g,
         from = info.IntersectionInfo[info.StreetSegInfo[i].fromIntersection].position;
         
         sufficentlyZoomed=(currentArea/startArea)<0.25;
-        sufficentlyBig=(info.StreetSegInfo[i].type==0||info.StreetSegInfo[i].type==1||info.StreetSegInfo[i].type==2);
+        sufficentlyBig=(info.StreetSegInfo[i].type==0||info.StreetSegInfo[i].type==1||info.StreetSegInfo[i].type==5);
+        
+        
+        
+        
         if(sufficentlyZoomed||sufficentlyBig){
             for(int c=0;c<info.StreetSegInfo[i].numCurvePoints;c++){
                 to = getStreetSegmentCurvePoint(c,i);
@@ -103,7 +107,7 @@ void roadDrawing::drawSpecialIntersections(mapBoundary &xy, infoStrucs &info, ez
 }
 
 void roadDrawing::drawOneIntersection(int id, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g){
-    const double NORMALRAD = 0.00015;
+    //const double NORMALRAD = 0.00015;
     const float RADIUSNORM = 0.00003;
     const double radius = g.get_visible_world().width()*0.009;
     float x, y;
