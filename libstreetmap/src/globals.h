@@ -25,6 +25,7 @@
 #define SECONDARY 2
 #define RESIDENTIAL 3
 #define SERVICE 4
+#define HIGHWAYRAMP 6
 
 //============================== Structures ===================================
 

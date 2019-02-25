@@ -26,7 +26,8 @@ void roadDrawing::setRoadColourSize(int type, bool highlight, ezgl::renderer &g,
     double inputAdjust=1/(currentArea/startArea);
     double adjustingAdd=(280930.9-(2586289/1221110)) + (2.117982 - 280930.9)/(1 + (pow(inputAdjust/17546410000, 0.7331144)));
     switch(type){
-        case HIGHWAY: // yellowish
+        case HIGHWAY: 
+        case HIGHWAYRAMP:// yellowish
             width =HIGHWAYWIDTH+adjustingAdd;
             g.set_color(250,215,56,200);
             break;

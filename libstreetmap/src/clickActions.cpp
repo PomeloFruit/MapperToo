@@ -139,20 +139,6 @@ std::string clickActions::searchOnMap(infoStrucs &info){
     int match1, match2;
     unsigned correct1 = 0;
     unsigned correct2 = 0;
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-//    const std::string STREETEXT = ".street.bin";
-//    if(info.textInput1.compare(info.textInput1.size()-(STREETEXT.size()+1), STREETEXT.size(), STREETEXT)){
-//        application->quit();
-//        close_map();
-//        std::cout << "here1\n";
-//        load_map(info.textInput1);
-//        std::cout << "here2\n";
-//        application->quit();
-//        //draw_map_helper(application);
-//        displayMessage = "Successfully loaded map at " + info.textInput1;
-//        return displayMessage;
-//    }
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     
     // get the match type of the search
     match1 = findMatches(street1ID, info.textInput1, info);
@@ -209,14 +195,16 @@ std::string clickActions::searchOnMap(infoStrucs &info){
             // create a message about the intersection found
             displayMessage = "Intersection(s) Found: ";
             displayMessage += getIntersectionName(resultID[0]);
+            if(resultID.size()>1){
+                displayMessage += " (Displaying 1 of " + std::to_string(resultID.size()) + " found)"; 
+            }
             
             std::cout << "Intersection search result(s):" << std::endl;
             
-            for(unsigned i=0 ; i<resultID.size()-1 ; i++){
+            for(unsigned i=0 ; i<resultID.size() ; i++){
+                std::cout << "(" << (i+1) << " of " << std::to_string(resultID.size()) << " found) "; 
                 std::cout << getIntersectionName(resultID[i]) << std::endl;
             }
-            
-            displayMessage += getIntersectionName(resultID[resultID.size()-1]);
             
         } else { // no intersection found
             displayMessage = "No intersections found.";
@@ -229,11 +217,19 @@ std::string clickActions::searchOnMap(infoStrucs &info){
         resultID = street1ID;
         displayMessage = "Street Found: ";
         displayMessage += getStreetName(resultID[0]);
-        info.corInput1 = getStreetName(resultID[0]);
-        
-        // if multiple results, tell user which option they are seeing
         if(resultID.size()>1){
             displayMessage += " (Displaying 1 of " + std::to_string(resultID.size()) + " found)"; 
+        }
+        
+        info.corInput1 = getStreetName(resultID[0]);
+                
+        // if multiple results, tell user which option they are seeing
+        
+        std::cout << "Street search result(s):" << std::endl;
+            
+        for(unsigned i=0 ; i<resultID.size() ; i++){
+            std::cout << "(" << (i+1) << " of " << std::to_string(resultID.size()) << " found) "; 
+            std::cout << getStreetName(resultID[i]) << std::endl;
         }
         
         highlightStreet(info, resultID[0]);
@@ -250,6 +246,13 @@ std::string clickActions::searchOnMap(infoStrucs &info){
             displayMessage += " (Displaying 1 of " + std::to_string(resultID.size()) + " found)"; 
         }
         
+        std::cout << "Street 2 search result(s):" << std::endl;
+            
+        for(unsigned i=0 ; i<resultID.size() ; i++){
+            std::cout << "(" << (i+1) << " of " << std::to_string(resultID.size()) << " found) " ; 
+            std::cout << getStreetName(resultID[i]) << std::endl;
+        }
+        
         highlightStreet(info, resultID[0]);
     
     // find POI from input 1
@@ -264,7 +267,14 @@ std::string clickActions::searchOnMap(infoStrucs &info){
             displayMessage += " (Displaying 1 of " + std::to_string(resultID.size()) + " found)"; 
         }
         
-        highlightPOI(info, resultID);
+        std::cout << "Point of Interest search result(s):" << std::endl;
+            
+        for(unsigned i=0 ; i<resultID.size() ; i++){
+            std::cout << "(" << (i+1) << " of " << std::to_string(resultID.size()) << " found) " ; 
+            std::cout << info.POIInfo[resultID[i]].name << std::endl;
+        }
+        
+        highlightPOI(info, resultID[0]);
     
     // find subway station from input 1
     } else if(match1 == RESULTSUBWAY) { 
@@ -278,7 +288,14 @@ std::string clickActions::searchOnMap(infoStrucs &info){
             displayMessage += " (Displaying 1 of " + std::to_string(resultID.size()) + " found)"; 
         }
         
-        highlightSubway(info, resultID);
+        std::cout << "Subway Station search result(s):" << std::endl;
+            
+        for(unsigned i=0 ; i<resultID.size() ; i++){
+            std::cout << "(" << (i+1) << " of " << std::to_string(resultID.size()) << " found) " ; 
+            std::cout << info.SubwayInfo[resultID[i]].name << std::endl;
+        }
+        
+        highlightSubway(info, resultID[0]);
         
         
     // find Features from input 1   
@@ -292,6 +309,13 @@ std::string clickActions::searchOnMap(infoStrucs &info){
         
         if(resultID.size()>1){
             displayMessage += " (Displaying 1 of " + std::to_string(resultID.size()) + " found)"; 
+        }
+        
+        std::cout << "Feature search result(s):" << std::endl;
+            
+        for(unsigned i=0 ; i<resultID.size() ; i++){
+            std::cout << " (" << (i+1) << " of " << std::to_string(resultID.size()) << " found) "; 
+            std::cout << info.FeatureInfo[resultID[i]].name << std::endl;
         }
         
         highlightFeature(info, resultID[0]);

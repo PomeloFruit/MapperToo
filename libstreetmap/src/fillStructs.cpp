@@ -167,7 +167,7 @@ void populateData::populateIntersectionInfo(infoStrucs &info){
     int numOfIntersections = getNumIntersections();
     info.IntersectionInfo.resize(numOfIntersections);
     
-    for(int i=0;i<numOfIntersections;++i){
+    for(int i=0;i<numOfIntersections;i++){
         info.IntersectionInfo[i].position = getIntersectionPosition(i);
         info.IntersectionInfo[i].name = getIntersectionName(i);
         info.IntersectionInfo[i].clicked = false;
@@ -274,7 +274,6 @@ void populateData::populateOSMSubwayInfo(infoStrucs &info){
     // fill the subway routes structure
     getOSMSubwayRelations(info);
     
-    std::cout << getNumberOfNodes() << std::endl;
     // if too much information, we are not displaying routes
     if(getNumberOfNodes() > MAXNODES){
         info.SubwayRouteInfo.clear();
@@ -384,7 +383,7 @@ int populateData::getRoadType(const OSMWay* wayPtr){
         std::transform(value.begin(), value.end(), value.begin(), ::tolower);
         
         if(key == "highway"){
-            if(value == "motorway" || value == "motorway_link"){
+            if(value == "motorway"){
                 return HIGHWAY;
             } else if (value == "primary"){
                 return PRIMARY;
@@ -394,7 +393,9 @@ int populateData::getRoadType(const OSMWay* wayPtr){
                 return RESIDENTIAL;
             } else if (value == "trunk" || value == "trunk_link"){
                 return TRUNK; 
-            }else {
+            } else if (value == "motorway_link") {
+                return HIGHWAYRAMP;
+            } else {
                 return SERVICE;
             }
         }
