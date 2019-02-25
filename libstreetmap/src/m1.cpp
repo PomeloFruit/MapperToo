@@ -254,8 +254,9 @@ void close_map() {
     segLengthVector.clear();
     streetLengthVector.clear();
     segTravelTimeVector.clear();
+//    streetBlock.clearGrid();
     streetBlock.poiGrid.clear();
-    streetBlock.intGrid.clear(); 
+    streetBlock.intGrid.clear();
     closeStreetDatabase();
     closeOSMDatabase();
 }

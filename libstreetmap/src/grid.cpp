@@ -1,10 +1,12 @@
 #include "grid.h"
 #include "latLonToXY.h"
+#include "drawFeatures.h"
 
 #include <algorithm>
 
 void streetGrid::populateGrid(){
     coord.initialize(); 
+//    pop.initialize(info, coord); 
     
     dLat = (coord.maxLat - coord.minLat)/100.0; 
     dLon = (coord.maxLon - coord.minLon)/100.0; 
@@ -72,15 +74,31 @@ void streetGrid::populateGrid(){
 }
 
 
+//void streetGrid::clearGrid(){
+//    pop.clear(info);
+//    poiGrid.clear();
+//    intGrid.clear(); 
+//}
+
 void streetGrid::findMinimumPOI(LatLon position, int &POI, int xIndex, int yIndex){    
     double min = find_distance_between_two_points(position, getPointOfInterestPosition(POI)); 
     std::vector<unsigned> gridBlock = poiGrid[xIndex][yIndex]; 
-    
+//    int poiType;
+    double temp; 
     //std::cout<<"Size: "<<poiGrid[xIndex][yIndex].size()<<std::endl;
-    if(gridBlock.size() > 0){
+    if(gridBlock.size() > 0){     
         for(unsigned i = 0; i < gridBlock.size(); i++){
             //std::cout<<"I: "<<i<<std::endl;
-            double temp = find_distance_between_two_points(position, getPointOfInterestPosition(gridBlock[i]));
+//            poiType = ft.classifyPOI(getPointOfInterestType(gridBlock[i]));
+//            
+//            if(poiType == 1 && info.poiButtonStatus[0] == 1){
+//                temp = find_distance_between_two_points(position, getPointOfInterestPosition(gridBlock[i]));
+//            }else if(poiType == 2 && info.poiButtonStatus[1] == 1){
+//                temp = find_distance_between_two_points(position, getPointOfInterestPosition(gridBlock[i]));
+//            }else if(poiType == 3 && info.poiButtonStatus[2] == 1){
+//                temp = find_distance_between_two_points(position, getPointOfInterestPosition(gridBlock[i]));
+//            }
+            temp = find_distance_between_two_points(position, getPointOfInterestPosition(gridBlock[i]));
             if(temp < min){
                 min = temp; 
                 POI = gridBlock[i];
