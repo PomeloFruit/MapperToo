@@ -25,6 +25,7 @@
 #include "ezgl/application.hpp"
 #include "ezgl/graphics.hpp"
 #include "ezgl/point.hpp"
+#include "ezgl/canvas.hpp"
 
 //============================ Class Objects ============================
 
@@ -60,6 +61,7 @@ void helpButton(GtkWidget *widget, ezgl::application *application);
 
 void newMap(std::string path, ezgl::application *application);
 void initializeMap(); 
+void zoomLocation(ezgl::application *application);
 // Callback functions for event handling
 
 
@@ -196,6 +198,8 @@ void act_on_mouse_press(ezgl::application *application, GdkEventButton *event, d
         
         message = ck.clickedOnIntersection(x, y, xy, info);
     }
+    
+    zoomLocation(application);
     
     application->update_message(message);
     application->refresh_drawing();
@@ -529,4 +533,20 @@ void helpButton(GtkWidget *widget, ezgl::application *application){
     dialog_box(widget, application, message.c_str());
 }
 
+void zoomLocation(ezgl::application *application){
+    if(info.lastPOI.size() > 0){
+        std::string canvasID = application->get_main_canvas_id(); 
+        ezgl::canvas* myCanvas = application->get_canvas(canvasID);
+        
+        double width = myCanvas->width()*0.00001/2; 
+        double height = myCanvas->height()*0.00001/2; 
 
+        int lat = getPointOfInterestPosition(info.lastPOI[0]).lat();
+        int lon = getPointOfInterestPosition(info.lastPOI[0]).lon(); 
+        int x = xy.xFromLon(lon);
+        int y = xy.yFromLat(lat);
+
+        ezgl::rectangle screen ({x-width, y-height}, {x+width, y+height}); 
+        ezgl::zoom_fit(myCanvas, screen); 
+    }  
+}

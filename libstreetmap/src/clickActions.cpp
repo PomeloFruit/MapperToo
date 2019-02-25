@@ -69,6 +69,7 @@ std::string clickActions::clickedOnPOI(double x, double y, mapBoundary &xy, info
     displayName += " | Nearest Intersection: ";
     displayName += info.IntersectionInfo[nearestIntID].name;
     
+    
     highlightPOI(info, clickedID);
     
     return displayName;

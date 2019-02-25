@@ -45,6 +45,14 @@ void zoom_in(canvas *cnv, point2d zoom_point, double zoom_factor)
   cnv->redraw();
 }
 
+void zoom_location(canvas *cnv, point2d zoom_point, double zoom_factor){
+    rectangle const world = cnv->get_camera().get_world();
+    //define a zoom_point  
+    //set a zoom factor -> might need world area? 
+    cnv->get_camera().set_world(zoom_in_world(zoom_point, world, zoom_factor));
+    cnv->redraw();
+}
+
 void zoom_out(canvas *cnv, double zoom_factor)
 {
   point2d const zoom_point = cnv->get_camera().get_world().center();
