@@ -30,8 +30,6 @@ void populateData::initialize(infoStrucs &info, mapBoundary &xy){
     
     if(getNumberOfNodes() < MAXLOADNODES){
         populateOSMSubwayInfo(info);
-    } else {
-        std::cout << "Skipped subway load, # of nodes: " << getNumberOfNodes() << std::endl;
     }
     
     info.lastIntersection.clear();

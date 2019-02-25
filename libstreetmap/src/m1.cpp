@@ -98,10 +98,11 @@ bool load_map(std::string path/*map_path*/) {
         path_osm = path.substr(0, path.size()-(STREETEXT.size()+1));
         path_osm = path_osm + OSMEXT;
         loadOSMDatabaseBIN(path_osm);
-        std::cout<<"OSM DONE"<<'\n';
+        
         std::vector<unsigned> collisionList(getNumIntersections(), 0);
         
         std::cout<<"loaded: "<<path_osm<<std::endl;
+        
         //clears all global data structures before filling with new data
         streetIDMap.clear();
         partialStreetNameMap.clear();
@@ -112,9 +113,7 @@ bool load_map(std::string path/*map_path*/) {
         segTravelTimeVector.clear();
         streetBlock.poiGrid.clear();
         streetBlock.intGrid.clear();
-        
-        std::cout<<"CLEARING STRUCTS DONE"<<'\n';
-        
+                
         //==== streetIDMap & segLengthVector & segTravelTimeVector ====
         int segStreetID;
         
@@ -135,7 +134,6 @@ bool load_map(std::string path/*map_path*/) {
             segLengthVector.push_back(find_street_segment_length_preload(i));
             segTravelTimeVector.push_back(find_street_segment_travel_time_preload(i));
         }
-        std::cout<<"TRAVELTIME+IDMAP DONE"<<'\n';
         
         //==== partialStreetNameMap & streetLengthVector & streetIntersectionsVector ====
         std::string currentStreetName;
@@ -208,7 +206,6 @@ bool load_map(std::string path/*map_path*/) {
             streetIntersectionsVector.push_back(intersectionOnStreet); 
         }
         
-        std::cout<<"partialStreetNameMap & streetLengthVector & streetIntersectionsVector DONE"<<'\n';
         //====intersectionSegNameVector & intersectionSegIDVector====
         /* Here 2 vectors are created one to populate with street segment ID's 
          * and the other with street names both of those vectors are populated 
@@ -236,8 +233,7 @@ bool load_map(std::string path/*map_path*/) {
         streetBlock.populateGrid();
        // dt.initilize(getNumStreetSegments());
     }    
-            std::cout<<"intersectionSegNameVector & intersectionSegIDVector DONE"<<'\n';
-
+    
     return load_successful;
 }
 

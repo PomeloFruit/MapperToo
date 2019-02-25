@@ -217,7 +217,8 @@ void featureDrawing::drawOnePOI(int i, mapBoundary &xy, infoStrucs &info, ezgl::
     xNew = xy.xFromLon(newPoint.lon());
     yNew = xy.yFromLat(newPoint.lat());
     
-    if (info.POIInfo[i].clicked&&drawPOI) {
+    
+    if (info.POIInfo[i].clicked && drawPOI) {
 //        //highlight circle (pink)
 //        g.set_color(255,77,190,125);
 //        g.fill_elliptic_arc(ezgl::point2d(xNew,yNew),radius,radius,0,360);

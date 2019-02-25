@@ -204,17 +204,23 @@ std::string clickActions::searchOnMap(infoStrucs &info){
             info.corInput2=getStreetName(street2ID[correct2]);
 
             // call for the intersection to be highlighted
-            highlightIntersection(info, resultID);
+            highlightIntersection(info, resultID[0]);
 
             // create a message about the intersection found
             displayMessage = "Intersection(s) Found: ";
+            displayMessage += getIntersectionName(resultID[0]);
+            
+            std::cout << "Intersection search result(s):" << std::endl;
+            
             for(unsigned i=0 ; i<resultID.size()-1 ; i++){
-                displayMessage += getIntersectionName(resultID[i]) + " | ";
-            }        
+                std::cout << getIntersectionName(resultID[i]) << std::endl;
+            }
+            
             displayMessage += getIntersectionName(resultID[resultID.size()-1]);
             
         } else { // no intersection found
             displayMessage = "No intersections found.";
+            std::cout << displayMessage << std::endl;
         }
     
     // find street from input 1

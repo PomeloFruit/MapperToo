@@ -462,47 +462,26 @@ void showShopsButton(GtkWidget *widget, ezgl::application *application){
 void newMap(std::string path, ezgl::application *application){
     path = "/cad2/ece297s/public/maps/" + path + ".streets.bin";
     
-    pop.clear(info);
-    std::cout<< "clear old info structs" << std::endl;
-    
+    pop.clear(info);  
     close_map(); 
-    std::cout<< "closed map" << std::endl; 
-
     load_map(path); 
-    std::cout<< "loaded new map at " << path << std::endl;
-    
     initializeMap();
-    std::cout << "map initialized" << std::endl;
-    
+   
     std::string canvasID = application->get_main_canvas_id(); 
-    std::cout<<"got main canvas ID"<<std::endl;
     ezgl::rectangle new_world({xy.xMin,xy.yMin},{xy.xMax,xy.yMax});
-    std::cout<<"set new world"<<std::endl;
     ezgl::canvas* myCanvas = application->get_canvas(canvasID);
-    std::cout<<"created new canvas"<<std::endl;
     
     myCanvas->get_camera().set_m_screen(new_world);
-    std::cout<<"set new m screen"<<std::endl;
     myCanvas->get_camera().update_widget(myCanvas->width(), myCanvas->height());
-    std::cout<<"updated widget"<<std::endl;
     myCanvas->get_camera().set_world(new_world);
-    std::cout<<"set world as new world"<<std::endl;
     myCanvas->get_camera().set_zoom_fit(new_world);
-    std::cout<<"set zoom fit"<<std::endl;
 //    if(info.SubwayInfo.size()==0){
-//        std::cout<<"start to load subway"<<std::endl;
 //        pop.loadAfterDraw(info);
 //    }
     //ezgl::camera myCamera = myCanvas->get_camera();
     //myCamera.set_world(new_world); 
     
     application->refresh_drawing(); 
-    std::cout<<"Now showing new map"<<std::endl;
-    
-    std::cout<<"Number of Trunks: "<<info.numStreetType[5]<<std::endl;
-    std::cout<<"Number of Primary Roads: "<<info.numStreetType[1]<<std::endl;
-    std::cout<<"Number of Secondary Roads: "<<info.numStreetType[2]<<std::endl;
-    //std::cout<<"Max Lat: "<<xy.maxLat<<" Min Lat: "<<xy.minLat<<" Max Lon: "<<xy.maxLon<<" Min Lon: "<<xy.minLon<<std::endl;
 }
 
 void helpButton(GtkWidget *widget, ezgl::application *application){
