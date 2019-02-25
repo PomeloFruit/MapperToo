@@ -1,15 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
-/* 
- * File:   drawText.cpp
- * Author: sartori2
- * 
- * Created on February 19, 2019, 9:28 PM
- */
 
 #include "drawText.h"
 
@@ -27,26 +15,25 @@
 std::vector<std::pair<double, bool>> anglesWithWay;
 double initialArea;
 
+
+/* initialize
+ *  - Gives drawText access to the current xy object
+ * @return void
+ */
 void drawText::initilize(){
     xy.initialize(); 
-//    ezgl::rectangle startRectangle({xy.xMin,xy.yMin},{xy.xMax,xy.yMax});
-//    double startArea=abs((startRectangle.right()-startRectangle.left())*(startRectangle.top()-startRectangle.bottom()));
-//    anglesWithWay.resize(numStreetSegs);
-//    for(int i=0;i<numStreetSegs;i++){
-//        LatLon initialPosition=getIntersectionPosition((getInfoStreetSegment(i).from));
-//        LatLon finalPosition=getIntersectionPosition((getInfoStreetSegment(i).to));
-//        
-//////        LatLon initialPosition=info.IntersectionInfo[info.StreetSegInfo[i].fromIntersection].position;
-//////        LatLon finalPosition=info.IntersectionInfo[info.StreetSegInfo[i].toIntersection].position;
-//        //double slope=(xy.yFromLat(finalPosition.lat())-xy.yFromLat(initialPosition.lat()))/(xy.xFromLon(finalPosition.lon())-xy.xFromLon(initialPosition.lon()));
-//        anglesWithWay[i]=findAngle(initialPosition, finalPosition);
-//
-//    }
 }
 
-//I'm probably going to split this up tomorrow (the 25th)
+/* createText
+ *  - Determines which text needs to be drawn and where it should be drawn and if it needs to be drawn
+ * @param numStreetSegs <int> - The number of street segments present in the map
+ * @param numStreets <int> - The number of streets present in the map
+ * @param info <infoStrucs> - An object that contains various data structures filled with info relevant to the map
+ * @param g <ezgl::renderer> - The EZGL renderer
+ * @return void
+ */
 void drawText::createText(int numStreetSegs, int numStreets, infoStrucs &info, ezgl::renderer &g){
-    //for(int i=0;i<numStreets;i++){
+        //initialization of all the variables that need in the function
         ezgl::rectangle currentRectangle=g.get_visible_world();
         std::vector<int> alreadyDrawnStreets;
         alreadyDrawnStreets.resize(numStreets);
@@ -55,17 +42,19 @@ void drawText::createText(int numStreetSegs, int numStreets, infoStrucs &info, e
         double currentArea=abs((currentRectangle.right()-currentRectangle.left())*(currentRectangle.top()-currentRectangle.bottom()));
         ezgl::rectangle startRectangle({xy.xMin,xy.yMin},{xy.xMax,xy.yMax});
         initialArea=abs((startRectangle.right()-startRectangle.left())*(startRectangle.top()-startRectangle.bottom()));
-        bool drawHighway=(true);//but make it a bool so I can change it later
+        bool drawHighway=(true);
         bool drawPrimary=((currentArea/initialArea)<.20);
         bool drawSecondary=((currentArea/initialArea)<.05);
         bool drawResidential=((currentArea/initialArea)<.005);
         bool drawService=((currentArea/initialArea)<.0009);
         bool charCapOff=((currentArea/initialArea)<.005);
         int space; 
-        
         int numRoadsDrawn=0;
-        int roadTypes=5;
-        //add something for trunks
+        int roadTypes=6;
+        unsigned charLimit=17;
+        int sizeAdjustmentFactor=4000;
+        
+        //Determining how many roads names should be shown at a given point in time
         if(drawPrimary){
             maxCount=maxCount+3;
             space = 5;
@@ -78,6 +67,9 @@ void drawText::createText(int numStreetSegs, int numStreets, infoStrucs &info, e
             maxCount=maxCount+0;
             space = 5;
         }
+        
+        //Goes through all the streets determining how/if the names should be drawn for each
+        //names are drawn in order of the street priority (more important roads are drawn first) and then by their seg ID
         for(int p=0;p<roadTypes;p++){
             for(int i=0;i<numStreetSegs;i=i+space){
                 alreadyDrawnStreets.clear();
@@ -85,7 +77,11 @@ void drawText::createText(int numStreetSegs, int numStreets, infoStrucs &info, e
                 LatLon initialPosition=info.IntersectionInfo[info.StreetSegInfo[i].fromIntersection].position;
                 LatLon finalPosition=info.IntersectionInfo[info.StreetSegInfo[i].toIntersection].position;
                 
+                //finding the angle and determining if the direction needs to be flipped if one way
                 std::pair<double, bool> angleToUse=findAngle(initialPosition, finalPosition);
+                
+                //if the street segment contains curvepoints the initial and final positions must change for the calcuation of the angle
+                //this block determines if the initial and final positions should change, and what they should be if they do change
                 if(info.StreetSegInfo[i].numCurvePoints>0){
                     int bestCurvePoint=indexOfLargestGoodCurvepoint(i, currentRectangle, info);
                     if(bestCurvePoint==0){
@@ -100,23 +96,31 @@ void drawText::createText(int numStreetSegs, int numStreets, infoStrucs &info, e
                         initialPosition=getStreetSegmentCurvePoint(bestCurvePoint-1, i);
                         finalPosition=getStreetSegmentCurvePoint(bestCurvePoint, i);
                     }
+                    //re-gets the angle if needed with the new positions
                     angleToUse=findAngle(initialPosition, finalPosition);
                 }
                 
-                
-                g.set_color(0, 0, 0, 255);//for now but I think if I don't wnt to draw things/draw things on different levels I can either: make the size 0 or make it transparent
+                //setting the colour and determining if either the initial position or the final position is in bounds 
+                g.set_color(0, 0, 0, 255);
                 bool inBoundsInitial=inBounds(currentRectangle, initialPosition);
                 bool inBoundsFinal=inBounds(currentRectangle, finalPosition);
-                if((numRoadsDrawn<maxCount)&&(alreadyDrawnStreets[info.StreetSegInfo[i].streetID]<1)&&(inBoundsInitial)&&(inBoundsFinal)
-                        &&(((((currentArea/initialArea)*4000<find_distance_between_two_points(initialPosition, finalPosition))||(info.StreetSegInfo[i].type==1))&&(info.StreetSegInfo[i].numCurvePoints==0))
-                        ||(((currentArea/initialArea)*4000<find_distance_between_two_points(initialPosition, finalPosition))&&(info.StreetSegInfo[i].numCurvePoints>0)))
-                        &&((((info.StreetSegInfo[i].name).length())<17)||(charCapOff))&&(info.StreetSegInfo[i].name.compare("<unknown>"))){
-                    //I'm also not going to chose to draw on a thing if the street length is too small
-                    //maybe I give some bias to streets with more intersections//longer length?
-                    if((drawHighway&&(info.StreetSegInfo[i].type==0)&&p==0)||(drawPrimary&&(info.StreetSegInfo[i].type==1)&&p==1)
-                            ||(drawSecondary&&(info.StreetSegInfo[i].type==2)&&p==2)||(drawResidential&&(info.StreetSegInfo[i].type==3)&&p==3)||
-                            (drawService&&(info.StreetSegInfo[i].type==4)&&p==4)){
+                
+                //determines if the road should be drawn based on a large variety of parameters
+                //the number of roads drawn must be less than the maximum, names will only be drawn once on each street
+                //either the first or last position must be in bounds for the street to be drawn
+                //the segment must be sufficiently large
+                //the segment must have either less than a certain amount of characters or we must be zoomed in far enough
+                if((numRoadsDrawn<maxCount)&&(alreadyDrawnStreets[info.StreetSegInfo[i].streetID]<1)&&((inBoundsInitial)||(inBoundsFinal))
+                        &&(((((currentArea/initialArea)*sizeAdjustmentFactor<find_distance_between_two_points(initialPosition, finalPosition))||(info.StreetSegInfo[i].type==PRIMARY))&&(info.StreetSegInfo[i].numCurvePoints==HIGHWAY))
+                        ||(((currentArea/initialArea)*sizeAdjustmentFactor<find_distance_between_two_points(initialPosition, finalPosition))&&(info.StreetSegInfo[i].numCurvePoints>0)))
+                        &&((((info.StreetSegInfo[i].name).length())<charLimit)||(charCapOff))&&(info.StreetSegInfo[i].name.compare("<unknown>"))){
+                    
+                    //the road will only draw if it is during its "priority" time to draw
+                    if((drawHighway&&(info.StreetSegInfo[i].type==HIGHWAY)&&p==HIGHWAY)||(drawPrimary&&(info.StreetSegInfo[i].type==PRIMARY)&&p==PRIMARY)
+                            ||(drawSecondary&&(info.StreetSegInfo[i].type==SECONDARY)&&p==SECONDARY)||(drawResidential&&(info.StreetSegInfo[i].type==RESIDENTIAL)&&p==RESIDENTIAL)||
+                            (drawService&&(info.StreetSegInfo[i].type==SERVICE)&&p==SERVICE)||(drawService&&(info.StreetSegInfo[i].type==TRUNK)&&p==TRUNK)){
                         std::string stringToDraw=info.StreetSegInfo[i].name;
+                        //determining which way to place the one way markers if the road is one way
                         if(getInfoStreetSegment(i).oneWay){
                             if(angleToUse.second){
                                 stringToDraw="> "+info.StreetSegInfo[i].name+" >";
@@ -125,11 +129,12 @@ void drawText::createText(int numStreetSegs, int numStreets, infoStrucs &info, e
                                 stringToDraw="< "+stringToDraw+" <";
                             }
                         }
+                        
+                        //get the x and y values, set the rotation format the text and draw it
                         double xPlace=xy.xFromLon(initialPosition.lon())+((xy.xFromLon((finalPosition.lon()))-xy.xFromLon(initialPosition.lon()))/2);
                         double yPlace=xy.yFromLat(initialPosition.lat()+((finalPosition.lat()-initialPosition.lat())/2));
                         g.format_font("sans serif", ezgl::font_slant::normal, ezgl::font_weight::normal, 11);
                         g.set_text_rotation(angleToUse.first);
-                        //g.draw_text({xPlace, yPlace}, info.StreetSegInfo[i].name, xy.xFromLon(finalPosition.lon()-initialPosition.lon()), xy.yFromLat(finalPosition.lat()-initialPosition.lat()));
                         g.draw_text({xPlace, yPlace}, stringToDraw);
                         alreadyDrawnStreets[info.StreetSegInfo[i].streetID]++;
                         numRoadsDrawn++;
@@ -180,7 +185,6 @@ int drawText::indexOfLargestGoodCurvepoint(int streetSegment, ezgl::rectangle& c
     }
     return bestCurvePoint;
 }
-//3 cases->i=0 (best curve is from start to i), i!=0&&i!=end(best curve is from i-1 to i), i=end(best curve is from i to end))
 
 /* inBounds
  *  - Determines if a given point is in bounds
@@ -193,16 +197,4 @@ bool drawText::inBounds(ezgl::rectangle& curBounds, LatLon& position){
     return (xy.yFromLat(position.lat())<curBounds.top())&&(xy.yFromLat(position.lat())>curBounds.bottom())&&(xy.xFromLon(position.lon())>curBounds.left())&&(xy.xFromLon(position.lon())<curBounds.right());
 }
 
-//so some of the intersections work as planned, others don't<-this problem persists and idk why
-
-//if there are multiple street segments belonging to the same street present I should place it on the one that is geographically in the middle (but if it's a curvepoint thing just don't bother)
-//^^I think doing this would be pretty computationally intensive to the point where I really don't think it's a good idea
-//putting the names down is really just an endless black hole, I could keep doing this forever
-
-//OPTIMIZING LOADMAP:
-/*
- * 
- * 
- * 
- */
 

@@ -100,6 +100,8 @@ bool load_map(std::string path/*map_path*/) {
         path_osm = path_osm + OSMEXT;
         loadOSMDatabaseBIN(path_osm);
         
+        //collision list will be used to prevent duplicates intersections existing inside
+        //intersectionOnStreet
         std::vector<unsigned> collisionList(getNumIntersections(), 0);
         
         std::cout<<"loaded: "<<path_osm<<std::endl;
