@@ -50,18 +50,16 @@ void hideSubwayButton(GtkWidget *widget, ezgl::application *application);
 void showSubwayButton(GtkWidget *widget, ezgl::application *application);
 void hideTrainsButton(GtkWidget *widget, ezgl::application *application);
 void showTrainsButton(GtkWidget *widget, ezgl::application *application);
-void loadTouristButton(GtkWidget *widget, ezgl::application *application);
-void hideTouristButton(GtkWidget *widget, ezgl::application *application);
-void showTouristButton(GtkWidget *widget, ezgl::application *application);
-void hideFDButton(GtkWidget *widget, ezgl::application *application);
-void showFDButton(GtkWidget *widget, ezgl::application *application);
-void hideShopsButton(GtkWidget *widget, ezgl::application *application);
-void showShopsButton(GtkWidget *widget, ezgl::application *application);
+
+void touristButton(GtkWidget *widget, ezgl::application *application);
+void fdButton(GtkWidget *widget, ezgl::application *application);
+void shopsButton(GtkWidget *widget, ezgl::application *application);
 void helpButton(GtkWidget *widget, ezgl::application *application);
 
 void newMap(std::string path, ezgl::application *application);
 void initializeMap(); 
-void zoomLocation(ezgl::application *application);
+void zoomLocation(ezgl::application *application, std::vector<unsigned> zoomVec, int zoomCode);
+void zoomAllPoints(ezgl::application *application);
 // Callback functions for event handling
 
 
@@ -160,9 +158,9 @@ void initial_setup(ezgl::application *application){
     
     application->create_button("Show Subways",8,showSubwayButton);
     application->create_button("Show Trains",9,showTrainsButton);
-    application->create_button("Show Tourist POIs", 10, showTouristButton); 
-    application->create_button("Show Food/Drink POIs", 11, showFDButton); 
-    application->create_button("Show Shopping POIs", 12, showShopsButton);
+    application->create_button("Show Tourist POIs", 10, touristButton); 
+    application->create_button("Show Food/Drink POIs", 11, fdButton); 
+    application->create_button("Show Shopping POIs", 12, shopsButton);
     application->create_button("Help", 13, helpButton);
 }
 
@@ -199,7 +197,7 @@ void act_on_mouse_press(ezgl::application *application, GdkEventButton *event, d
         message = ck.clickedOnIntersection(x, y, xy, info);
     }
     
-    zoomLocation(application);
+    zoomAllPoints(application);
     
     application->update_message(message);
     application->refresh_drawing();
@@ -425,57 +423,44 @@ void showTrainsButton(GtkWidget *widget, ezgl::application *application){
     application->refresh_drawing();
 }
 
-void hideTouristButton(GtkWidget *widget, ezgl::application *application){
-    info.poiButtonStatus[0] = 0;
+void touristButton(GtkWidget *widget, ezgl::application *application){
     widget->parent_instance.ref_count;
     
-    application->destroy_button("Hide Tourist POIs"); 
-    application->create_button("Show Tourist POIs", 10, showTouristButton);
-    application->refresh_drawing(); 
-}
-
-void showTouristButton(GtkWidget *widget, ezgl::application *application){
-    info.poiButtonStatus[0] = 1;
-    widget->parent_instance.ref_count;
+    if(info.poiButtonStatus[0] == 0){
+        info.poiButtonStatus[0] = 1;
+        application->change_button_text("Show Tourist POIs", "Hide Tourist POIs");
+    }else{
+        info.poiButtonStatus[0] = 0;
+        application->change_button_text("Hide Tourist POIs", "Show Tourist POIs");
+    }
     
-    application->destroy_button("Show Tourist POIs");
-    application->create_button("Hide Tourist POIs", 10, hideTouristButton); 
     application->refresh_drawing();
 }
 
-void hideFDButton(GtkWidget *widget, ezgl::application *application){
-    info.poiButtonStatus[1] = 0;
+void fdButton(GtkWidget *widget, ezgl::application *application){
     widget->parent_instance.ref_count;
     
-    application->destroy_button("Hide Food/Drink POIs"); 
-    application->create_button("Show Food/Drink POIs", 11, showFDButton);
-    application->refresh_drawing(); 
-}
-
-void showFDButton(GtkWidget *widget, ezgl::application *application){
-    info.poiButtonStatus[1] = 1;
-    widget->parent_instance.ref_count;
+    if(info.poiButtonStatus[1] == 0){
+        info.poiButtonStatus[1] = 1;
+        application->change_button_text("Show Food/Drink POIs", "Hide Food/Drink POIs");
+    }else{
+        info.poiButtonStatus[1] = 0;
+        application->change_button_text("Hide Food/Drink POIs", "Show Food/Drink POIs");
+    }
     
-    application->destroy_button("Show Food/Drink POIs");
-    application->create_button("Hide Food/Drink POIs", 11, hideFDButton); 
     application->refresh_drawing();
 }
 
-void hideShopsButton(GtkWidget *widget, ezgl::application *application){
-    info.poiButtonStatus[2] = 0;
+void shopsButton(GtkWidget *widget, ezgl::application *application){
     widget->parent_instance.ref_count;
     
-    application->destroy_button("Hide Shopping POIs"); 
-    application->create_button("Show Shopping POIs", 12, showShopsButton);
-    application->refresh_drawing(); 
-}
-
-void showShopsButton(GtkWidget *widget, ezgl::application *application){
-    info.poiButtonStatus[2] = 1;
-    widget->parent_instance.ref_count;
-    
-    application->destroy_button("Show Shopping POIs");
-    application->create_button("Hide Shopping POIs", 12, hideShopsButton); 
+    if(info.poiButtonStatus[2] == 0){
+        info.poiButtonStatus[2] = 1;
+        application->change_button_text("Show Shopping POIs", "Hide Shopping POIs");
+    }else{
+        info.poiButtonStatus[2] = 0;
+        application->change_button_text("Hide Shopping POIs", "Show Shopping POIs");
+    }
     
     application->refresh_drawing();
 }
@@ -533,20 +518,35 @@ void helpButton(GtkWidget *widget, ezgl::application *application){
     dialog_box(widget, application, message.c_str());
 }
 
-void zoomLocation(ezgl::application *application){
-    if(info.lastPOI.size() > 0){
+void zoomLocation(ezgl::application *application, std::vector<unsigned> zoomVec, int zoomCode){
+    if(zoomVec.size() > 0){
         std::string canvasID = application->get_main_canvas_id(); 
         ezgl::canvas* myCanvas = application->get_canvas(canvasID);
         
-        double width = myCanvas->width()*0.00001/2; 
-        double height = myCanvas->height()*0.00001/2; 
+        double lat = 0; 
+        double lon = 0; 
+        
+        if(zoomCode == 0){
+            lat = getPointOfInterestPosition(zoomVec[0]).lat();
+            lon = getPointOfInterestPosition(zoomVec[0]).lon();
+        }else if (zoomCode == 1){
+            lat = getIntersectionPosition(zoomVec[0]).lat();
+            lon = getIntersectionPosition(zoomVec[0]).lon();
+        }else if (zoomCode == 2){
+            lat = info.SubwayInfo[zoomVec[0]].point.lat();
+            lon = info.SubwayInfo[zoomVec[0]].point.lon();
+        }
+        
+        double x = xy.xFromLon(lon);
+        double y = xy.yFromLat(lat);
+        
+        ezgl::point2d focusPt(x, y); 
+        ezgl::zoom_location(myCanvas, focusPt, 50);
+    }
+}
 
-        int lat = getPointOfInterestPosition(info.lastPOI[0]).lat();
-        int lon = getPointOfInterestPosition(info.lastPOI[0]).lon(); 
-        int x = xy.xFromLon(lon);
-        int y = xy.yFromLat(lat);
-
-        ezgl::rectangle screen ({x-width, y-height}, {x+width, y+height}); 
-        ezgl::zoom_fit(myCanvas, screen); 
-    }  
+void zoomAllPoints(ezgl::application *application){
+    zoomLocation(application, info.lastPOI, 0);
+    zoomLocation(application, info.lastIntersection, 1);
+    zoomLocation(application, info.lastSubway, 2);
 }

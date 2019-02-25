@@ -2,6 +2,7 @@
 
 #include "ezgl/camera.hpp"
 #include "ezgl/canvas.hpp"
+#include <iostream>
 
 namespace ezgl {
 
@@ -46,10 +47,17 @@ void zoom_in(canvas *cnv, point2d zoom_point, double zoom_factor)
 }
 
 void zoom_location(canvas *cnv, point2d zoom_point, double zoom_factor){
-    rectangle const world = cnv->get_camera().get_world();
-    //define a zoom_point  
-    //set a zoom factor -> might need world area? 
-    cnv->get_camera().set_world(zoom_in_world(zoom_point, world, zoom_factor));
+    double currentH = cnv->get_camera().get_world().height();
+    double currentW = cnv->get_camera().get_world().width();
+    double ratioHW = currentH/currentW; //x-y ratio
+    const double zoomAreaW = 0.005;
+    
+    zoom_point.x = zoom_point.x-(zoomAreaW/2);
+    zoom_point.y = zoom_point.y-(zoomAreaW*ratioHW/2);
+    
+    rectangle zoomArea(zoom_point, zoomAreaW, zoomAreaW*ratioHW);
+    
+    cnv->get_camera().set_world(zoomArea);
     cnv->redraw();
 }
 

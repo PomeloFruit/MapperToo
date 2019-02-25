@@ -165,6 +165,7 @@ void featureDrawing::drawFeatures(int numFeatures, infoStrucs &info, ezgl::rende
 void featureDrawing::drawPOI(int numPOI, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g, double adjustmentFactor){
     bool zoom1=(adjustmentFactor)<0.5;
     bool zoom2=(adjustmentFactor)<0.01;
+    int spacing = 1;
     
     drawnPOIs.clear();
     
@@ -172,17 +173,20 @@ void featureDrawing::drawPOI(int numPOI, mapBoundary &xy, infoStrucs &info, ezgl
         foodDrinkLimit = 40; 
         touristLimit = 40;
         shopsLimit = 40;
+        spacing = 5;
     }else if (zoom1){
         foodDrinkLimit = 20;
         touristLimit = 20;
         shopsLimit = 20;
+        spacing = 10;
     }else{
-        foodDrinkLimit = 10;
-        touristLimit = 10;
-        shopsLimit = 10;
+        foodDrinkLimit = 15;
+        touristLimit = 15;
+        shopsLimit = 15;
+        spacing = 15;
     }
     
-    for(int i=0 ; i<numPOI ; i++){   
+    for(int i=0 ; i<numPOI ; i=i+spacing){   
         drawOnePOI(i, xy, info, g);
     }
     drawClickedPOI(xy, info, g);
