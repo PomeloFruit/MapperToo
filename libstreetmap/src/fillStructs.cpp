@@ -364,7 +364,7 @@ std::string populateData::getOSMNodeName(const OSMNode* nodePtr){
 
 
 /* getRoadType function
- * - goes through the tags of thw way, looking for "highway"
+ * - goes through the tags of the way, looking for "highway"
  * - categorizes the type based on predifined constants
  * 
  * @param wayPtr <OSMWay*> - pointer to way with a lot of tags

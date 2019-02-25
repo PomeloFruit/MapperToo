@@ -14,8 +14,9 @@
 
 //============================== Constants ===================================
 
-#define ROADWIDTH 2
-#define PRIMWIDTH 4
+#define TRUNKWIDTH 4
+#define SECONDARYWIDTH 1
+#define PRIMWIDTH 3
 #define HIGHWAYWIDTH 5
 
 #define TRUNK 5

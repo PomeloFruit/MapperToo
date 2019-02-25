@@ -142,7 +142,7 @@ void draw_main_canvas(ezgl::renderer &g){
     ft.drawSubways(info.showRoute, xy, info, g);
     rd.drawSpecialIntersections(xy,info,g);
     dt.createText(getNumStreetSegments(), getNumStreets(), info, g);
-    ft.drawTextOnPOI(g, info);
+    //ft.drawTextOnPOI(g, info);
 }
 
 

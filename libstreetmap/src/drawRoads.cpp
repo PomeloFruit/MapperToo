@@ -8,10 +8,19 @@
 #include "ezgl/point.hpp"
 
 
-
+/* setRoadColurSize
+ *  - sets the roads colour and size based on the parameters below
+ *  - equations found in the function were determined by finding points that looked good and then using curve fitting
+ * @param type <int> - The type of street as classified in fillStructs 
+ * @param highlight <bool> - determines if the road should be highlighted or not
+ * @param g <ezgl::renderer> - (???????????????????????????????EIUT3 Y4OHFDSGH SOIRG)(idk how to describe this)
+ * @param startArea <double> - The initial area of the canvas
+ * @param currentArea <double> - the current area of the canvas
+ * @return void
+ */
 void roadDrawing::setRoadColourSize(int type, bool highlight, ezgl::renderer &g, double startArea, double currentArea){
     const int HIGHLIGHTFACT = 5;
-    int width = ROADWIDTH;
+    int width = SECONDARYWIDTH;
     g.set_color(255,255,255,255); //Ddefault white colour
     //1/(cur/start))
     double inputAdjust=1/(currentArea/startArea);
@@ -26,19 +35,19 @@ void roadDrawing::setRoadColourSize(int type, bool highlight, ezgl::renderer &g,
             g.set_color(255,255,255,255);
             break;
         case PRIMARY: // white and thick
-            width = PRIMWIDTH+adjustingAdd-1;
+            width = PRIMWIDTH+adjustingAdd;
             g.set_color(255,255,255,255);
             break;
         case SECONDARY: //===========================================================================
-            width = ROADWIDTH+adjustingAdd-1;
+            width = SECONDARYWIDTH+adjustingAdd;
             g.set_color(255,255,255,255);
             break;
         case RESIDENTIAL: //===========================================================================
-            width = ROADWIDTH+adjustingAdd-2;
+            width = adjustingAdd;
             g.set_color(255,255,255,255);
             break;
         case SERVICE: // light gray
-            width = ROADWIDTH+adjustingAdd-2;
+            width = adjustingAdd;
             g.set_color(244,244,244,255);
             break;
         default: //=====================================================================================
@@ -53,7 +62,18 @@ void roadDrawing::setRoadColourSize(int type, bool highlight, ezgl::renderer &g,
     g.set_line_width(width);
     g.set_line_cap (ezgl::line_cap::round);
 }
-//y = (280930.9-(2586289/1221110)) + (2.117982 - 280930.9)/(1 + (x/17546410000)^0.7331144)
+
+/* drawStreetRoads
+ *  - Determines which street segments should be drawn and calls another function to draw them
+ * @param numSegs <int> - The number of street segments on the map
+ * @param xy <mapBoundary> - An object that contains the bounds of the original map and functions to convert to and from LatLon/XY
+ * @param info <infoStrucs> - An object that contains various data structures filled with info relevant to the map
+ * @param g <ezgl::renderer> - (???????????????????????????????EIUT3 Y4OHFDSGH SOIRG)(idk how to describe this)
+ * @param startArea <double> - The initial area of the canvas
+ * @param currentArea <double> - the current area of the canvas
+ * @param currentRectangle <ezgl::rectangle> - the rectangle representing the current bounds of the map
+ * @return void
+ */
  void roadDrawing::drawStreetRoads(int numSegs, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g, double startArea, double currentArea, ezgl::rectangle currentRectangle){
     LatLon from, to;
     bool sufficentlyZoomed=false;
@@ -111,6 +131,14 @@ void roadDrawing::setRoadColourSize(int type, bool highlight, ezgl::renderer &g,
     }
 }
 
+ /* drawStraightStreet
+ *  - Draws a straight line on the map according to the specifications set out in setRoadColourSize. Called by drawStreetRoads
+ * @param pt1 <LatLon> - The latitude and longitude of the first point
+ * @param pt2 <LatLon> - The latitude and longitude of the second point
+ * @param xy <mapBoundary> - An object that contains the bounds of the original map and functions to convert to and from LatLon/XY
+ * @param g <ezgl::renderer> - (???????????????????????????????EIUT3 Y4OHFDSGH SOIRG)(idk how to describe this)
+ * @return void
+ */
 void roadDrawing::drawStraightStreet(LatLon &pt1, LatLon &pt2, mapBoundary &xy, ezgl::renderer &g){
     float xInitial, yInitial, xFinal, yFinal;
     
@@ -122,6 +150,14 @@ void roadDrawing::drawStraightStreet(LatLon &pt1, LatLon &pt2, mapBoundary &xy, 
     g.draw_line({xInitial, yInitial},{xFinal, yFinal});
 }
 
+/* drawIntersections
+ *  - Determines if an intersections is to be drawn and calls a function to draw it if it is
+ * @param numInter <int> - The number of intersections on the map
+ * @param xy <mapBoundary> - An object that contains the bounds of the original map and functions to convert to and from LatLon/XY
+ * @param info <infoStrucs> - An object that contains various data structures filled with info relevant to the map
+ * @param g <ezgl::renderer> - (???????????????????????????????EIUT3 Y4OHFDSGH SOIRG)(idk how to describe this)
+ * @return void
+ */
 void roadDrawing::drawIntersections(int numInter, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g){
     //make sure it's in bounds
     ezgl::rectangle currentRectangle=g.get_visible_world();
@@ -133,12 +169,28 @@ void roadDrawing::drawIntersections(int numInter, mapBoundary &xy, infoStrucs &i
     drawSpecialIntersections(xy, info, g);
 }
 
+/* drawSpecialIntersections
+ *  - (IDK WHAT THIS DOES EXACTLY)
+ * @param xy <mapBoundary> - An object that contains the bounds of the original map and functions to convert to and from LatLon/XY
+ * @param info <infoStrucs> - An object that contains various data structures filled with info relevant to the map
+ * @param g <ezgl::renderer> - (???????????????????????????????EIUT3 Y4OHFDSGH SOIRG)(idk how to describe this)
+ * @return void
+ */
 void roadDrawing::drawSpecialIntersections(mapBoundary &xy, infoStrucs &info, ezgl::renderer &g){
     for(unsigned i = 0 ; i < info.lastIntersection.size() ; i++){
         drawOneIntersection(info.lastIntersection[i], xy, info, g);
     }
 }
 
+/* drawStreetRoads
+ *  - Determines if the intersection should be drawn as normal or loaded in with a png
+ *  - Then draws the intersection as specified
+ * @param id <int> - The index number of the intersection to be drawn
+ * @param xy <mapBoundary> - An object that contains the bounds of the original map and functions to convert to and from LatLon/XY
+ * @param info <infoStrucs> - An object that contains various data structures filled with info relevant to the map
+ * @param g <ezgl::renderer> - (???????????????????????????????EIUT3 Y4OHFDSGH SOIRG)(idk how to describe this)
+ * @return void
+ */
 void roadDrawing::drawOneIntersection(int id, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g){
     //const double NORMALRAD = 0.00015;
     const float RADIUSNORM = 0.00003;
@@ -164,11 +216,29 @@ void roadDrawing::drawOneIntersection(int id, mapBoundary &xy, infoStrucs &info,
         g.fill_elliptic_arc(ezgl::point2d(x,y),RADIUSNORM,RADIUSNORM,0,360);
     }
 }
+
+/* inBounds
+ *  - Determines if a given point is in bounds
+ * @param xy <mapBoundary> - An object that contains the bounds of the original map and functions to convert to and from LatLon/XY
+ * @param currentRectangle <ezgl::rectangle> - the rectangle representing the current bounds of the map
+ * @param position <LatLon> - the position that is to be determined to be in bounds or not (in latitude and longitude)
+ * @return bool
+ */
 bool roadDrawing::inBounds(mapBoundary &xy, ezgl::rectangle& curBounds, LatLon& position){
     return (xy.yFromLat(position.lat())<curBounds.top())&&(xy.yFromLat(position.lat())>curBounds.bottom())&&(xy.xFromLon(position.lon())>curBounds.left())&&(xy.xFromLon(position.lon())<curBounds.right());
 }
 
 
+
+
+
+
+
+
+
+
+//below this is potentially useful data to whoever wants to look at it
+//if not it could be deleted 
 
 /*SHOWING TRUNKS AND HIGHWAYS ONLY==>try trunks, highways, primary for those biggers
  * beijing:seems a bit empty in terms of feats, roads seem nice
