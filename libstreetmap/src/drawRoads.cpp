@@ -201,14 +201,7 @@ void roadDrawing::drawOneIntersection(int id, mapBoundary &xy, infoStrucs &info,
     y = xy.yFromLat(info.IntersectionInfo[id].position.lat());
 
     if(info.IntersectionInfo[id].clicked) {
-        g.draw_surface(g.load_png("/homes/d/dujia3/ece297/work/mapper/libstreetmap/resources/intersection.png"), ezgl::point2d(x-2*radius, y+2*radius));
-//        //outer circle (turquoise)
-//        g.set_color(110,236,209,125);
-//        g.fill_elliptic_arc(ezgl::point2d(x,y),RADIUSHIGH,RADIUSHIGH,0,360);
-//        
-//        //inner circle (dark navy)
-//        g.set_color(0,119,119,255);
-//        g.fill_elliptic_arc(ezgl::point2d(x,y),RADIUSHIGH/5,RADIUSHIGH/5,0,360);
+        g.draw_surface(g.load_png("intersection.png"), ezgl::point2d(x-2*radius, y+2*radius));
         
     } else {
         //regular intersection (white)

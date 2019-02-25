@@ -71,6 +71,7 @@ std::vector<double> streetLengthVector;
 //vector of street segment travel times indexed on segment ID
 std::vector<double> segTravelTimeVector;
 
+//streetGrid object that stores all POIs and intersections in two 3D vector
 streetGrid streetBlock; 
 //========================= Function Implementations =========================
 
@@ -187,18 +188,6 @@ bool load_map(std::string path/*map_path*/) {
                     intersectionOnStreet.push_back(intersectionID2);
                     collisionList[intersectionID2]++;
                 }
-////                intersectionIt = std::find(intersectionOnStreet.begin(), 
-////                            intersectionOnStreet.end(), intersectionID1); 
-////                if(intersectionIt == intersectionOnStreet.end()){
-////                    intersectionOnStreet.push_back(intersectionID1); 
-////                }
-////                
-////                intersectionIt = std::find(intersectionOnStreet.begin(), 
-////                            intersectionOnStreet.end(), intersectionID2); 
-////                if(intersectionIt == intersectionOnStreet.end()){
-////                    intersectionOnStreet.push_back(intersectionID2); 
-////                }
-                
             }
             for(unsigned j=0;j<intersectionOnStreet.size();j++){
                 collisionList[intersectionOnStreet[j]]=0;
@@ -230,8 +219,9 @@ bool load_map(std::string path/*map_path*/) {
             intersectionSegNameVector.push_back(segNames);
             intersectionSegIDVector.push_back(intersectionIds);
         }
+        
+        //initializing the streetGrid object
         streetBlock.populateGrid();
-       // dt.initilize(getNumStreetSegments());
     }    
     
     return load_successful;
@@ -254,7 +244,6 @@ void close_map() {
     segLengthVector.clear();
     streetLengthVector.clear();
     segTravelTimeVector.clear();
-//    streetBlock.clearGrid();
     streetBlock.poiGrid.clear();
     streetBlock.intGrid.clear();
     closeStreetDatabase();

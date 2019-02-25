@@ -43,7 +43,7 @@ void initial_setup(ezgl::application *application);
 void act_on_mouse_press(ezgl::application *application, GdkEventButton *event, double x, double y);
 void findButton(GtkWidget *widget, ezgl::application *application);
 void dialog_box(GtkWidget *widget, ezgl::application *application, std::string message);
-void on_dialog_response(GtkDialog *dialog, gint response_id, gpointer user_data);
+void on_dialog_response(GtkDialog *dialog);
 
 void hideSubwayButton(GtkWidget *widget, ezgl::application *application);
 void showSubwayButton(GtkWidget *widget, ezgl::application *application);
@@ -56,8 +56,6 @@ void hideFDButton(GtkWidget *widget, ezgl::application *application);
 void showFDButton(GtkWidget *widget, ezgl::application *application);
 void hideShopsButton(GtkWidget *widget, ezgl::application *application);
 void showShopsButton(GtkWidget *widget, ezgl::application *application);
-void hideAllButton(GtkWidget *widget, ezgl::application *application);
-void showAllButton(GtkWidget *widget, ezgl::application *application);
 void helpButton(GtkWidget *widget, ezgl::application *application);
 
 void newMap(std::string path, ezgl::application *application);
@@ -303,7 +301,8 @@ void dialog_box(GtkWidget *widget, ezgl::application *application, std::string m
 }
 
 // couldnt suppress these warnings
-void on_dialog_response(GtkDialog *dialog, gint response_id, gpointer user_data){
+void on_dialog_response(GtkDialog *dialog){
+
     gtk_widget_destroy(GTK_WIDGET (dialog));
 }
 

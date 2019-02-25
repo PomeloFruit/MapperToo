@@ -68,7 +68,8 @@ void featureDrawing::setFeatureColour(int type, ezgl::renderer &g, bool special)
                 g.set_color(80, 179, 255, 128);
                 break;
             case 5: // island = dark green
-                g.set_color(100,209, 0, 99);
+                g.set_color(82, 204, 42, 200);
+                //g.set_color(100,209, 0, 179);
                 break;
             case 6: // building = darkish gray
                 g.set_color(22, 23, 56, 20);
@@ -195,13 +196,7 @@ void featureDrawing::drawClickedPOI(mapBoundary &xy, infoStrucs &info, ezgl::ren
 }
 
 void featureDrawing::drawOnePOI(int i, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g){
-    //const double HIGHLIGHTRADIUS = 0.0005;
     const double radius = g.get_visible_world().width()*0.009;
-    //double areaForcer=sqrt(0.000073593*currentArea/M_PI)/NORMALRAD;//that first number is the average of two proportions of areas that were deemed to be desireable
-    //double areaForcerClick=sqrt(0.000432814*currentArea/M_PI)/HIGHLIGHTRADIUS;
-    //double forcedRadius=areaForcer*NORMALRAD;
-    //double forcedRadiusClick=areaForcerClick*HIGHLIGHTRADIUS;
-    
     LatLon newPoint;
     double xNew, yNew;
     
@@ -219,16 +214,7 @@ void featureDrawing::drawOnePOI(int i, mapBoundary &xy, infoStrucs &info, ezgl::
     
     
     if (info.POIInfo[i].clicked && drawPOI) {
-//        //highlight circle (pink)
-//        g.set_color(255,77,190,125);
-//        g.fill_elliptic_arc(ezgl::point2d(xNew,yNew),radius,radius,0,360);
-//        
-//        //inner circle (dark purple)
-//        radius = forcedRadius;
-//        g.set_color(79,0,79,255);
-//        g.fill_elliptic_arc(ezgl::point2d(xNew,yNew),radius,radius,0,360);
-        
-        g.draw_surface(g.load_png("/homes/d/dujia3/ece297/work/mapper/libstreetmap/resources/POI_select.png"), ezgl::point2d(xNew-radius, yNew+radius));
+        g.draw_surface(g.load_png("POI_select.png"), ezgl::point2d(xNew-radius, yNew+radius));
         if(info.POIInfo[i].poiNum == 1 && info.poiButtonStatus[0] == 1){
             touristPOICounter++;
             drawnPOIs.push_back(std::make_pair(ezgl::point2d(xNew-radius, yNew+radius), i));
@@ -239,43 +225,21 @@ void featureDrawing::drawOnePOI(int i, mapBoundary &xy, infoStrucs &info, ezgl::
             shopsPOICounter++;
             drawnPOIs.push_back(std::make_pair(ezgl::point2d(xNew-radius, yNew+radius), i));
         }
-        //drawnPOIs.push_back(ezgl::point2d(xNew-radius, yNew+radius));
     } else if(drawPOI){
-        //regular POI (dark red)
         info.POIInfo[i].poiNum = classifyPOI(info.POIInfo[i].type);
-//        setPOIColour(poiType, g);
         if(info.POIInfo[i].poiNum == 1 && touristPOICounter < touristLimit && info.poiButtonStatus[0] == 1){
-            g.draw_surface(g.load_png("/homes/d/dujia3/ece297/work/mapper/libstreetmap/resources/tourist.png"), ezgl::point2d(xNew-radius, yNew+radius));
+            g.draw_surface(g.load_png("tourist.png"), ezgl::point2d(xNew-radius, yNew+radius));
             touristPOICounter++;
             drawnPOIs.push_back(std::make_pair(ezgl::point2d(xNew-radius, yNew+radius), i));
         } else if (info.POIInfo[i].poiNum == 2 && foodDrinkPOICounter < foodDrinkLimit && info.poiButtonStatus[1] == 1){
-            g.draw_surface(g.load_png("/homes/d/dujia3/ece297/work/mapper/libstreetmap/resources/food.png"), ezgl::point2d(xNew-radius, yNew+radius));
+            g.draw_surface(g.load_png("food.png"), ezgl::point2d(xNew-radius, yNew+radius));
             foodDrinkPOICounter++;
             drawnPOIs.push_back(std::make_pair(ezgl::point2d(xNew-radius, yNew+radius), i));
         } else if (info.POIInfo[i].poiNum == 3 && shopsPOICounter < shopsLimit && info.poiButtonStatus[2] == 1){
-            g.draw_surface(g.load_png("/homes/d/dujia3/ece297/work/mapper/libstreetmap/resources/shop bag.png"), ezgl::point2d(xNew-radius, yNew+radius));
+            g.draw_surface(g.load_png("shop bag.png"), ezgl::point2d(xNew-radius, yNew+radius));
             shopsPOICounter++;
             drawnPOIs.push_back(std::make_pair(ezgl::point2d(xNew-radius, yNew+radius), i));
         }
-        
-        //drawnPOIs.push_back(ezgl::point2d(xNew-radius, yNew+radius));
-//        if((info.POIInfo[i].poiNum!=2)){
-//            if(info.POIInfo[i].poiNum == 1){
-//                g.draw_surface(g.load_png("/homes/d/dujia3/ece297/work/mapper/libstreetmap/resources/tourist.png"), ezgl::point2d(xNew-radius, yNew+radius));
-//            }else if (info.POIInfo[i].poiNum == 3){
-//                g.draw_surface(g.load_png("/homes/d/dujia3/ece297/work/mapper/libstreetmap/resources/shop bag.png"), ezgl::point2d(xNew-radius, yNew+radius));
-//            }
-//            //g.fill_elliptic_arc(ezgl::point2d(xNew,yNew),radius,radius,0,360);
-//        }
-//        else if(foodDrinkPOICounter<50){
-//            g.draw_surface(g.load_png("/homes/d/dujia3/ece297/work/mapper/libstreetmap/resources/food.png"), ezgl::point2d(xNew-radius, yNew+radius));
-////            g.fill_elliptic_arc(ezgl::point2d(xNew,yNew),radius,radius,0,360);
-//            foodDrinkPOICounter++;
-//        }
-//            //g.draw_surface(g.load_png("/homes/d/dujia3/ece297/work/mapper/libstreetmap/resources/small_image.png"), ezgl::point2d(xNew, yNew));
-//        //radius = NORMALRAD;
-//        //setPOIColour(classifyPOI(info.POIInfo[i].type), g);  
-//        //g.fill_elliptic_arc(ezgl::point2d(xNew,yNew),radius,radius,0,360);
     }
 }
 
@@ -301,15 +265,10 @@ void featureDrawing::drawOneSubway(unsigned i, mapBoundary &xy, infoStrucs &info
     yNew = xy.yFromLat(drawPoint.lat());
     
     if(info.SubwayInfo[i].clicked){
-//        g.set_color(64,255,194,255);
-//        g.fill_elliptic_arc(ezgl::point2d(xNew,yNew),SUBWAYRAD,SUBWAYRAD,0,360);
-//        g.set_color(255,155,36,150);
-//        g.fill_elliptic_arc(ezgl::point2d(xNew,yNew),HIGHLIGHTRAD,HIGHLIGHTRAD,0,360);
-        g.draw_surface(g.load_png("/homes/d/dujia3/ece297/work/mapper/libstreetmap/resources/train_click.png"), ezgl::point2d(xNew-radius, yNew+radius));
+        g.draw_surface(g.load_png("train_click.png"), ezgl::point2d(xNew-radius, yNew+radius));
         return;
     }
-//    g.fill_elliptic_arc(ezgl::point2d(xNew,yNew),SUBWAYRAD,SUBWAYRAD,0,360);
-    g.draw_surface(g.load_png("/homes/d/dujia3/ece297/work/mapper/libstreetmap/resources/train.png"), ezgl::point2d(xNew-radius, yNew+radius));
+    g.draw_surface(g.load_png("train.png"), ezgl::point2d(xNew-radius, yNew+radius));
 
 }
 
