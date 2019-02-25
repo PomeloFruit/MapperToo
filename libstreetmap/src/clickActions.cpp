@@ -136,9 +136,13 @@ std::string clickActions::clickedOnSubway(double x, double y, mapBoundary &xy, i
 std::string clickActions::searchOnMap(infoStrucs &info){
     std::string displayMessage;
     std::vector<unsigned> street1ID, street2ID, resultID;
-    int match1, match2;
+    int match1 = 0;
+    int match2 = 0;
     unsigned correct1 = 0;
     unsigned correct2 = 0;
+    int start = 0;
+    
+    resultID.clear();
     
     // get the match type of the search
     match1 = findMatches(street1ID, info.textInput1, info);
@@ -150,10 +154,9 @@ std::string clickActions::searchOnMap(infoStrucs &info){
     
     // if inputs are invalid, get the error message
     displayMessage = getMessagesFromMatches(match1, match2);
-      
+
     // find intersections, both inputs have at least one matching name
     if((match1 > RESULTNONE) && (match2 > RESULTNONE)){
-        
         for(unsigned i=0 ; i<street1ID.size() ; i++){
             for(unsigned j=0 ; j<street2ID.size() ; j++){
                 
@@ -184,7 +187,7 @@ std::string clickActions::searchOnMap(infoStrucs &info){
         }
         
         if(resultID.size() > 0){ // if intersection found
-        
+
             // add full name of streets into search field
             info.corInput1=getStreetName(street1ID[correct1]);
             info.corInput2=getStreetName(street2ID[correct2]);
@@ -213,8 +216,8 @@ std::string clickActions::searchOnMap(infoStrucs &info){
     
     // find street from input 1
     } else if(match1 > RESULTNONE) { 
-        
         resultID = street1ID;
+        
         displayMessage = "Street Found: ";
         displayMessage += getStreetName(resultID[0]);
         if(resultID.size()>1){
@@ -236,7 +239,6 @@ std::string clickActions::searchOnMap(infoStrucs &info){
 
     // find street from input 2
     } else if(match2 > RESULTNONE) { 
-        
         resultID = street2ID;
         displayMessage = "Street Found: ";
         displayMessage += getStreetName(resultID[0]);
@@ -257,68 +259,63 @@ std::string clickActions::searchOnMap(infoStrucs &info){
     
     // find POI from input 1
     } else if(match1 == RESULTPOI) { 
-        
         resultID = street1ID;
+        
         displayMessage = "Point of Interest Found: ";
-        displayMessage += info.POIInfo[resultID[0]].name;
-        info.corInput1 = info.POIInfo[resultID[0]].name;
-        
-        if(resultID.size()>1){
-            displayMessage += " (Displaying 1 of " + std::to_string(resultID.size()) + " found)"; 
+        displayMessage += info.POIInfo[resultID[start]].name;
+        info.corInput1 = info.POIInfo[resultID[start]].name;
+
+        if((resultID.size()-start)>1){
+            displayMessage += " (Displaying 1 of " + std::to_string(resultID.size()-start) + " found)"; 
         }
-        
+
         std::cout << "Point of Interest search result(s):" << std::endl;
-            
-        for(unsigned i=0 ; i<resultID.size() ; i++){
-            std::cout << "(" << (i+1) << " of " << std::to_string(resultID.size()) << " found) " ; 
+
+        for(unsigned i=start ; i<resultID.size() ; i++){
+            std::cout << "(" << (i-start+1) << " of " << std::to_string(resultID.size()-start) << " found) " ; 
             std::cout << info.POIInfo[resultID[i]].name << std::endl;
         }
-        
-        highlightPOI(info, resultID[0]);
+
+        highlightPOI(info, resultID[start]);
     
     // find subway station from input 1
     } else if(match1 == RESULTSUBWAY) { 
-        
         resultID = street1ID;
+
         displayMessage = "Subway Found: ";
-        displayMessage += info.SubwayInfo[resultID[0]].name;
-        info.corInput1 = info.SubwayInfo[resultID[0]].name;
-        
-        if(resultID.size()>1){
-            displayMessage += " (Displaying 1 of " + std::to_string(resultID.size()) + " found)"; 
+        displayMessage += info.SubwayInfo[resultID[start]].name;
+        info.corInput1 = info.SubwayInfo[resultID[start]].name;
+        std::cout<<"Updated corInput1"<<std::endl;
+
+        if((resultID.size()-start)>1){
+            displayMessage += " (Displaying 1 of " + std::to_string(resultID.size()-start) + " found)"; 
         }
-        
-        std::cout << "Subway Station search result(s):" << std::endl;
-            
-        for(unsigned i=0 ; i<resultID.size() ; i++){
-            std::cout << "(" << (i+1) << " of " << std::to_string(resultID.size()) << " found) " ; 
+        for(unsigned i=start ; i<resultID.size() ; i++){
+            std::cout << "(" << (i-start+1) << " of " << std::to_string(resultID.size()-start) << " found) " ; 
             std::cout << info.SubwayInfo[resultID[i]].name << std::endl;
         }
-        
-        highlightSubway(info, resultID[0]);
-        
-        
+        highlightSubway(info, resultID[start]);
+ 
     // find Features from input 1   
-    } else if(match1 == RESULTFEATURE) { 
-        
+    } else if(match1 == RESULTFEATURE) {     
         resultID = street1ID;
         
         displayMessage = "Feature Found: ";
-        displayMessage += info.FeatureInfo[resultID[0]].name;
-        info.corInput1 = info.FeatureInfo[resultID[0]].name;
-        
-        if(resultID.size()>1){
-            displayMessage += " (Displaying 1 of " + std::to_string(resultID.size()) + " found)"; 
+        displayMessage += info.FeatureInfo[resultID[start]].name;
+        info.corInput1 = info.FeatureInfo[resultID[start]].name;
+
+        if((resultID.size()-start)>1){
+            displayMessage += " (Displaying 1 of " + std::to_string(resultID.size()-start) + " found)"; 
         }
-        
+
         std::cout << "Feature search result(s):" << std::endl;
-            
-        for(unsigned i=0 ; i<resultID.size() ; i++){
-            std::cout << " (" << (i+1) << " of " << std::to_string(resultID.size()) << " found) "; 
-            std::cout << info.FeatureInfo[resultID[i]].name << std::endl;
+
+        for(unsigned i=start ; i<resultID.size() ; i++){
+            std::cout << " (" << (i-start+1) << " of " << std::to_string(resultID.size()-start) << " found) "; 
+            std::cout << info.FeatureInfo[resultID[start]].name << std::endl;
         }
-        
-        highlightFeature(info, resultID[0]);
+
+        highlightFeature(info, resultID[start]);
     }
     
     return displayMessage;
@@ -371,24 +368,27 @@ int clickActions::findMatches(std::vector<unsigned> &streetID, std::string userI
     int match = RESULTEMPTY;
     int numMatches = 0;
     std::string station = "station";
+    streetID.clear();
     
     std::transform(userInput.begin(), userInput.end(), userInput.begin(), ::tolower);
 
     if(userInput != ""){
-        streetID = find_street_ids_from_partial_street_name(userInput);        
-        numMatches = streetID.size();
         
         // check if input ends with "station"
         if(userInput.size()>station.size() && userInput.compare(userInput.size()-(station.size()), station.size(), station)==0){
             
+            numMatches = streetID.size();
             // check if input matches any subway stations
             findSubwaysByName(streetID, userInput, info);
             numMatches = streetID.size();
+            
             if(numMatches > 0){
                 match = RESULTSUBWAY;
             }
             
         } else {
+            streetID = find_street_ids_from_partial_street_name(userInput);        
+            numMatches = streetID.size();
             
             if(numMatches == 0){
                 match = RESULTNONE;
@@ -458,19 +458,13 @@ void clickActions::findPOIByName(std::vector<unsigned> &streetID, std::string us
 
 void clickActions::findSubwaysByName(std::vector<unsigned> &streetID, std::string userInput, infoStrucs &info){
     std::string temp;
-    int sim = 0;
 
     for(unsigned i=0 ; i<info.SubwayInfo.size() ; i++){
-        
         temp = info.SubwayInfo[i].name;
         std::transform(temp.begin(), temp.end(), temp.begin(), ::tolower);
         
-        // in case a name is not found for a subway
-        if(temp.size() >= userInput.size()){
-            sim = temp.compare(0, userInput.size(), userInput);
-        }
-        
-        if(sim == 0){
+        if(temp.size() != 0 && temp == userInput){
+            std::cout << i << std::endl;
             streetID.push_back(i);
         }
     }

@@ -207,7 +207,7 @@ void act_on_mouse_press(ezgl::application *application, GdkEventButton *event, d
  * - sets the text in fields to "corrected" name if searched
  * - reads the text in fields to search for
  * 
- * @param widget <GtkWidget> -event object to determine mouse action
+ * @param widget <GtkWidget> - widget object to determine which gtk object to modify
  * @param application <ezgl::application> - application object to access window elements
  * 
  * @return void
@@ -271,6 +271,17 @@ void findButton(GtkWidget *widget, ezgl::application *application){
     }
 }
 
+
+/* dialog_box function
+ * - calls for message to be displayed in the dialog box
+ * 
+ * @param widget <GtkWidget> - gtk object pointer to get access to dialog box
+ * @param application <ezgl::application> - application object to access window elements
+ * @param message <string> - message to display in the dialog box
+ * 
+ * @return void
+ */
+
 void dialog_box(GtkWidget *widget, ezgl::application *application, std::string message){
     GObject *window; // the parent window over which to add the dialog
     GtkWidget *content_area; // the content area of the dialog (i.e. where to put stuff in the dialog)
@@ -300,9 +311,16 @@ void dialog_box(GtkWidget *widget, ezgl::application *application, std::string m
     
 }
 
-// couldnt suppress these warnings
-void on_dialog_response(GtkDialog *dialog){
 
+/* dialog_box function
+ * - calls for dialog box to be destroyed
+ * 
+ * @param dialog <GtkDialog> - gtk object pointer to get access to dialog box
+ * 
+ * @return void
+ */
+
+void on_dialog_response(GtkDialog *dialog){
     gtk_widget_destroy(GTK_WIDGET (dialog));
 }
 
