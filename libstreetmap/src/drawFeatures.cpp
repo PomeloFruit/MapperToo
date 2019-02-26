@@ -7,7 +7,7 @@
 
 #include <algorithm>
 
-
+std::vector<std::pair<ezgl::point2d, int>> drawnPOIs;
 /* setFeatureColour function
  * - sets the feature colours based on Feature Type
  * 
@@ -158,7 +158,7 @@ void featureDrawing::drawPOI(int numPOI, mapBoundary &xy, infoStrucs &info, ezgl
     const int SPACING2 = 10;
     const int SPACING3 = 15;
     
-    //drawnPOIs.clear();
+    drawnPOIs.clear();
         
     if(screenRatio < LV1ZOOM){
         limit = POILIMIT1;
@@ -235,17 +235,17 @@ void featureDrawing::drawOnePOI(int i, mapBoundary &xy, infoStrucs &info, ezgl::
         if(info.POIInfo[i].poiNum == 1 && info.poiButtonStatus[0] == 1) {
             
             touristPOICounter++;
-            //drawnPOIs.push_back(std::make_pair(ezgl::point2d(xNew-radius, yNew+radius), i));
+            drawnPOIs.push_back(std::make_pair(ezgl::point2d(xNew-RADIUS, yNew+RADIUS), i));
         
         } else if(info.POIInfo[i].poiNum == 2 && info.poiButtonStatus[1] == 1) {
             
             foodDrinkPOICounter++;
-            //drawnPOIs.push_back(std::make_pair(ezgl::point2d(xNew-radius, yNew+radius), i));
+            drawnPOIs.push_back(std::make_pair(ezgl::point2d(xNew-RADIUS, yNew+RADIUS), i));
         
         } else if (info.POIInfo[i].poiNum == 3 && info.poiButtonStatus[2] == 1) {
             
             shopsPOICounter++;
-            //drawnPOIs.push_back(std::make_pair(ezgl::point2d(xNew-radius, yNew+radius), i));
+            drawnPOIs.push_back(std::make_pair(ezgl::point2d(xNew-RADIUS, yNew+RADIUS), i));
         
         }
         
@@ -256,19 +256,19 @@ void featureDrawing::drawOnePOI(int i, mapBoundary &xy, infoStrucs &info, ezgl::
             
             g.draw_surface(g.load_png("tourist.png"), ezgl::point2d(xNew-RADIUS, yNew+RADIUS));
             touristPOICounter++;
-            //drawnPOIs.push_back(std::make_pair(ezgl::point2d(xNew-radius, yNew+radius), i));
+            drawnPOIs.push_back(std::make_pair(ezgl::point2d(xNew-RADIUS, yNew+RADIUS), i));
         
         } else if (info.POIInfo[i].poiNum == 2 && foodDrinkPOICounter < foodDrinkLimit && info.poiButtonStatus[1] == 1) {
             
             g.draw_surface(g.load_png("food.png"), ezgl::point2d(xNew-RADIUS, yNew+RADIUS));
             foodDrinkPOICounter++;
-            //drawnPOIs.push_back(std::make_pair(ezgl::point2d(xNew-radius, yNew+radius), i));
+            drawnPOIs.push_back(std::make_pair(ezgl::point2d(xNew-RADIUS, yNew+RADIUS), i));
         
         } else if (info.POIInfo[i].poiNum == 3 && shopsPOICounter < shopsLimit && info.poiButtonStatus[2] == 1) {
             
             g.draw_surface(g.load_png("shop bag.png"), ezgl::point2d(xNew-RADIUS, yNew+RADIUS));
             shopsPOICounter++;
-            //drawnPOIs.push_back(std::make_pair(ezgl::point2d(xNew-radius, yNew+radius), i));
+            drawnPOIs.push_back(std::make_pair(ezgl::point2d(xNew-RADIUS, yNew+RADIUS), i));
         
         }
     }
@@ -427,12 +427,14 @@ void featureDrawing::drawStraightSubwaySection(LatLon &pt1, LatLon &pt2, mapBoun
 
 // function can be used later to label selective POI
 
-//void featureDrawing::drawTextOnPOI(ezgl::renderer &g, infoStrucs &info){
-//    int namesToBeDrawn=drawnPOIs.size();
-//    g.set_text_rotation(0);
-//    //probably set a character limit somewhere around here
-//    for(int i=0;i<namesToBeDrawn;i=i+5){
-//        g.draw_text(drawnPOIs[i].first, info.POIInfo[drawnPOIs[i].second].name);
-//    }
-//    
-//}
+void featureDrawing::drawTextOnPOI(ezgl::renderer &g, infoStrucs &info){
+    int namesToBeDrawn=drawnPOIs.size();
+    g.set_text_rotation(0);
+    //probably set a character limit somewhere around here
+    for(int i=0;i<namesToBeDrawn;i++){
+        if((i%5)==0){
+            g.draw_text(drawnPOIs[i].first, info.POIInfo[drawnPOIs[i].second].name);
+        }
+    }
+    
+}

@@ -39,7 +39,7 @@ public:
     // draws a section of subway, highlighted if high is true, train/subway based on t
     void drawStraightSubwaySection(LatLon &pt1, LatLon &pt2, mapBoundary &xy, ezgl::renderer &g, bool high, int t);
     
-    //void drawTextOnPOI(ezgl::renderer &g, infoStrucs &info);
+    void drawTextOnPOI(ezgl::renderer &g, infoStrucs &info);
 private:
     //POI counter limits 
     int foodDrinkLimit;
