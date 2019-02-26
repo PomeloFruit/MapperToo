@@ -108,7 +108,13 @@ void drawText::createText(int numStreetSegs, int numStreets, infoStrucs &info, e
                 
                 
                 //setting the colour and determining if either the initial position or the final position is in bounds 
-                g.set_color(0, 0, 0, 255);
+                if(info.initiateSicko == 1){
+                    g.set_color(255,255,255,255);
+                }else{
+                    g.set_color(0, 0, 0, 255);
+                }
+                
+                
                 bool inBoundsInitial=inBounds(currentRectangle, initialPosition);
                 bool inBoundsFinal=inBounds(currentRectangle, finalPosition);
                                 

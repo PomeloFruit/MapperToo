@@ -18,11 +18,48 @@
  * @return void
  */
 
-void featureDrawing::setFeatureColour(int type, ezgl::renderer &g, bool special){
+void featureDrawing::setFeatureColour(infoStrucs &info, int type, ezgl::renderer &g, bool special){
     if(special){
         g.set_color(216, 0, 113, 150);
         //g.set_color(255,236,175,150);
-    } else {
+        
+    } else if (info.initiateSicko == 1) { 
+        switch(type){
+            case 0: // unknown = dark gray
+                g.set_color(0,0,0,255);
+                break;
+            case 1: // park = darkish green
+                g.set_color(0, 109, 0, 200);
+                break;
+            case 2: // beach = peach
+                g.set_color(255, 255, 0, 200);
+                break;
+            case 3: // lake = blue 
+                g.set_color(0, 0, 87, 255);
+                break;
+            case 4: // river = dark blue 
+                g.set_color(255, 255, 0, 200);
+                break;
+            case 5: // island = dark green
+                g.set_color(0, 109, 0, 200);
+                break;
+            case 6: // building = darkish gray
+                g.set_color(0,0,0,180);
+                break;
+            case 7: // green space = light green 
+                g.set_color(0, 109, 0, 200);
+                break;
+            case 8: // golf course = putting green
+                g.set_color(0, 109, 0, 200);
+                break;
+            case 9: // stream = light blue
+                g.set_color(255, 255, 0, 200);
+                break;
+            default: //dark gray
+                g.set_color(0,0,0,255);
+                break;
+        }
+    }else {
         switch(type){
             case 0: // unknown = dark gray
                 g.set_color(152,151,150,255);
@@ -103,7 +140,7 @@ void featureDrawing::drawFeatures(int numFeatures, infoStrucs &info, ezgl::rende
             
             if(info.FeatureInfo[i].priorityNum == s){
                 
-                setFeatureColour(info.FeatureInfo[i].featureType, g, info.FeatureInfo[i].clicked);
+                setFeatureColour(info, info.FeatureInfo[i].featureType, g, info.FeatureInfo[i].clicked);
                 
                 if(info.FeaturePointVec[i].size()>1){
                     
@@ -231,8 +268,12 @@ void featureDrawing::drawOnePOI(int i, mapBoundary &xy, infoStrucs &info, ezgl::
     
     // if the POI is clicked, draw the Selected POI png
     if (info.POIInfo[i].clicked && drawPOI) {
-        g.draw_surface(g.load_png("POI_select.png"), ezgl::point2d(xNew-RADIUS, yNew+RADIUS));
-        
+        if(info.initiateSicko == 1){
+            g.draw_surface(g.load_png("jesus.png"), ezgl::point2d(xNew-RADIUS, yNew+RADIUS));
+        }else{
+            g.draw_surface(g.load_png("POI_select.png"), ezgl::point2d(xNew-RADIUS, yNew+RADIUS));
+        }
+ 
         if(info.POIInfo[i].poiNum == 1 && info.poiButtonStatus[0] == 1) {
             
             touristPOICounter++;

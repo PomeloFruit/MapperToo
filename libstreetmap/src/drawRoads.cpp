@@ -21,42 +21,74 @@
  * @return void
  */
 
-void roadDrawing::setRoadColourSize(int type, bool highlight, ezgl::renderer &g, double startArea, double currentArea){
+void roadDrawing::setRoadColourSize(infoStrucs &info, int type, bool highlight, ezgl::renderer &g, double startArea, double currentArea){
     const int HIGHLIGHTFACT = 5;
     int width = SECONDARYWIDTH;
     g.set_color(255,255,255,255); //Default white colour
     double inputAdjust=1/(currentArea/startArea);
     double adjustingAdd=(280930.9-(2586289/1221110)) + (2.117982 - 280930.9)/(1 + (pow(inputAdjust/17546410000, 0.7331144)));
-    switch(type){
-        case HIGHWAY: 
-        case HIGHWAYRAMP:// yellowish
-            width =HIGHWAYWIDTH + adjustingAdd;
-            g.set_color(250,215,56,200);
-            break;
-        case TRUNK:
-            width = PRIMWIDTH + adjustingAdd;
-            g.set_color(255,255,255,255);
-            break;
-        case PRIMARY: // white and thick
-            width = PRIMWIDTH + adjustingAdd;
-            g.set_color(255,255,255,255);
-            break;
-        case SECONDARY:
-            width = SECONDARYWIDTH + adjustingAdd;
-            g.set_color(255,255,255,255);
-            break;
-        case RESIDENTIAL:
-            width = adjustingAdd;
-            g.set_color(255,255,255,255);
-            break;
-        case SERVICE:
-            width = adjustingAdd;
-            g.set_color(244,244,244,255);
-            break;
-        default:
-            break;
+    if(info.initiateSicko == 1){
+        switch(type){
+            case HIGHWAY: 
+            case HIGHWAYRAMP:// yellowish
+                width =HIGHWAYWIDTH + adjustingAdd;
+                g.set_color(255, 101, 0, 170);
+                break;
+            case TRUNK:
+                width = PRIMWIDTH + adjustingAdd;
+                g.set_color(255, 101, 0, 170);
+                break;
+            case PRIMARY: // white and thick
+                width = PRIMWIDTH + adjustingAdd;
+                g.set_color(255, 101, 0, 170);
+                break;
+            case SECONDARY:
+                width = SECONDARYWIDTH + adjustingAdd;
+                g.set_color(255, 101, 0, 170);
+                break;
+            case RESIDENTIAL:
+                width = adjustingAdd;
+                g.set_color(255, 101, 0, 170);
+                break;
+            case SERVICE:
+                width = adjustingAdd;
+                g.set_color(255, 101, 0, 170);
+                break;
+            default:
+                break;
+        }
+    }else{
+        switch(type){
+            case HIGHWAY: 
+            case HIGHWAYRAMP:// yellowish
+                width =HIGHWAYWIDTH + adjustingAdd;
+                g.set_color(250,215,56,200);
+                break;
+            case TRUNK:
+                width = PRIMWIDTH + adjustingAdd;
+                g.set_color(255,255,255,255);
+                break;
+            case PRIMARY: // white and thick
+                width = PRIMWIDTH + adjustingAdd;
+                g.set_color(255,255,255,255);
+                break;
+            case SECONDARY:
+                width = SECONDARYWIDTH + adjustingAdd;
+                g.set_color(255,255,255,255);
+                break;
+            case RESIDENTIAL:
+                width = adjustingAdd;
+                g.set_color(255,255,255,255);
+                break;
+            case SERVICE:
+                width = adjustingAdd;
+                g.set_color(244,244,244,255);
+                break;
+            default:
+                break;
+        }
     }
-    
+      
     if(highlight){
         width = width + HIGHLIGHTFACT;
         g.set_color(255,102,255,175);
@@ -99,7 +131,7 @@ void roadDrawing::setRoadColourSize(int type, bool highlight, ezgl::renderer &g,
     
     for(int i=0 ; i<numSegs ; i++){
         
-        setRoadColourSize(info.StreetSegInfo[i].type, info.StreetSegInfo[i].clicked, g, startArea, currentArea);
+        setRoadColourSize(info, info.StreetSegInfo[i].type, info.StreetSegInfo[i].clicked, g, startArea, currentArea);
         
         from = info.IntersectionInfo[info.StreetSegInfo[i].fromIntersection].position;
         //============================== DEFINE THE NUMBERS ===================================================
@@ -236,9 +268,18 @@ void roadDrawing::drawOneIntersection(int id, mapBoundary &xy, infoStrucs &info,
     y = xy.yFromLat(info.IntersectionInfo[id].position.lat());
 
     if(info.IntersectionInfo[id].clicked) {
-        g.draw_surface(g.load_png("intersection.png"), ezgl::point2d(x-RADIUS, y+RADIUS));
+        if(info.initiateSicko == 1){
+            g.draw_surface(g.load_png("jesus.png"), ezgl::point2d(x-RADIUS, y+RADIUS));
+        }else{
+            g.draw_surface(g.load_png("intersection.png"), ezgl::point2d(x-RADIUS, y+RADIUS));
+        }
     } else {
-        g.set_color(255,255,255,255);
+        if(info.initiateSicko == 1){
+            g.set_color(0,0,0,255);
+        }else{
+            g.set_color(255,255,255,255);
+        }
+        
         g.fill_elliptic_arc(ezgl::point2d(x,y),RADIUSNORM,RADIUSNORM,0,360);
     }
 }

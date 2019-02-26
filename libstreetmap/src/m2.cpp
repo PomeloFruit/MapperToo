@@ -56,6 +56,7 @@ void touristButton(GtkWidget *widget, ezgl::application *application);
 void fdButton(GtkWidget *widget, ezgl::application *application);
 void shopsButton(GtkWidget *widget, ezgl::application *application);
 void helpButton(GtkWidget *widget, ezgl::application *application);
+void initiateTheSicko(GtkWidget *widget, ezgl::application *application); 
 
 void newMap(std::string path, ezgl::application *application);
 void initializeMap(); 
@@ -130,7 +131,13 @@ void draw_map(){
 void draw_main_canvas(ezgl::renderer &g){
     double startArea;
     
-    g.set_color(219,219,219,255); //light gray for background
+    if(info.initiateSicko == 1){
+        g.set_color(0,0,0,255);
+    }else{
+        //light gray for background
+        g.set_color(219,219,219,255);
+    }
+     
     g.fill_rectangle(g.get_visible_world());
     
     ezgl::rectangle startRectangle({xy.xMin,xy.yMin},{xy.xMax,xy.yMax});
@@ -169,6 +176,7 @@ void initial_setup(ezgl::application *application){
     application->create_button("Show Food/Drink POIs", 11, fdButton); 
     application->create_button("Show Shopping POIs", 12, shopsButton);
     application->create_button("Help", 13, helpButton);
+    application->create_button("Sicko Mode", 14, initiateTheSicko); 
 }
 
 
@@ -804,3 +812,34 @@ void zoomAllPoints(ezgl::application *application){
 }
 
 
+/* initiateTheSicko function
+ * - literally the best function ever 
+ * - Drake shows up  
+ *
+ *  * @param widget <GtkWidget> -event object to determine mouse action
+ * @param application <ezgl::application> - application object to access window elements
+ * 
+ * @return void
+ */
+
+void initiateTheSicko(GtkWidget *widget, ezgl::application *application){
+    widget->parent_instance.ref_count;
+    std::string message;
+    
+    if(info.initiateSicko == 0){
+        info.initiateSicko = 1;
+        application->change_button_text("Sicko Mode", "Mo Bamba");
+        message = "Warning, you may be in awe by how amazing this mode is.\n"
+            "Once you go sicko, you can never go back!\n"
+            "If you look closely enough at the CN Tower you can see Drake.";
+    }else{
+        info.initiateSicko = 0;
+        application->change_button_text("Mo Bamba", "Sicko Mode");
+        message = "You have left sicko mode.\n"
+            "Your life will never be the same!\n";
+    }
+    
+    dialog_box(widget, application, message.c_str());
+            
+    application->refresh_drawing();
+}

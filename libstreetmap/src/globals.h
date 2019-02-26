@@ -152,6 +152,9 @@ public:
     std::vector<std::pair<unsigned, int>> streetType;
     
     // shows which button is on (0 means don't show, 1 means show)
-    int poiButtonStatus [4]; 
+    int poiButtonStatus [4];
+    
+    // initiates sicko mode
+    int initiateSicko; 
 };
 

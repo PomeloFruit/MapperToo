@@ -10,7 +10,7 @@ public:
     int classifyPOI (std::string type);
     
     // sets the feature colours based on feature type 
-    void setFeatureColour(int type, ezgl::renderer &g, bool special);
+    void setFeatureColour(infoStrucs &info, int type, ezgl::renderer &g, bool special);
 
     // draws all features
     void drawFeatures(int numFeatures, infoStrucs &info, ezgl::renderer &g, double currentArea, double startArea);

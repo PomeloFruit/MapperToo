@@ -9,7 +9,7 @@ class roadDrawing {
 
 public: 
     //Draws a straight line on the map according to the specifications set out in setRoadColourSize. Called by drawStreetRoads
-    void setRoadColourSize(int type, bool highlight, ezgl::renderer &g, double startArea, double currentArea);
+    void setRoadColourSize(infoStrucs &info, int type, bool highlight, ezgl::renderer &g, double startArea, double currentArea);
     //Determines if the intersection should be drawn as normal or loaded in with a png
     //Then draws the intersection as specified
     void drawStreetRoads(int numSegs, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g, double startArea, double currentArea, ezgl::rectangle currentRectangle);
