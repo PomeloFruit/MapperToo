@@ -20,7 +20,8 @@
 
 void featureDrawing::setFeatureColour(int type, ezgl::renderer &g, bool special){
     if(special){
-        g.set_color(0,0,0,150);
+        g.set_color(216, 0, 113, 150);
+        //g.set_color(255,236,175,150);
     } else {
         switch(type){
             case 0: // unknown = dark gray

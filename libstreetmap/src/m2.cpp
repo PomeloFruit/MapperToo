@@ -61,6 +61,7 @@ void newMap(std::string path, ezgl::application *application);
 void initializeMap(); 
 void zoomLocation(ezgl::application *application, std::vector<unsigned> zoomVec, int zoomCode);
 void zoomStreet(ezgl::application *application);
+void zoomFeature(ezgl::application *application);
 void zoomAllPoints(ezgl::application *application);
 
 //=========================== Global Variables =========================== 
@@ -708,6 +709,84 @@ void zoomStreet(ezgl::application *application){
 }
 
 
+/* zoomFeature function
+ * - zooms into the specified feature by iterating through the feature and finding
+ * - its maximum and minimum x and y points
+ * 
+ * @param application <ezgl::application> - application object to access window elements
+ * 
+ * @return void
+ */
+
+void zoomFeature(ezgl::application *application){
+    double x1, x2, y1, y2; 
+    if(info.lastFeature.size() > 0){
+        std::vector<ezgl::point2d> feature = info.FeaturePointVec[info.lastFeature[0]]; 
+        ezgl::point2d startPt = feature[0]; 
+        
+        x1 = startPt.x;
+        y1 = startPt.y;
+        x2 = startPt.x;
+        y2 = startPt.y;
+        
+        //find the maximum and minimum x and y points of the feature
+        for(unsigned i = 0; i < feature.size(); i++){
+            startPt = feature[i]; 
+            if(startPt.x < x1){
+                x1 = startPt.x; 
+            }else if (startPt.x > x2){
+                x2 = startPt.x; 
+            }
+
+            if(startPt.y < y2){
+                y2 = startPt.y; 
+            }else if (startPt.y > y1){
+                y1 = startPt.y; 
+            }
+        }
+                
+        std::string canvasID = application->get_main_canvas_id(); 
+        ezgl::canvas* cnv = application->get_canvas(canvasID);
+        
+        //find the dimensions of the new rectangle/viewing area
+        double deltaX = x2 - x1;
+        double deltaY = y2 - y1;
+        const double BUFFER = 5; 
+
+        double currentH = cnv->get_camera().get_world().height();
+        double currentW = cnv->get_camera().get_world().width();
+        double ratioHW = currentH/currentW;
+
+        double recX, recY;
+
+        //scale the rectangle to the appropriate ratio of the screen 
+        if(abs(deltaX) <= abs(deltaY)) {
+            recX = abs(deltaY)/ratioHW*BUFFER;
+            recY = abs(deltaY)*BUFFER;
+        } else {
+            recX = abs(deltaX)*BUFFER;
+            recY = abs(deltaX)*ratioHW*BUFFER;
+        }
+
+
+        //change the viewing area
+        double startX = (x1 + x2 - recX)/2;
+        double startY = (y1 + y2 - recY)/2;
+
+        ezgl::point2d focusPt(startX, startY); 
+        ezgl::rectangle zoomArea (focusPt, recX,  recY); 
+        
+        if(zoomArea.area() < cnv->get_camera().get_initial_world().area()){
+            cnv->get_camera().set_world(zoomArea);
+            cnv->redraw();
+        } else {
+            cnv->get_camera().set_world(cnv->get_camera().get_initial_world());
+            cnv->redraw();
+        }
+    } 
+}
+
+
 /* zoomAllPoints function
  * - provides the correct vector and zoomCode for the zoomLocation function  
  * 
@@ -721,6 +800,7 @@ void zoomAllPoints(ezgl::application *application){
     zoomLocation(application, info.lastIntersection, 1);
     zoomLocation(application, info.lastSubway, 2);
     zoomStreet(application);
+    zoomFeature(application);
 }
 
 
