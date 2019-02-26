@@ -68,5 +68,7 @@ public:
     
     // clears all flags previously raised, removing their highlighting
     void clearPreviousHighlights(infoStrucs &info);
+    
+    std::pair< LatLon, LatLon > getCornerStreetSeg(infoStrucs &info); 
 };
 

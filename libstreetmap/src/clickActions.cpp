@@ -804,3 +804,53 @@ void clickActions::clearPreviousHighlights(infoStrucs &info){
     }
     info.lastFeature.clear();
 }
+
+
+std::pair< LatLon, LatLon > clickActions::getCornerStreetSeg(infoStrucs &info){
+    if(info.lastSeg.size() > 0){
+        LatLon top = getIntersectionPosition(getInfoStreetSegment(info.lastSeg[0]).from);
+        LatLon bot = getIntersectionPosition(getInfoStreetSegment(info.lastSeg[0]).from);
+        
+        double latMin, latMax, lonMin, lonMax; 
+        latMin = bot.lat(); 
+        latMax = top.lat();
+        lonMin = top.lon();
+        lonMax = bot.lon();
+        
+        for(unsigned i = 0; i < info.lastSeg.size(); i++){
+            LatLon from = getIntersectionPosition(getInfoStreetSegment(info.lastSeg[i]).from);
+            if(from.lat() > latMax){
+                latMax = from.lat();
+            } else if (from.lat() < latMin) {
+                latMin = from.lat();
+            }
+            
+            if(from.lon() > lonMax){
+                lonMax = from.lon();
+            } else if (from.lon() < lonMin) {
+                lonMin = from.lon();
+            }
+            
+            LatLon to = getIntersectionPosition(getInfoStreetSegment(info.lastSeg[i]).to);
+            if(to.lat() > latMax){
+                latMax = to.lat();
+            } else if (to.lat() < latMin) {
+                latMin = to.lat();
+            }
+            
+            if(to.lon() > lonMax){
+                lonMax = to.lon();
+            } else if (to.lon() < lonMin) {
+                lonMin = to.lon();
+            }
+        }
+        
+        LatLon topPt(latMax, lonMin);
+        LatLon botPt(latMin, lonMax);
+        
+        return std::make_pair(topPt, botPt);
+    }
+    
+    LatLon garbage(190,190);
+    return std::make_pair(garbage, garbage);
+}

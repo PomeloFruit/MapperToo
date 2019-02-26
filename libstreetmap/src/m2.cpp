@@ -42,6 +42,7 @@ drawText dt;
 void draw_main_canvas(ezgl::renderer &g);
 void initial_setup(ezgl::application *application);
 void act_on_mouse_press(ezgl::application *application, GdkEventButton *event, double x, double y);
+void act_on_key_press(ezgl::application *application, GdkEventKey *event, char *key_name);
 void findButton(GtkWidget *widget, ezgl::application *application);
 void dialog_box(GtkWidget *widget, ezgl::application *application, std::string message);
 void on_dialog_response(GtkDialog *dialog);
@@ -112,7 +113,7 @@ void draw_map(){
 
     
     application.add_canvas("MainCanvas",draw_main_canvas,initial_world);
-    application.run(initial_setup, act_on_mouse_press, NULL, NULL);
+    application.run(initial_setup, act_on_mouse_press, NULL, act_on_key_press);
 }
 
 
@@ -208,6 +209,34 @@ void act_on_mouse_press(ezgl::application *application, GdkEventButton *event, d
 }
 
 
+/* act_on_key_press function
+ * - allows user to use 'enter' key to search
+ * 
+ * @param application <ezgl::application> - application object to access window elements
+ * @param event <GdkEventButton> -event object to determine mouse action
+ * @param key_name <char*> - name of key pressed
+ * 
+ * @return void
+ */
+
+void act_on_key_press(ezgl::application *application, GdkEventKey *, char *key_name) {
+    std::string canvasID = application->get_main_canvas_id(); 
+    ezgl::canvas* cnv = application->get_canvas(canvasID);
+    
+    if(strcmp(key_name, "Return") == 0){
+        findButton(NULL, application);
+    } else if(strcmp(key_name, "Up") == 0){
+        ezgl::translate_up(cnv, 5.0);
+    } else if(strcmp(key_name, "Down") == 0){
+        ezgl::translate_down(cnv, 5.0);
+    } else if(strcmp(key_name, "Left") == 0){
+        ezgl::translate_left(cnv, 5.0);
+    } else if(strcmp(key_name, "Right") == 0){
+        ezgl::translate_right(cnv, 5.0); 
+    }
+}
+
+
 /* findButton function
  * - writes and reads words in input fields 1 and 2
  * - sets the text in fields to "corrected" name if searched
@@ -222,7 +251,9 @@ void act_on_mouse_press(ezgl::application *application, GdkEventButton *event, d
 void findButton(GtkWidget *widget, ezgl::application *application){
 
     //cancels warning / not needed at all
-    widget->parent_instance.ref_count;
+    if(widget != NULL){
+        widget->parent_instance.ref_count;
+    }    
         
     const char *name1;
     const char *name2;
