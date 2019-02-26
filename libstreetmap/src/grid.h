@@ -10,6 +10,17 @@
 
 class streetGrid{
 public:
+    std::vector<std::vector<std::vector<unsigned> > > poiGrid;
+    std::vector<std::vector<std::vector<unsigned> > > intGrid;
+    std::vector<std::pair<int, int>> check;
+
+    double dLat; 
+    double dLon; 
+    bool isFullPOI = false;
+    bool isFullInt = false;
+    mapBoundary coord; 
+    featureDrawing ft;
+    
     // populates the Grid structures with POIs and intersection IDs
     void populateGrid();
     
@@ -24,16 +35,4 @@ public:
     
     // finds the nearest intersection in the grid
     int findNearestInt(LatLon position); 
-    
-private:
-    std::vector<std::vector<std::vector<unsigned> > > poiGrid;
-    std::vector<std::vector<std::vector<unsigned> > > intGrid;
-    std::vector<std::pair<int, int>> check;
-
-    double dLat; 
-    double dLon; 
-    bool isFullPOI = false;
-    bool isFullInt = false;
-    mapBoundary coord; 
-    featureDrawing ft;
 };

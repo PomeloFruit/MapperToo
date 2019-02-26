@@ -277,7 +277,9 @@ void findButton(GtkWidget *widget, ezgl::application *application){
             name2 = info.corInput2.c_str();
         }
         application->set_input_text(name1, name2);
-
+        
+        zoomAllPoints(application);
+        
         // reflect the changes
         application->update_message(message);
         application->refresh_drawing();
