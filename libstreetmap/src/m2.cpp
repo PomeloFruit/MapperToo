@@ -217,6 +217,23 @@ void setCompletionModel(ezgl::application *application){
         // free char* memory
         delete[] nameChar;
     }
+    
+    // add all city names from city vector
+    for(auto it = city.begin(); it != city.end(); it++){
+        
+        // convert string to char*
+        std::string str = it->first;
+        char * nameChar = new char[str.size() + 1];
+        std::copy(str.begin(), str.end(), nameChar);
+        nameChar[str.size()] = '\0';
+
+        // add new row to list store and store street name
+        gtk_list_store_insert(completeModel, &iter, -1);
+        gtk_list_store_set(completeModel, &iter, 0, nameChar, -1);
+        
+        // free char* memory
+        delete[] nameChar;
+    }    
 }
 
 
