@@ -81,7 +81,8 @@ void roadDrawing::setRoadColourSize(int type, bool highlight, ezgl::renderer &g,
  * @return void
  */
 
- void roadDrawing::drawStreetRoads(int numSegs, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g, double startArea, double currentArea, ezgl::rectangle currentRectangle){
+ void roadDrawing::drawStreetRoads(int numSegs, mapBoundary &xy, infoStrucs &info, 
+                    ezgl::renderer &g, double startArea, double currentArea, ezgl::rectangle currentRectangle){
     LatLon from, to;
     bool sufficentlyZoomed=false;
     bool sufficentlyBig=false;
@@ -89,36 +90,45 @@ void roadDrawing::setRoadColourSize(int type, bool highlight, ezgl::renderer &g,
     bool sufficentlyZoomedLevel2=false;
     bool draw=false;
     
+    const double RATIO1 = 0.1;
+    const double RATIO2 = 0.25;
+    const double RATIO3 = 0.05;
+    
+    const int TRUNKLIM1 = 1000;
+    const int TRUNKLIM2 = 100;
+    
     for(int i=0 ; i<numSegs ; i++){
-               //========================================REQUIRES WORK, EXPLAIN, CONSTANT ALL NUMS======================================= 
         
         setRoadColourSize(info.StreetSegInfo[i].type, info.StreetSegInfo[i].clicked, g, startArea, currentArea);
         
         from = info.IntersectionInfo[info.StreetSegInfo[i].fromIntersection].position;
+        //============================== DEFINE THE NUMBERS ===================================================
+        int &type = info.StreetSegInfo[i].type;
         
-        if((100<info.numStreetType[5])&&(info.numStreetType[5]<1000)){
+        
+        if((100<info.numStreetType[TRUNK]) && (info.numStreetType[TRUNK] < TRUNKLIM1)){
             
-            sufficentlyBig=(info.StreetSegInfo[i].type==0||info.StreetSegInfo[i].type==5||info.StreetSegInfo[i].type==1);
-            sufficentlyZoomedLevel1=(info.StreetSegInfo[i].type==2)&&((currentArea/startArea)<0.25);
-            sufficentlyZoomed=(currentArea/startArea)<0.10;
+            sufficentlyBig = (type == HIGHWAY || type == TRUNK || type == PRIMARY);
+            sufficentlyZoomedLevel1 = (type == SECONDARY) && ((currentArea/startArea) < RATIO2);
+            sufficentlyZoomed = (currentArea/startArea) < RATIO1;
             
         }
-        else if(info.numStreetType[5]<100){
+        else if(info.numStreetType[TRUNK] < TRUNKLIM2){
             
-            sufficentlyBig=(info.StreetSegInfo[i].type==0||info.StreetSegInfo[i].type==5||info.StreetSegInfo[i].type==1||info.StreetSegInfo[i].type==2);
-            sufficentlyZoomed=(currentArea/startArea)<0.25;
+            sufficentlyBig=(type == HIGHWAY || type == TRUNK || type == PRIMARY || type == SECONDARY);
+            sufficentlyZoomed=(currentArea/startArea) < RATIO2;
             
         }
         else{
             
-            sufficentlyBig=(info.StreetSegInfo[i].type==0||info.StreetSegInfo[i].type==5);
-            sufficentlyZoomedLevel1=(info.StreetSegInfo[i].type==1)&&((currentArea/startArea)<0.25);
-            sufficentlyZoomed=(currentArea/startArea)<0.05;
-            sufficentlyZoomedLevel2=(info.StreetSegInfo[i].type==2)&&(currentArea/startArea)<0.1; 
+            sufficentlyBig=(type == HIGHWAY || type == TRUNK);
+            sufficentlyZoomedLevel1 = (type == PRIMARY) && ((currentArea/startArea) < RATIO2);
+            sufficentlyZoomed = (currentArea/startArea) < RATIO3;
+            sufficentlyZoomedLevel2 = (type == SECONDARY) && (currentArea/startArea) < RATIO1; 
             
         }
          
-        if(sufficentlyZoomed||sufficentlyBig||sufficentlyZoomedLevel1||sufficentlyZoomedLevel2){
+        if(sufficentlyZoomed || sufficentlyBig || sufficentlyZoomedLevel1 || sufficentlyZoomedLevel2){
            
             for(int c=0;c<info.StreetSegInfo[i].numCurvePoints;c++){
                 
@@ -132,11 +142,12 @@ void roadDrawing::setRoadColourSize(int type, bool highlight, ezgl::renderer &g,
             }
             
             to = info.IntersectionInfo[info.StreetSegInfo[i].toIntersection].position;
-            draw=(inBounds(xy, currentRectangle, to))||(inBounds(xy, currentRectangle, from));
+            draw = (inBounds(xy, currentRectangle, to))||(inBounds(xy, currentRectangle, from));
             
             if(draw){
                     drawStraightStreet(from, to, xy, g);
             }
+            
         }
     }
 }
@@ -144,6 +155,7 @@ void roadDrawing::setRoadColourSize(int type, bool highlight, ezgl::renderer &g,
  
  /* drawStraightStreet
  *  - Draws a straight line on the map according to the specifications set out in setRoadColourSize. Called by drawStreetRoads
+  * 
  * @param pt1 <LatLon> - The latitude and longitude of the first point
  * @param pt2 <LatLon> - The latitude and longitude of the second point
  * @param xy <mapBoundary> - An object that contains the bounds of the original map and functions to convert to and from LatLon/XY
@@ -163,14 +175,18 @@ void roadDrawing::drawStraightStreet(LatLon &pt1, LatLon &pt2, mapBoundary &xy, 
     g.draw_line({xInitial, yInitial},{xFinal, yFinal});
 }
 
+
 /* drawIntersections
  *  - Determines if an intersections is to be drawn and calls a function to draw it if it is
+ * 
  * @param numInter <int> - The number of intersections on the map
  * @param xy <mapBoundary> - An object that contains the bounds of the original map and functions to convert to and from LatLon/XY
  * @param info <infoStrucs> - An object that contains various data structures filled with info relevant to the map
  * @param g <ezgl::renderer> - The EZGL renderer
+ * 
  * @return void
  */
+
 void roadDrawing::drawIntersections(int numInter, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g){
     ezgl::rectangle currentRectangle=g.get_visible_world();
     for(int i = 0 ; i < numInter ; i++){
@@ -181,38 +197,46 @@ void roadDrawing::drawIntersections(int numInter, mapBoundary &xy, infoStrucs &i
     drawSpecialIntersections(xy, info, g);
 }
 
+
 /* drawSpecialIntersections
  *  - Draws special intersections
+ * 
  * @param xy <mapBoundary> - An object that contains the bounds of the original map and functions to convert to and from LatLon/XY
  * @param info <infoStrucs> - An object that contains various data structures filled with info relevant to the map
  * @param g <ezgl::renderer> - The EZGL renderer
+ * 
  * @return void
  */
+
 void roadDrawing::drawSpecialIntersections(mapBoundary &xy, infoStrucs &info, ezgl::renderer &g){
     for(unsigned i = 0 ; i < info.lastIntersection.size() ; i++){
         drawOneIntersection(info.lastIntersection[i], xy, info, g);
     }
 }
 
+
 /* drawStreetRoads
  *  - Determines if the intersection should be drawn as normal or loaded in with a png
  *  - Then draws the intersection as specified
+ * 
  * @param id <int> - The index number of the intersection to be drawn
  * @param xy <mapBoundary> - An object that contains the bounds of the original map and functions to convert to and from LatLon/XY
  * @param info <infoStrucs> - An object that contains various data structures filled with info relevant to the map
  * @param g <ezgl::renderer> - The EZGL renderer
+ * 
  * @return void
  */
+
 void roadDrawing::drawOneIntersection(int id, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g){
     const float RADIUSNORM = 0.00003;
-    const double radius = g.get_visible_world().width()*0.009;
+    const double RADIUS = g.get_visible_world().width()*0.018;
     float x, y;
        
     x = xy.xFromLon(info.IntersectionInfo[id].position.lon());
     y = xy.yFromLat(info.IntersectionInfo[id].position.lat());
 
     if(info.IntersectionInfo[id].clicked) {
-        g.draw_surface(g.load_png("intersection.png"), ezgl::point2d(x-2*radius, y+2*radius));
+        g.draw_surface(g.load_png("intersection.png"), ezgl::point2d(x-RADIUS, y+RADIUS));
     } else {
         //regular intersection (white)
         g.set_color(255,255,255,255);
@@ -220,13 +244,24 @@ void roadDrawing::drawOneIntersection(int id, mapBoundary &xy, infoStrucs &info,
     }
 }
 
+
 /* inBounds
  *  - Determines if a given point is in bounds
+ * 
  * @param xy <mapBoundary> - An object that contains the bounds of the original map and functions to convert to and from LatLon/XY
  * @param currentRectangle <ezgl::rectangle> - the rectangle representing the current bounds of the map
  * @param position <LatLon> - the position that is to be determined to be in bounds or not (in latitude and longitude)
- * @return bool
+ * 
+ * @return inBounds <bool> - if the draw within the bounds
  */
+
 bool roadDrawing::inBounds(mapBoundary &xy, ezgl::rectangle& curBounds, LatLon& position){
-    return (xy.yFromLat(position.lat())<curBounds.top())&&(xy.yFromLat(position.lat())>curBounds.bottom())&&(xy.xFromLon(position.lon())>curBounds.left())&&(xy.xFromLon(position.lon())<curBounds.right());
+    bool inBounds;
+    
+    inBounds = (xy.yFromLat(position.lat())<curBounds.top())
+            && (xy.yFromLat(position.lat())>curBounds.bottom())
+            && (xy.xFromLon(position.lon())>curBounds.left())
+            && (xy.xFromLon(position.lon())<curBounds.right());
+
+    return inBounds;
 }

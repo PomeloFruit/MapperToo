@@ -65,7 +65,7 @@ public:
    */
   void set_world(rectangle new_world);
 
-  //?????????????????????????????????
+  // sets new zoom fit rectangle
   void set_zoom_fit(rectangle new_world); 
   
   
@@ -86,6 +86,8 @@ public:
    * @see canvas::configure_event
    */
   void update_widget(int width, int height);
+  
+  // sets m screen 
   void set_m_screen(rectangle new_world);
 
 protected:

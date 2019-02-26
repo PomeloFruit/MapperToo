@@ -22,11 +22,8 @@ public:
     bool isFullInt = false;
     mapBoundary coord; 
     featureDrawing ft;
-//    populateData pop; 
-//    infoStrucs info;
     
     void populateGrid();
-//    void clearGrid();
     
     void findMinimumPOI(LatLon position, int &POI, int xIndex, int yIndex);
     void findMinimumInt(LatLon position, int &Int, int xIndex, int yIndex);

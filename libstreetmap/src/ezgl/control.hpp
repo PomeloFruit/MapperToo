@@ -26,6 +26,9 @@ void zoom_out(canvas *cnv, double zoom_factor);
  */
 void zoom_in(canvas *cnv, point2d zoom_point, double zoom_factor);
 
+/*
+ * Zoom into a specific location given by zoom_point
+ */
 void zoom_location(canvas *cnv, point2d zoom_point);
 
 /**
