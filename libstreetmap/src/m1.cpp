@@ -647,18 +647,6 @@ double find_street_segment_travel_time(unsigned street_segment_id){
 
 
 unsigned find_closest_point_of_interest(LatLon my_position){
-//    double min = EARTH_RADIUS_IN_METERS;
-//    int nearestPOIIndex = 0; 
-//
-//    for(int i = 0; i < getNumPointsOfInterest(); i++){
-//        double temp = find_distance_between_two_points(my_position, getPointOfInterestPosition(i));
-//        if(temp <= min){
-//            min = temp;
-//            nearestPOIIndex = i;  
-//        }
-//    }
-//    std::cout<<"POI:" << nearestPOIIndex<<std::endl;
-//    return unsigned(nearestPOIIndex); 
     int poi = streetBlock.findNearestPOI(my_position);
     return unsigned(poi); 
 }
@@ -672,19 +660,6 @@ unsigned find_closest_point_of_interest(LatLon my_position){
  */
 
 unsigned find_closest_intersection(LatLon my_position){
-//    double min = EARTH_RADIUS_IN_METERS;
-//    int nearestIntIndex = 0; 
-//
-//    for(int i = 0; i < getNumIntersections(); i++){
-//        double temp = find_distance_between_two_points(my_position, getIntersectionPosition(i));
-//        if(temp <= min){
-//            min = temp;
-//            nearestIntIndex = i;
-//        }
-//    }
-//    std::cout<<"INT:" << nearestIntIndex<<std::endl;
-//    return unsigned(nearestIntIndex); 
-    
     int intersection = streetBlock.findNearestInt(my_position);  
     return unsigned(intersection); 
 }
@@ -706,7 +681,6 @@ std::vector<unsigned> find_street_ids_from_partial_street_name(std::string stree
     try {
         matchIDs = partialStreetNameMap.at(street_prefix);
     } catch(std::exception& e) {
-        //std::cout << "Match not found!" << std::endl;
     }
     
     return matchIDs;

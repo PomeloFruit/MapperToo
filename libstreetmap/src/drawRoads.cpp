@@ -49,7 +49,7 @@ void roadDrawing::setRoadColourSize(int type, bool highlight, ezgl::renderer &g,
             width = adjustingAdd;
             g.set_color(255,255,255,255);
             break;
-        case SERVICE: // light gray
+        case SERVICE:
             width = adjustingAdd;
             g.set_color(244,244,244,255);
             break;
@@ -238,7 +238,6 @@ void roadDrawing::drawOneIntersection(int id, mapBoundary &xy, infoStrucs &info,
     if(info.IntersectionInfo[id].clicked) {
         g.draw_surface(g.load_png("intersection.png"), ezgl::point2d(x-RADIUS, y+RADIUS));
     } else {
-        //regular intersection (white)
         g.set_color(255,255,255,255);
         g.fill_elliptic_arc(ezgl::point2d(x,y),RADIUSNORM,RADIUSNORM,0,360);
     }

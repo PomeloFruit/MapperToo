@@ -165,8 +165,7 @@ std::pair<double, bool> drawText::findAngle(LatLon &initialPosition, LatLon &fin
         angle=angle+M_PI;
         right=false;
     }
-    return std::make_pair(180*angle/M_PI, right);               
-    //so basically if I had to add pi at any point the arrow should appear on the left side instead of the right 
+    return std::make_pair(180*angle/M_PI, right);
 }
 
 
@@ -187,7 +186,8 @@ int drawText::indexOfLargestGoodCurvepoint(int streetSegment, ezgl::rectangle& c
     for(int x=0;x<info.StreetSegInfo[streetSegment].numCurvePoints;x++){
         LatLon curLocation=getStreetSegmentCurvePoint(x, streetSegment);
         if(inBounds(curBounds, prevLocation)&&inBounds(curBounds, curLocation)&&(find_distance_between_two_points(curLocation, prevLocation)>distance))
-            bestCurvePoint=x;//->meaning from curvepoint i-1 to curvepoint i
+            //This means that the best segment of the street segment is from curvepoint i-1 to curvepoint i
+            bestCurvePoint=x;
         prevLocation=curLocation;
     }
     return bestCurvePoint;
