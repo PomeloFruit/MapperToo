@@ -2,6 +2,20 @@
 <!-- Generated with glade 3.20.0 -->
 <interface>
   <requires lib="gtk+" version="3.6"/>
+  <object class="GtkEntryCompletion" id="NameCompletion1">
+    <property name="model">NameSuggestion</property>
+    <property name="text_column">0</property>
+  </object>
+  <object class="GtkListStore" id="NameSuggestion">
+    <columns>
+      <!-- column-name StreetName -->
+      <column type="gchararray"/>
+    </columns>
+  </object>
+  <object class="GtkEntryCompletion" id="NameCompletion2">
+    <property name="model">NameSuggestion</property>
+    <property name="text_column">0</property>
+  </object>
   <object class="GtkWindow" id="MainWindow">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -235,6 +249,7 @@
                 <property name="primary_icon_activatable">False</property>
                 <property name="primary_icon_sensitive">False</property>
                 <property name="placeholder_text" translatable="yes">Enter Name to Search</property>
+                <property name="completion">NameCompletion1</property>
               </object>
               <packing>
                 <property name="left_attach">0</property>
@@ -249,6 +264,7 @@
                 <property name="primary_icon_activatable">False</property>
                 <property name="primary_icon_sensitive">False</property>
                 <property name="placeholder_text" translatable="yes">(only for Intersection Search)</property>
+                <property name="completion">NameCompletion2</property>
               </object>
               <packing>
                 <property name="left_attach">1</property>
@@ -288,5 +304,11 @@
         </child>
       </object>
     </child>
+  </object>
+  <object class="GtkListStore" id="NameSuggestion1">
+    <columns>
+      <!-- column-name StreetName -->
+      <column type="gchararray"/>
+    </columns>
   </object>
 </interface>

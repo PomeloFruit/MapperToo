@@ -41,6 +41,7 @@ drawText dt;
 
 void draw_main_canvas(ezgl::renderer &g);
 void initial_setup(ezgl::application *application);
+void setCompletionModel(ezgl::application *application);
 void act_on_mouse_press(ezgl::application *application, GdkEventButton *event, double x, double y);
 void act_on_key_press(ezgl::application *application, GdkEventKey *event, char *key_name);
 void findButton(GtkWidget *widget, ezgl::application *application);
@@ -114,9 +115,32 @@ void draw_map(){
     ezgl::application application(settings);
     ezgl::rectangle initial_world({xy.xMin,xy.yMin},{xy.xMax,xy.yMax});
 
-    
     application.add_canvas("MainCanvas",draw_main_canvas,initial_world);
     application.run(initial_setup, act_on_mouse_press, NULL, act_on_key_press);
+}
+
+// fills the completion model
+void setCompletionModel(ezgl::application *application){
+    GtkListStore *completeModel = (GtkListStore *) application->get_object("NameSuggestion");
+    GtkEntryCompletion *completionBox1 = (GtkEntryCompletion *) application->get_object("NameCompletion1");
+    GtkEntryCompletion *completionBox2 = (GtkEntryCompletion *) application->get_object("NameCompletion2");
+    GtkTreeIter iter;
+    
+    gtk_list_store_append(completeModel, &iter);
+    gtk_entry_completion_set_text_column(completionBox1, 0);
+    gtk_entry_completion_set_text_column(completionBox2, 0);
+    
+    for(unsigned i=0 ; i< static_cast<unsigned>(getNumStreets()) ; i++){
+        
+        // convert string to char*
+        std::string str = getStreetName(i);
+        char * nameChar = new char[str.size() + 1];
+        std::copy(str.begin(), str.end(), nameChar);
+        nameChar[str.size()] = '\0';
+
+        gtk_list_store_insert(completeModel, &iter, -1);
+        gtk_list_store_set(completeModel, &iter, 0, nameChar, -1);
+    }
 }
 
 
@@ -167,6 +191,7 @@ void draw_main_canvas(ezgl::renderer &g){
  */
 
 void initial_setup(ezgl::application *application){
+    setCompletionModel(application);
     application->update_message("Left-click for Points of Interest | Right-click for Intersections | <ctrl> + Left-click for Subways ");
     application->connect_feature(findButton);
     
@@ -579,6 +604,8 @@ void newMap(std::string path, ezgl::application *application){
     myCanvas->get_camera().update_widget(myCanvas->width(), myCanvas->height());
     myCanvas->get_camera().set_world(new_world);
     myCanvas->get_camera().set_zoom_fit(new_world);
+    
+    setCompletionModel(application);
     
     application->refresh_drawing(); 
 }

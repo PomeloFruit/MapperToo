@@ -187,7 +187,9 @@ void application::register_default_events_callbacks(ezgl::application *applicati
 
   // Connect scroll_mouse function to the mouse scroll event (up, down, left and right)
   g_signal_connect(main_canvas, "scroll_event", G_CALLBACK(scroll_mouse), application);
+
 }
+
 
 void application::register_default_buttons_callbacks(ezgl::application *application)
 {  
