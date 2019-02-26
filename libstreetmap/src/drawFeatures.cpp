@@ -467,12 +467,19 @@ void featureDrawing::drawStraightSubwaySection(LatLon &pt1, LatLon &pt2, mapBoun
     }
 }
 
-// function can be used later to label selective POI
+
+/* drawTextOnPOI
+ * - draws text above POI
+ * 
+ * @param info <infoStrucs> - object that contains all the data structures created when map is loaded 
+ * @param g <ezgl::renderer> - renderer object to draw and modify graphics
+ * 
+ * @return void
+ */
 
 void featureDrawing::drawTextOnPOI(ezgl::renderer &g, infoStrucs &info){
     int namesToBeDrawn=drawnPOIs.size();
     g.set_text_rotation(0);
-    //probably set a character limit somewhere around here
     for(int i=0;i<namesToBeDrawn;i++){
         if((i%5)==0){
             g.draw_text(drawnPOIs[i].first, info.POIInfo[drawnPOIs[i].second].name);
