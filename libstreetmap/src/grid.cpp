@@ -4,16 +4,28 @@
 
 #include <algorithm>
 
+
+/* populateGrid function
+ * - populates the poiGrid and the intGrid with POIs and Intersections into a 3D vector
+ * - 1st Dimension - xIndex, 2nd Dimension - yIndex, 3rd Dimension - bin containing all relevant IDs  
+ * 
+ * @param void
+ * 
+ * @return void
+ */
+
 void streetGrid::populateGrid(){
     coord.initialize(); 
     
+    //split the map into a 100 by 100 grid
     dLat = (coord.maxLat - coord.minLat)/100.0; 
     dLon = (coord.maxLon - coord.minLon)/100.0; 
     
     int xIndex, yIndex; 
     
     double latPOI, lonPOI, latInt, lonInt; 
-
+    
+    //creating 3D vector
     for(int i = 0; i < 101; i++){
         std::vector<std::vector<unsigned>> temp1; 
         std::vector<std::vector<unsigned>> temp2; 
@@ -27,6 +39,7 @@ void streetGrid::populateGrid(){
         temp2.clear(); 
     }
     
+    //storing POIs into the correct grid
     for(int i = 0; i < getNumPointsOfInterest(); i++){
         latPOI = getPointOfInterestPosition(i).lat(); 
         lonPOI = getPointOfInterestPosition(i).lon(); 
@@ -48,6 +61,7 @@ void streetGrid::populateGrid(){
         poiGrid[xIndex][yIndex].push_back(i); 
     }
     
+    //storing Intersections into the correct grid
     for(int i = 0; i < getNumIntersections(); i++){
         latInt = getIntersectionPosition(i).lat(); 
         lonInt = getIntersectionPosition(i).lon(); 
@@ -73,6 +87,16 @@ void streetGrid::populateGrid(){
 }
 
 
+/* findMinimumPOI function
+ * - finds the nearest POI of all the POIs in the selected grid
+ * 
+ * @param position <LatLon> - the current selected position
+ * @param POI <int> - the current nearest POI (1D)
+ * @param xIndex <int> - the x index of the grid (2D)
+ * 
+ * @return void
+ */
+
 void streetGrid::findMinimumPOI(LatLon position, int &POI, int xIndex, int yIndex){    
     double min = find_distance_between_two_points(position, getPointOfInterestPosition(POI)); 
     std::vector<unsigned> gridBlock = poiGrid[xIndex][yIndex]; 
@@ -89,6 +113,17 @@ void streetGrid::findMinimumPOI(LatLon position, int &POI, int xIndex, int yInde
     }
 }
 
+
+/* findMinimumInt function
+ * - finds the nearest intersection of all intersections in the selected grid
+ * 
+ * @param position <LatLon> - the current selected position
+ * @param Int <int> - the current nearest intersection
+ * @param xIndex <int> - the x index of the grid (1D)
+ * @param yIndex <int> - the y index of the grid (2D)
+ * 
+ * @return void
+ */
 
 void streetGrid::findMinimumInt(LatLon position, int &Int, int xIndex, int yIndex){    
     double min = find_distance_between_two_points(position, getIntersectionPosition(Int)); 
@@ -107,6 +142,15 @@ void streetGrid::findMinimumInt(LatLon position, int &Int, int xIndex, int yInde
 }
 
 
+/* findNearestPOI function
+ * - loops through grid blocks until the nearest POI is found 
+ * - searches in a radial manner starting with 9 blocks, then 25, 49 etc..
+ * 
+ * @param position <LatLon> - the current selected position
+ * 
+ * @return nearestPOIIndex <int> the ID of the nearest POI
+ */
+
 int streetGrid::findNearestPOI(LatLon position){
     int nearestPOIIndex = 0; 
     
@@ -116,7 +160,14 @@ int streetGrid::findNearestPOI(LatLon position){
     int tempX, tempY; 
     int radius = 1; 
     int limit = 2;
-    bool extraSearch = false; 
+    bool extraSearch = false;
+    
+    /*
+     * Searches radially through blocks in the grid until the nearest POI is found 
+     * each iteration of the do-while loop increases the radius of search by 1
+     * After the nearest POI is found, the search is performed additionally for up to 
+     * 1.5 times the radius to confirm that the POI is the nearest. 
+     */
     for(int t = 0; t < limit; t++){
         do{
             for(int i = xIndex-radius; i<=xIndex+radius; i++){
@@ -135,6 +186,8 @@ int streetGrid::findNearestPOI(LatLon position){
                     }else{
                         tempY = j; 
                     }
+                    
+                    //if the block was already searched, do not search it again
                     bool found = false;
                     for(auto it = check.begin(); it != check.end(); it++){
                         if(it->first == tempX && it->second == tempY){
@@ -161,6 +214,16 @@ int streetGrid::findNearestPOI(LatLon position){
     return nearestPOIIndex; 
 }
 
+
+/* findNearestInt function
+ * - loops through grid blocks until the nearest intersection is found 
+ * - searches in a radial manner starting with 9 blocks, then 25, 49 etc..
+ * 
+ * @param position <LatLon> - the current selected position
+ * 
+ * @return nearestIntIndex <int> the ID of the nearest intersection
+ */
+
 int streetGrid::findNearestInt(LatLon position){
     int nearestIntIndex = 0; 
     
@@ -170,7 +233,14 @@ int streetGrid::findNearestInt(LatLon position){
     int tempX, tempY; 
     int radius = 1;  
     int limit = 2;
-    bool extraSearch = false; 
+    bool extraSearch = false;
+    
+    /*
+     * Searches radially through blocks in the grid until the nearest intersection is found 
+     * each iteration of the do-while loop increases the radius of search by 1
+     * After the nearest intersection is found, the search is performed additionally for up to 
+     * 1.5 times the radius to confirm that the intersection is the nearest. 
+     */
     for(int t = 0; t < limit; t++){
         do{
             for(int i = xIndex-radius; i<=xIndex+radius; i++){
@@ -189,6 +259,8 @@ int streetGrid::findNearestInt(LatLon position){
                     }else{
                         tempY = j; 
                     }
+                    
+                    //if the block was already searched, do not search it again
                     bool found = false;
                     for(auto it = check.begin(); it != check.end(); it++){
                         if(it->first == tempX && it->second == tempY){
