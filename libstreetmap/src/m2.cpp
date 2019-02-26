@@ -210,8 +210,12 @@ void setCompletionModel(ezgl::application *application){
         std::copy(str.begin(), str.end(), nameChar);
         nameChar[str.size()] = '\0';
 
+        // add new row to list store and store street name
         gtk_list_store_insert(completeModel, &iter, -1);
         gtk_list_store_set(completeModel, &iter, 0, nameChar, -1);
+        
+        // free char* memory
+        delete[] nameChar;
     }
 }
 
