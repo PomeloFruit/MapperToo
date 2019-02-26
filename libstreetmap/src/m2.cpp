@@ -60,6 +60,7 @@ void helpButton(GtkWidget *widget, ezgl::application *application);
 void newMap(std::string path, ezgl::application *application);
 void initializeMap(); 
 void zoomLocation(ezgl::application *application, std::vector<unsigned> zoomVec, int zoomCode);
+void zoomStreet(ezgl::application *application);
 void zoomAllPoints(ezgl::application *application);
 
 //=========================== Global Variables =========================== 
@@ -650,6 +651,63 @@ void zoomLocation(ezgl::application *application, std::vector<unsigned> zoomVec,
 }
 
 
+/* zoomStreet function
+ * - zooms into the specified street using the points from getCornerStreetSeg
+ * 
+ * @param application <ezgl::application> - application object to access window elements
+ * 
+ * @return void
+ */
+
+void zoomStreet(ezgl::application *application){
+    //get the corners of the rectangles if they exist (190 means they do not exist)
+    LatLon topPt, botPt; 
+    std::tie(topPt, botPt) = ck.getCornerStreetSeg(info); 
+    if(topPt.lat() == 190){
+        return; 
+    }
+    
+    std::string canvasID = application->get_main_canvas_id(); 
+    ezgl::canvas* cnv = application->get_canvas(canvasID);
+    
+    //find the dimensions of the new rectangle/viewing area
+    double x1 = xy.xFromLon(topPt.lon());
+    double y1 = xy.yFromLat(topPt.lat());
+    double x2 = xy.xFromLon(botPt.lon());
+    double y2 = xy.yFromLat(botPt.lat());
+    
+    double deltaX = x2 - x1;
+    double deltaY = y2 - y1;
+    const double BUFFER = 1.2; 
+    
+    double currentH = cnv->get_camera().get_world().height();
+    double currentW = cnv->get_camera().get_world().width();
+    double ratioHW = currentH/currentW;
+    
+    double recX, recY;
+    
+    //scale the rectangle to the appropriate ratio of the screen 
+    if(abs(deltaX) <= abs(deltaY)) {
+        recX = abs(deltaY)/ratioHW*BUFFER;
+        recY = abs(deltaY)*BUFFER;
+    } else {
+        recX = abs(deltaX)*BUFFER;
+        recY = abs(deltaX)*ratioHW*BUFFER;
+    }
+    
+    
+    //change the viewing area
+    double startX = (x1 + x2 - recX)/2;
+    double startY = (y1 + y2 - recY)/2;
+    
+    ezgl::point2d focusPt(startX, startY); 
+    ezgl::rectangle zoomArea (focusPt, recX,  recY); 
+    
+    cnv->get_camera().set_world(zoomArea);
+    cnv->redraw();
+}
+
+
 /* zoomAllPoints function
  * - provides the correct vector and zoomCode for the zoomLocation function  
  * 
@@ -662,4 +720,7 @@ void zoomAllPoints(ezgl::application *application){
     zoomLocation(application, info.lastPOI, 0);
     zoomLocation(application, info.lastIntersection, 1);
     zoomLocation(application, info.lastSubway, 2);
+    zoomStreet(application);
 }
+
+

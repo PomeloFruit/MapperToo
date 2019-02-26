@@ -69,6 +69,7 @@ public:
     // clears all flags previously raised, removing their highlighting
     void clearPreviousHighlights(infoStrucs &info);
     
+    // returns a pair of LatLon points representing the top left and bottom right of the street
     std::pair< LatLon, LatLon > getCornerStreetSeg(infoStrucs &info); 
 };
 

@@ -806,6 +806,15 @@ void clickActions::clearPreviousHighlights(infoStrucs &info){
 }
 
 
+/* getCornerStreetSeg function
+ * - finds the minimum and maximum lat and lon points of the given vector 
+ * - creates a top point and bottom point for a rectangle 
+ *
+ * @param info <infoStrucs> - contains all map information needed
+ * 
+ * @return <std::pair<LatLon, LatLon>> top and bottom corners  
+ */
+
 std::pair< LatLon, LatLon > clickActions::getCornerStreetSeg(infoStrucs &info){
     if(info.lastSeg.size() > 0){
         LatLon top = getIntersectionPosition(getInfoStreetSegment(info.lastSeg[0]).from);
@@ -818,6 +827,7 @@ std::pair< LatLon, LatLon > clickActions::getCornerStreetSeg(infoStrucs &info){
         lonMax = bot.lon();
         
         for(unsigned i = 0; i < info.lastSeg.size(); i++){
+            //finds min and max latitude from all segments 
             LatLon from = getIntersectionPosition(getInfoStreetSegment(info.lastSeg[i]).from);
             if(from.lat() > latMax){
                 latMax = from.lat();
@@ -830,7 +840,7 @@ std::pair< LatLon, LatLon > clickActions::getCornerStreetSeg(infoStrucs &info){
             } else if (from.lon() < lonMin) {
                 lonMin = from.lon();
             }
-            
+            //finds min and max longitude from all segments 
             LatLon to = getIntersectionPosition(getInfoStreetSegment(info.lastSeg[i]).to);
             if(to.lat() > latMax){
                 latMax = to.lat();
@@ -845,12 +855,15 @@ std::pair< LatLon, LatLon > clickActions::getCornerStreetSeg(infoStrucs &info){
             }
         }
         
+        //Top corner use maximum latitude and minimum longitude 
+        //Bottom corner use minimum latitude and maximum longitude 
         LatLon topPt(latMax, lonMin);
         LatLon botPt(latMin, lonMax);
         
         return std::make_pair(topPt, botPt);
     }
     
+    //If there is no street in the vector return a garbage LatLon 
     LatLon garbage(190,190);
     return std::make_pair(garbage, garbage);
 }

@@ -50,8 +50,8 @@ void zoom_location(canvas *cnv, point2d zoom_point){
     double currentH = cnv->get_camera().get_world().height();
     double currentW = cnv->get_camera().get_world().width();
     double ratioHW = currentH/currentW; //x-y ratio
-    double world = cnv->get_camera().get_initial_world().width();  
-    double zoomAreaW = (0.005*world)/0.57;
+    double worldW = cnv->get_camera().get_initial_world().width();  
+    double zoomAreaW = (0.005*worldW)/0.57;
     
     zoom_point.x = zoom_point.x-(zoomAreaW/2);
     zoom_point.y = zoom_point.y-(zoomAreaW*ratioHW/2);
