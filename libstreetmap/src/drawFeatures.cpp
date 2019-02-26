@@ -7,7 +7,7 @@
 
 #include <algorithm>
 
-std::vector<std::pair<ezgl::point2d, int>> drawnPOIs;
+
 /* setFeatureColour function
  * - sets the feature colours based on Feature Type
  * 

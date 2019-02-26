@@ -56,6 +56,7 @@ void drawText::createText(int numStreetSegs, int numStreets, infoStrucs &info, e
         bool drawResidential=((currentArea/initialArea)<.005);
         bool drawService=((currentArea/initialArea)<.0009);
         bool charCapOff=((currentArea/initialArea)<.0005);
+        
         //space is 'jump' between the checked street seg numbers
         int space; 
         //numRoadsDrawn is the number of roads that have already been drawn
@@ -63,8 +64,8 @@ void drawText::createText(int numStreetSegs, int numStreets, infoStrucs &info, e
         //roadTypes is the number of roads we want to draw (there are 7 kinds of roads)
         int roadTypes=6;
         //the charLimit prevents very large names from being drawn when the roads are very small
-        unsigned charLimit=17;
-        int sizeAdjustmentFactor=4000;
+        const unsigned CHARLIMIT=17;
+        const int SIZEADJUSTMENTFACTOR=4000;
         g.format_font("sans serif", ezgl::font_slant::normal, ezgl::font_weight::normal, 11);
        
         //determines what space and maxCounter should be
@@ -119,12 +120,12 @@ void drawText::createText(int numStreetSegs, int numStreets, infoStrucs &info, e
                 bool validToDraw=((numRoadsDrawn<maxCount)
                     &&(alreadyDrawnStreets[info.StreetSegInfo[i].streetID]<1)
                     &&((inBoundsInitial)||(inBoundsFinal))
-                    &&(((((currentArea/initialArea)*sizeAdjustmentFactor<find_distance_between_two_points(initialPosition, finalPosition))
+                    &&(((((currentArea/initialArea)*SIZEADJUSTMENTFACTOR<find_distance_between_two_points(initialPosition, finalPosition))
                     ||(roadType==PRIMARY))
                     &&(info.StreetSegInfo[i].numCurvePoints==HIGHWAY))
-                    ||(((currentArea/initialArea)*sizeAdjustmentFactor<find_distance_between_two_points(initialPosition, finalPosition))
+                    ||(((currentArea/initialArea)*SIZEADJUSTMENTFACTOR<find_distance_between_two_points(initialPosition, finalPosition))
                     &&(info.StreetSegInfo[i].numCurvePoints>0)))
-                    &&((((roadName).length())<charLimit)
+                    &&((((roadName).length())<CHARLIMIT)
                     ||(charCapOff))
                     &&(roadName.compare("<unknown>")));
 
