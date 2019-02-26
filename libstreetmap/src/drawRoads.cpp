@@ -11,39 +11,41 @@
 /* setRoadColurSize
  *  - sets the roads colour and size based on the parameters below
  *  - equations found in the function were determined by finding points that looked good and then using curve fitting
+ * 
  * @param type <int> - The type of street as classified in fillStructs 
  * @param highlight <bool> - determines if the road should be highlighted or not
  * @param g <ezgl::renderer> - The EZGL renderer
  * @param startArea <double> - The initial area of the canvas
  * @param currentArea <double> - the current area of the canvas
+ * 
  * @return void
  */
+
 void roadDrawing::setRoadColourSize(int type, bool highlight, ezgl::renderer &g, double startArea, double currentArea){
     const int HIGHLIGHTFACT = 5;
     int width = SECONDARYWIDTH;
-    g.set_color(255,255,255,255); //Ddefault white colour
-    //1/(cur/start))
+    g.set_color(255,255,255,255); //Default white colour
     double inputAdjust=1/(currentArea/startArea);
     double adjustingAdd=(280930.9-(2586289/1221110)) + (2.117982 - 280930.9)/(1 + (pow(inputAdjust/17546410000, 0.7331144)));
     switch(type){
         case HIGHWAY: 
         case HIGHWAYRAMP:// yellowish
-            width =HIGHWAYWIDTH+adjustingAdd;
+            width =HIGHWAYWIDTH + adjustingAdd;
             g.set_color(250,215,56,200);
             break;
         case TRUNK:
-            width = PRIMWIDTH+adjustingAdd;
+            width = PRIMWIDTH + adjustingAdd;
             g.set_color(255,255,255,255);
             break;
         case PRIMARY: // white and thick
-            width = PRIMWIDTH+adjustingAdd;
+            width = PRIMWIDTH + adjustingAdd;
             g.set_color(255,255,255,255);
             break;
-        case SECONDARY: //===========================================================================
-            width = SECONDARYWIDTH+adjustingAdd;
+        case SECONDARY:
+            width = SECONDARYWIDTH + adjustingAdd;
             g.set_color(255,255,255,255);
             break;
-        case RESIDENTIAL: //===========================================================================
+        case RESIDENTIAL:
             width = adjustingAdd;
             g.set_color(255,255,255,255);
             break;
@@ -51,7 +53,7 @@ void roadDrawing::setRoadColourSize(int type, bool highlight, ezgl::renderer &g,
             width = adjustingAdd;
             g.set_color(244,244,244,255);
             break;
-        default: //=====================================================================================
+        default:
             break;
     }
     
@@ -64,8 +66,10 @@ void roadDrawing::setRoadColourSize(int type, bool highlight, ezgl::renderer &g,
     g.set_line_cap (ezgl::line_cap::round);
 }
 
+
 /* drawStreetRoads
  *  - Determines which street segments should be drawn and calls another function to draw them
+ * 
  * @param numSegs <int> - The number of street segments on the map
  * @param xy <mapBoundary> - An object that contains the bounds of the original map and functions to convert to and from LatLon/XY
  * @param info <infoStrucs> - An object that contains various data structures filled with info relevant to the map
@@ -73,51 +77,63 @@ void roadDrawing::setRoadColourSize(int type, bool highlight, ezgl::renderer &g,
  * @param startArea <double> - The initial area of the canvas
  * @param currentArea <double> - the current area of the canvas
  * @param currentRectangle <ezgl::rectangle> - the rectangle representing the current bounds of the map
+ * 
  * @return void
  */
+
  void roadDrawing::drawStreetRoads(int numSegs, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g, double startArea, double currentArea, ezgl::rectangle currentRectangle){
     LatLon from, to;
     bool sufficentlyZoomed=false;
     bool sufficentlyBig=false;
     bool sufficentlyZoomedLevel1=false;
     bool sufficentlyZoomedLevel2=false;
-    
     bool draw=false;
     
     for(int i=0 ; i<numSegs ; i++){
+               //========================================REQUIRES WORK, EXPLAIN, CONSTANT ALL NUMS======================================= 
+        
         setRoadColourSize(info.StreetSegInfo[i].type, info.StreetSegInfo[i].clicked, g, startArea, currentArea);
         
         from = info.IntersectionInfo[info.StreetSegInfo[i].fromIntersection].position;
+        
         if((100<info.numStreetType[5])&&(info.numStreetType[5]<1000)){
+            
             sufficentlyBig=(info.StreetSegInfo[i].type==0||info.StreetSegInfo[i].type==5||info.StreetSegInfo[i].type==1);
             sufficentlyZoomedLevel1=(info.StreetSegInfo[i].type==2)&&((currentArea/startArea)<0.25);
             sufficentlyZoomed=(currentArea/startArea)<0.10;
+            
         }
         else if(info.numStreetType[5]<100){
+            
             sufficentlyBig=(info.StreetSegInfo[i].type==0||info.StreetSegInfo[i].type==5||info.StreetSegInfo[i].type==1||info.StreetSegInfo[i].type==2);
             sufficentlyZoomed=(currentArea/startArea)<0.25;
+            
         }
         else{
+            
             sufficentlyBig=(info.StreetSegInfo[i].type==0||info.StreetSegInfo[i].type==5);
             sufficentlyZoomedLevel1=(info.StreetSegInfo[i].type==1)&&((currentArea/startArea)<0.25);
             sufficentlyZoomed=(currentArea/startArea)<0.05;
             sufficentlyZoomedLevel2=(info.StreetSegInfo[i].type==2)&&(currentArea/startArea)<0.1; 
             
         }
-        
-        
-        
+         
         if(sufficentlyZoomed||sufficentlyBig||sufficentlyZoomedLevel1||sufficentlyZoomedLevel2){
+           
             for(int c=0;c<info.StreetSegInfo[i].numCurvePoints;c++){
+                
                 to = getStreetSegmentCurvePoint(c,i);
                 draw=(inBounds(xy, currentRectangle, to))||(inBounds(xy, currentRectangle, from));
+                
                 if(draw){
                     drawStraightStreet(from, to, xy, g);
                 }
                 from = to;
             }
+            
             to = info.IntersectionInfo[info.StreetSegInfo[i].toIntersection].position;
             draw=(inBounds(xy, currentRectangle, to))||(inBounds(xy, currentRectangle, from));
+            
             if(draw){
                     drawStraightStreet(from, to, xy, g);
             }
@@ -125,14 +141,17 @@ void roadDrawing::setRoadColourSize(int type, bool highlight, ezgl::renderer &g,
     }
 }
 
+ 
  /* drawStraightStreet
  *  - Draws a straight line on the map according to the specifications set out in setRoadColourSize. Called by drawStreetRoads
  * @param pt1 <LatLon> - The latitude and longitude of the first point
  * @param pt2 <LatLon> - The latitude and longitude of the second point
  * @param xy <mapBoundary> - An object that contains the bounds of the original map and functions to convert to and from LatLon/XY
  * @param g <ezgl::renderer> - The EZGL renderer
+  * 
  * @return void
  */
+ 
 void roadDrawing::drawStraightStreet(LatLon &pt1, LatLon &pt2, mapBoundary &xy, ezgl::renderer &g){
     float xInitial, yInitial, xFinal, yFinal;
     

@@ -11,27 +11,28 @@
 #include "StreetsDatabaseAPI.h"
 #include <string>
 
-
-std::vector<std::pair<double, bool>> anglesWithWay;
-double initialArea;
-
-
 /* initialize
  *  - Gives drawText access to the current xy object
+ * 
+ * @param void 
  * @return void
  */
+
 void drawText::initilize(){
     xy.initialize(); 
 }
 
+
 /* createText
  *  - Determines which text needs to be drawn and where it should be drawn and if it needs to be drawn
+ * 
  * @param numStreetSegs <int> - The number of street segments present in the map
  * @param numStreets <int> - The number of streets present in the map
  * @param info <infoStrucs> - An object that contains various data structures filled with info relevant to the map
  * @param g <ezgl::renderer> - The EZGL renderer
  * @return void
  */
+
 void drawText::createText(int numStreetSegs, int numStreets, infoStrucs &info, ezgl::renderer &g){
         //initialization of all the variables that need in the function
         ezgl::rectangle currentRectangle=g.get_visible_world();
@@ -144,12 +145,15 @@ void drawText::createText(int numStreetSegs, int numStreets, infoStrucs &info, e
     }
 }
 
+
 /* findAngle
  *  - Determines the angle at which the text should be placed and also loads in a bool that tells if one way directions should be flipped
+ * 
  * @param initialPosition <LatLon> - The initial position in latitude and longitude
  * @param finalPosition <LatLon> - The final position in latitude and longitude
  * @return std::pair<double, bool>
  */
+
 std::pair<double, bool> drawText::findAngle(LatLon &initialPosition, LatLon &finalPosition){
     double angle=atan2(xy.yFromLat(finalPosition.lat())-xy.yFromLat(initialPosition.lat()), (xy.xFromLon(finalPosition.lon())-xy.xFromLon(initialPosition.lon())));
     bool right=true;
@@ -161,18 +165,21 @@ std::pair<double, bool> drawText::findAngle(LatLon &initialPosition, LatLon &fin
         angle=angle+M_PI;
         right=false;
     }
-    return std::make_pair(180*angle/M_PI, right);
+    return std::make_pair(180*angle/M_PI, right);               
     //so basically if I had to add pi at any point the arrow should appear on the left side instead of the right 
 }
+
 
 /* indexOfLargestGoodCurvepoint
  *  - For when the street contains curvepoints
  *  - This function determines on which segment of the street segment to draw the name
+ * 
  * @param streetSegment <int> - The index of the street segment that is to be drawn on
  * @param info <infoStrucs> - An object that contains various data structures filled with info relevant to the map
  * @param currentRectangle <ezgl::rectangle> - the rectangle representing the current bounds of the map
  * @return void
  */
+
 int drawText::indexOfLargestGoodCurvepoint(int streetSegment, ezgl::rectangle& curBounds, infoStrucs &info){
     int bestCurvePoint=0;
     double distance=0;
@@ -186,13 +193,16 @@ int drawText::indexOfLargestGoodCurvepoint(int streetSegment, ezgl::rectangle& c
     return bestCurvePoint;
 }
 
+
 /* inBounds
  *  - Determines if a given point is in bounds
+ * 
  * @param xy <mapBoundary> - An object that contains the bounds of the original map and functions to convert to and from LatLon/XY
  * @param currentRectangle <ezgl::rectangle> - the rectangle representing the current bounds of the map
  * @param position <LatLon> - the position that is to be determined to be in bounds or not (in latitude and longitude)
  * @return bool
  */
+
 bool drawText::inBounds(ezgl::rectangle& curBounds, LatLon& position){
     return (xy.yFromLat(position.lat())<curBounds.top())&&(xy.yFromLat(position.lat())>curBounds.bottom())&&(xy.xFromLon(position.lon())>curBounds.left())&&(xy.xFromLon(position.lon())<curBounds.right());
 }

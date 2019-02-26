@@ -91,7 +91,7 @@ bool load_map(std::string path/*map_path*/) {
 
     //Indicates whether the map has loaded successfully
     load_successful = loadStreetsDatabaseBIN(path);
-    std::cout<<"loaded: "<<path<<std::endl;
+    std::cout << "Loaded: " << path << std::endl;
     
     if(load_successful){
         
@@ -104,7 +104,7 @@ bool load_map(std::string path/*map_path*/) {
         //intersectionOnStreet
         std::vector<unsigned> collisionList(getNumIntersections(), 0);
         
-        std::cout<<"loaded: "<<path_osm<<std::endl;
+        std::cout << "Loaded: " << path_osm << std::endl;
         
         //clears all global data structures before filling with new data
         streetIDMap.clear();

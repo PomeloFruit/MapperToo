@@ -7,44 +7,16 @@
 
 #include <algorithm>
 
-std::vector<std::string> tourist {"aquarium", "artwork", "attraction", "gallery", "information", "museum", "theme_park", "zoo", "college", "university", "brothel", "arts_centre"
-    , "casino", "cinema", "fountain", "gambling", "music_venue", "nightclub", "planetarium", "theatre", "marketplace", "townhall", "stadium"};
-    
-std::vector<std::string> foodDrink {"alcohol", "bakery", "beverages", "coffee", "confectionery", "convenience", "ice_cream","pastry", "seafood", "bar", "bbq", "cafe", 
-    "food_court", "pub", "restaurant"}; 
-    //food drink more like only show 50
-    //note: i don't have "fast_food" in here because there are too many foodDrink POIs
-std::vector<std::string> shops {"department_store", "general", "kiosk", "mall", "supermarket", "wholesale", "bag", "boutique", "clothes" , "jewelry", "leather"
-    , "shoes", "watches", "variety", "second_hand", "beauty", "cosmetics", "erotic", "hairdresser", "herbalist", "massage", "medical_supply", "perfumery"
-    , "tattoo", "electrical", "florist", "antiques", "candles", "interior_decoration", "computer", "robot", "electronics", "mobile_phone", "radiotechnics" 
-    , "fishing", "fuel", "outdoor", "scuba_diving", "ski", "sports", "swimming_pool", "art", "collector", "craft", "games", "model", "music", "musical_instrument"
-    , "photo", "camera", "video", "video_games", "anime", "books", "gift", "stationery", "ticket", "cannabis", "e-cigarette", "tobacco", "toys", "travel_agency"};
 
-    
-    
-const int POITOURIST = 1;
-const int POIFOOD = 2;
-const int POISHOPS = 3;
-const int POIUNDEF = 0;
-
-const double SUBWAYRAD = 0.0005;
-const double HIGHLIGHTRAD = 0.0015;   
-
-const int TRAINROUTE = 3;
-const int HIGHTRAINROUTE = 6;
-const int SUBWAYROUTE = 5;
-const int HIGHSUBWAYROUTE = 10;
-
-int foodDrinkLimit;
-int touristLimit; 
-int shopsLimit;
-
-int foodDrinkPOICounter;
-int touristPOICounter;
-int shopsPOICounter; 
-
-std::vector<std::pair<ezgl::point2d, int>> drawnPOIs;
-//std::vector<ezgl::point2d> drawnPOIs;
+/* setFeatureColour function
+ * - sets the feature colours based on Feature Type
+ * 
+ * @param type <int> - feature type as defined by layer 2 api
+ * @param g <ezgl::renderer> - renderer object to draw and modify graphics
+ * @param special <bool> - true when feature is highlighted 
+ * 
+ * @return void
+ */
 
 void featureDrawing::setFeatureColour(int type, ezgl::renderer &g, bool special){
     if(special){
@@ -92,68 +64,66 @@ void featureDrawing::setFeatureColour(int type, ezgl::renderer &g, bool special)
 }
 
 
-int featureDrawing::classifyPOI(std::string type){
-    int poiType = POIUNDEF; 
-    
-    if(std::find(tourist.begin(), tourist.end(), type) != tourist.end()){
-        poiType = POITOURIST; 
-    } else if(std::find(foodDrink.begin(), foodDrink.end(), type) != foodDrink.end()){
-        poiType = POIFOOD;
-    } else if(std::find(shops.begin(), shops.end(), type) != shops.end()){
-        poiType = POISHOPS; 
-    } else {
-        poiType = POIUNDEF; 
-    }
-    
-    return poiType; 
-}
-//
-//void featureDrawing::setPOIColour(int type, ezgl::renderer& g){
-//    if(type == POITOURIST){
-//        g.set_color(255,71,113,191);
-//    }else if (type == POIFOOD){
-//        g.set_color(255, 165, 54, 191);
-//    }else if (type == POISHOPS){
-//        g.set_color(0, 112, 255, 191);
-//    } else { //POIUNDEF
-//        g.set_color(0,0,0,0);
-//    }
-//}
+/* drawFeatures function
+ * - draw features taking into account their size and current viewing window
+ * 
+ * @param numFeatures <int> - number of features in the map 
+ * @param info <infoStrucs> - object that contains all the data structures created when map is loaded 
+ * @param g <ezgl::renderer> - renderer object to draw and modify graphics
+ * @param currentArea <double> - the current viewing area of the map
+ * @param startArea <double> - the initial area of the map 
+ * 
+ * @return void
+ */
 
 void featureDrawing::drawFeatures(int numFeatures, infoStrucs &info, ezgl::renderer &g, double currentArea, double startArea){
-    foodDrinkPOICounter=0;
-    touristPOICounter=0;
-    shopsPOICounter=0; 
-    int endDraw=1;
+    foodDrinkPOICounter = 0;
+    touristPOICounter = 0;
+    shopsPOICounter = 0; 
+    int endDraw = 1;
+    
+    // determines the types of features to draw based on view port
     if((currentArea/startArea)>0.7){
-        endDraw=2;
+        endDraw = 2;
     }
-    else if((0.8>(currentArea/startArea))&&((currentArea/startArea)>0.2)){
-        endDraw=3;
+    else if((0.8 >(currentArea/startArea))&&((currentArea/startArea)>0.2)){
+        endDraw = 3;
     }
-    else if((0.3>(currentArea/startArea))&&((currentArea/startArea)>0.01)){
-        endDraw=4;
+    else if((0.3 >(currentArea/startArea))&&((currentArea/startArea)>0.01)){
+        endDraw = 4;
     }
     else{
-        endDraw=5;
+        endDraw = 5;
     }
-    //std::cout<<endDraw<<'\n';
-    for(int s=1; s <= endDraw; s++){        //drawing by priority number where 1 is the highest and 4 is the lowest (all open features are 4 automatically)
+    
+    //drawing by priority number where 1 is the highest and 4 is the lowest (all open features are 4 automatically)
+    for(int s=1; s <= endDraw; s++){        
         for(int i = 0; i < numFeatures; i++){
+            
             if(info.FeatureInfo[i].priorityNum == s){
+                
                 setFeatureColour(info.FeatureInfo[i].featureType, g, info.FeatureInfo[i].clicked);
+                
                 if(info.FeaturePointVec[i].size()>1){
+                    
                     if(info.FeatureInfo[i].isOpen){
-                        for(int p=1; p< static_cast<int>(info.FeaturePointVec[i].size()); p++){
-                            g.set_line_width(3); ///////////////////////////////////////////////////////magic  number???????
+                        
+                        for(int p=1; p< static_cast<int>(info.FeaturePointVec[i].size()); p++){   
+                            g.set_line_width(3);
                             g.draw_line(info.FeaturePointVec[i][p-1], info.FeaturePointVec[i][p]);
                         }
+                        
                     } else { //closed feature
-                        //info.F
+                        
                         g.fill_poly(info.FeaturePointVec[i]);
+                        
                     }
+                    
                 } else { // feature is node
-                    g.fill_rectangle(info.FeaturePointVec[i][0],0.0001,0.0001);///////////////////////////////////////////////////////magic  number???????
+                    
+                    const double size = 0.0001;
+                    g.fill_rectangle(info.FeaturePointVec[i][0],size,size);
+                
                 }
             }
         }
@@ -161,30 +131,50 @@ void featureDrawing::drawFeatures(int numFeatures, infoStrucs &info, ezgl::rende
 }
 
 
-// draw all
-void featureDrawing::drawPOI(int numPOI, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g, double adjustmentFactor){
-    bool zoom1=(adjustmentFactor)<0.5;
-    bool zoom2=(adjustmentFactor)<0.01;
-    int spacing = 1;
+/* drawPOI function
+ * - sets the limit for the number of POIs shown at each zoom level and then calls 
+ *   drawOnePOI to draw the POI 
+ * 
+ * @param numPOI <int> - the number of POIs in the map
+ * @param xy <mapBoundary> - allows for conversion of units from lat lon to xy 
+ * @param info <infoStrucs> - object that contains all the data structures created when map is loaded 
+ * @param g <ezgl::renderer> - renderer object to draw and modify graphics
+ * @param screenRatio <double> - ratio of current viewing area to total map 
+ * 
+ * @return void
+ */
+
+void featureDrawing::drawPOI(int numPOI, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g, double screenRatio){
+    int limit = 0;
+    int spacing = 0;
     
-    drawnPOIs.clear();
+    const double LV1ZOOM = 0.01;
+    const double LV2ZOOM = 0.5;
     
-    if(zoom2){
-        foodDrinkLimit = 40; 
-        touristLimit = 40;
-        shopsLimit = 40;
-        spacing = 5;
-    }else if (zoom1){
-        foodDrinkLimit = 20;
-        touristLimit = 20;
-        shopsLimit = 20;
-        spacing = 10;
-    }else{
-        foodDrinkLimit = 15;
-        touristLimit = 15;
-        shopsLimit = 15;
-        spacing = 15;
+    const int POILIMIT1 = 40;
+    const int POILIMIT2 = 20;
+    const int POILIMIT3 = 15;
+    const int SPACING1 = 5;
+    const int SPACING2 = 10;
+    const int SPACING3 = 15;
+    
+    //drawnPOIs.clear();
+        
+    if(screenRatio < LV1ZOOM){
+        limit = POILIMIT1;
+        spacing = SPACING1;
+    } else if (screenRatio < LV2ZOOM) {
+        limit = POILIMIT2;
+        spacing = SPACING2;
+
+    } else {
+        limit = POILIMIT3;
+        spacing = SPACING3;
     }
+    
+    foodDrinkLimit = limit; 
+    touristLimit = limit;
+    shopsLimit = limit;
     
     for(int i=0 ; i<numPOI ; i=i+spacing){   
         drawOnePOI(i, xy, info, g);
@@ -192,60 +182,109 @@ void featureDrawing::drawPOI(int numPOI, mapBoundary &xy, infoStrucs &info, ezgl
     drawClickedPOI(xy, info, g);
 }
 
-// make sure last clicked is on top of others
+
+/* drawClickedPOI function
+ * - draws the highlighted POI 
+ * 
+ * @param xy <mapBoundary> - allows for conversion of units from lat lon to xy 
+ * @param info <infoStrucs> - object that contains all the data structures created when map is loaded 
+ * @param g <ezgl::renderer> - renderer object to draw and modify graphics
+ * 
+ * @return void
+ */
+
 void featureDrawing::drawClickedPOI(mapBoundary &xy, infoStrucs &info, ezgl::renderer &g){
     for(unsigned i=0 ; i<info.lastPOI.size() ; i++){
         drawOnePOI(info.lastPOI[i], xy, info, g);
     }
 }
 
+
+/* drawOnePOI function
+ * - sets the limit for the number of POIs shown at each zoom level and then calls 
+ *   drawOnePOI to draw the POI 
+ * 
+ * @param numPOI <int> - the number of POIs in the map
+ * @param xy <mapBoundary> - allows for conversion of units from lat lon to xy 
+ * @param info <infoStrucs> - object that contains all the data structures created when map is loaded 
+ * @param g <ezgl::renderer> - renderer object to draw and modify graphics
+ * 
+ * @return void
+ */
+
 void featureDrawing::drawOnePOI(int i, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g){
-    const double radius = g.get_visible_world().width()*0.009;
+    const double RADIUS = g.get_visible_world().width()*0.009;
     LatLon newPoint;
     double xNew, yNew;
     
     newPoint = getPointOfInterestPosition(i);
-    
     ezgl::rectangle curBounds=g.get_visible_world();
-    bool drawPOI=
-            (xy.yFromLat(newPoint.lat())<curBounds.top())
-            &&(xy.yFromLat(newPoint.lat())>curBounds.bottom())
-            &&(xy.xFromLon(newPoint.lon())>curBounds.left())
-            &&(xy.xFromLon(newPoint.lon())<curBounds.right());
+    
+    bool drawPOI = (xy.yFromLat(newPoint.lat())<curBounds.top())
+                &&(xy.yFromLat(newPoint.lat())>curBounds.bottom())
+                &&(xy.xFromLon(newPoint.lon())>curBounds.left())
+                &&(xy.xFromLon(newPoint.lon())<curBounds.right());
 
     xNew = xy.xFromLon(newPoint.lon());
     yNew = xy.yFromLat(newPoint.lat());
     
-    
+    // if the POI is clicked, draw the Selected POI png
     if (info.POIInfo[i].clicked && drawPOI) {
-        g.draw_surface(g.load_png("POI_select.png"), ezgl::point2d(xNew-radius, yNew+radius));
-        if(info.POIInfo[i].poiNum == 1 && info.poiButtonStatus[0] == 1){
+        g.draw_surface(g.load_png("POI_select.png"), ezgl::point2d(xNew-RADIUS, yNew+RADIUS));
+        
+        if(info.POIInfo[i].poiNum == 1 && info.poiButtonStatus[0] == 1) {
+            
             touristPOICounter++;
-            drawnPOIs.push_back(std::make_pair(ezgl::point2d(xNew-radius, yNew+radius), i));
-        }else if(info.POIInfo[i].poiNum == 2 && info.poiButtonStatus[1] == 1){
+            //drawnPOIs.push_back(std::make_pair(ezgl::point2d(xNew-radius, yNew+radius), i));
+        
+        } else if(info.POIInfo[i].poiNum == 2 && info.poiButtonStatus[1] == 1) {
+            
             foodDrinkPOICounter++;
-            drawnPOIs.push_back(std::make_pair(ezgl::point2d(xNew-radius, yNew+radius), i));
-        }else if (info.POIInfo[i].poiNum == 3 && info.poiButtonStatus[2] == 1){
+            //drawnPOIs.push_back(std::make_pair(ezgl::point2d(xNew-radius, yNew+radius), i));
+        
+        } else if (info.POIInfo[i].poiNum == 3 && info.poiButtonStatus[2] == 1) {
+            
             shopsPOICounter++;
-            drawnPOIs.push_back(std::make_pair(ezgl::point2d(xNew-radius, yNew+radius), i));
+            //drawnPOIs.push_back(std::make_pair(ezgl::point2d(xNew-radius, yNew+radius), i));
+        
         }
-    } else if(drawPOI){
-        info.POIInfo[i].poiNum = classifyPOI(info.POIInfo[i].type);
-        if(info.POIInfo[i].poiNum == 1 && touristPOICounter < touristLimit && info.poiButtonStatus[0] == 1){
-            g.draw_surface(g.load_png("tourist.png"), ezgl::point2d(xNew-radius, yNew+radius));
+        
+    // if the POI is not clicked, draw the POI using the icon 
+    } else if(drawPOI) {
+      
+        if(info.POIInfo[i].poiNum == 1 && touristPOICounter < touristLimit && info.poiButtonStatus[0] == 1) {
+            
+            g.draw_surface(g.load_png("tourist.png"), ezgl::point2d(xNew-RADIUS, yNew+RADIUS));
             touristPOICounter++;
-            drawnPOIs.push_back(std::make_pair(ezgl::point2d(xNew-radius, yNew+radius), i));
-        } else if (info.POIInfo[i].poiNum == 2 && foodDrinkPOICounter < foodDrinkLimit && info.poiButtonStatus[1] == 1){
-            g.draw_surface(g.load_png("food.png"), ezgl::point2d(xNew-radius, yNew+radius));
+            //drawnPOIs.push_back(std::make_pair(ezgl::point2d(xNew-radius, yNew+radius), i));
+        
+        } else if (info.POIInfo[i].poiNum == 2 && foodDrinkPOICounter < foodDrinkLimit && info.poiButtonStatus[1] == 1) {
+            
+            g.draw_surface(g.load_png("food.png"), ezgl::point2d(xNew-RADIUS, yNew+RADIUS));
             foodDrinkPOICounter++;
-            drawnPOIs.push_back(std::make_pair(ezgl::point2d(xNew-radius, yNew+radius), i));
-        } else if (info.POIInfo[i].poiNum == 3 && shopsPOICounter < shopsLimit && info.poiButtonStatus[2] == 1){
-            g.draw_surface(g.load_png("shop bag.png"), ezgl::point2d(xNew-radius, yNew+radius));
+            //drawnPOIs.push_back(std::make_pair(ezgl::point2d(xNew-radius, yNew+radius), i));
+        
+        } else if (info.POIInfo[i].poiNum == 3 && shopsPOICounter < shopsLimit && info.poiButtonStatus[2] == 1) {
+            
+            g.draw_surface(g.load_png("shop bag.png"), ezgl::point2d(xNew-RADIUS, yNew+RADIUS));
             shopsPOICounter++;
-            drawnPOIs.push_back(std::make_pair(ezgl::point2d(xNew-radius, yNew+radius), i));
+            //drawnPOIs.push_back(std::make_pair(ezgl::point2d(xNew-radius, yNew+radius), i));
+        
         }
     }
 }
+
+
+/* drawSubways function
+ * - draws the subways onto the map if selected to do so (if draw > 0)
+ * 
+ * @param draw <int> - determines what routes to draw
+ * @param xy <mapBoundary> - allows for conversion of units from lat lon to xy 
+ * @param info <infoStrucs> - object that contains all the data structures created when map is loaded 
+ * @param g <ezgl::renderer> - renderer object to draw and modify graphics
+ * 
+ * @return void
+ */
 
 void featureDrawing::drawSubways(int draw, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g){
     if(draw>0){
@@ -257,24 +296,47 @@ void featureDrawing::drawSubways(int draw, mapBoundary &xy, infoStrucs &info, ez
     }
 }
 
+
+/* drawOneSubway function
+ * - draws the subway station at index i
+ * 
+ * @param i <int> - index of the subway to draw
+ * @param xy <mapBoundary> - allows for conversion of units from lat lon to xy 
+ * @param info <infoStrucs> - object that contains all the data structures created when map is loaded 
+ * @param g <ezgl::renderer> - renderer object to draw and modify graphics
+ * 
+ * @return void
+ */
+
 void featureDrawing::drawOneSubway(unsigned i, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g){
-    const double radius = g.get_visible_world().width()*0.009;
+    const double RADIUS = g.get_visible_world().width()*0.009;
     double xNew, yNew;
     LatLon drawPoint;
     
     drawPoint = info.SubwayInfo[i].point;
-    g.set_color(79,0,79,255);
     
     xNew = xy.xFromLon(drawPoint.lon());
     yNew = xy.yFromLat(drawPoint.lat());
     
     if(info.SubwayInfo[i].clicked){
-        g.draw_surface(g.load_png("train_click.png"), ezgl::point2d(xNew-radius, yNew+radius));
+        g.draw_surface(g.load_png("train_click.png"), ezgl::point2d(xNew-RADIUS, yNew+RADIUS));
         return;
     }
-    g.draw_surface(g.load_png("train.png"), ezgl::point2d(xNew-radius, yNew+radius));
+    g.draw_surface(g.load_png("train.png"), ezgl::point2d(xNew-RADIUS, yNew+RADIUS));
 
 }
+
+
+/* drawSubwayRoute function
+ * - draws the subway routes if selected to do so
+ * 
+ * @param draw <int> - coded information for what routes to draw
+ * @param xy <mapBoundary> - allows for conversion of units from lat lon to xy 
+ * @param info <infoStrucs> - object that contains all the data structures created when map is loaded 
+ * @param g <ezgl::renderer> - renderer object to draw and modify graphics
+ * 
+ * @return void
+ */
 
 void featureDrawing::drawSubwayRoute(int draw, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g){
     for(unsigned i=0 ; i<info.SubwayRouteInfo.size() ; i++){
@@ -289,6 +351,19 @@ void featureDrawing::drawSubwayRoute(int draw, mapBoundary &xy, infoStrucs &info
         }
     }
 }
+
+
+/* drawOneSubwayRoute function
+ * - draws one subway routes if selected to do so
+ * 
+ * @param unsigned <r> - index value of subway route to draw
+ * @param xy <mapBoundary> - allows for conversion of units from lat lon to xy 
+ * @param info <infoStrucs> - object that contains all the data structures created when map is loaded 
+ * @param g <ezgl::renderer> - renderer object to draw and modify graphics
+ * @param t <int> - type of route (subway/train)
+ * 
+ * @return void
+ */
 
  void featureDrawing::drawOneSubwayRoute(unsigned r, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g, int t){
     LatLon from, to;
@@ -306,6 +381,20 @@ void featureDrawing::drawSubwayRoute(int draw, mapBoundary &xy, infoStrucs &info
         }
     }
 }
+ 
+ 
+ /* drawStraightSubwaySection function
+ * - draws one subway routes if selected to do so
+ * 
+ * @param pt1 <LatLon> - start point in latlon coordinates
+ * @param pt2 <LatLon> - end point in latlon coordinates
+ * @param xy <mapBoundary> - allows for conversion of units from lat lon to xy 
+ * @param g <ezgl::renderer> - renderer object to draw and modify graphics
+ * @param high <bool> - where or the route section is highlighted
+ * @param t <int> - classification of route type 
+ * 
+ * @return void
+ */
 
 void featureDrawing::drawStraightSubwaySection(LatLon &pt1, LatLon &pt2, mapBoundary &xy, ezgl::renderer &g, bool high, int t){
     float xInitial, yInitial, xFinal, yFinal;
@@ -336,16 +425,14 @@ void featureDrawing::drawStraightSubwaySection(LatLon &pt1, LatLon &pt2, mapBoun
     }
 }
 
-void featureDrawing::drawTextOnPOI(ezgl::renderer &g, infoStrucs &info){
-    int namesToBeDrawn=drawnPOIs.size();
-    g.set_text_rotation(0);
-    //probably set a character limit somewhere around here
-    for(int i=0;i<namesToBeDrawn;i++){
-        g.draw_text(drawnPOIs[i].first, info.POIInfo[drawnPOIs[i].second].name);
-    }
-    
-}
-//drawn features==>literally just do push_back id or whaetever, clear each time different poi's are drawn, draw horizontally I guess
-//it seems like google maps really doesn't care where it draws the text but they also seems to keep track of where text is placed <== this is doable but I think it would take more time and effort than I think it's worth
-//so basically I'm just gonna put the text just like somewhere around the poi and horizontal
-//also currently (the 24th) no warnings
+// function can be used later to label selective POI
+
+//void featureDrawing::drawTextOnPOI(ezgl::renderer &g, infoStrucs &info){
+//    int namesToBeDrawn=drawnPOIs.size();
+//    g.set_text_rotation(0);
+//    //probably set a character limit somewhere around here
+//    for(int i=0;i<namesToBeDrawn;i=i+5){
+//        g.draw_text(drawnPOIs[i].first, info.POIInfo[drawnPOIs[i].second].name);
+//    }
+//    
+//}

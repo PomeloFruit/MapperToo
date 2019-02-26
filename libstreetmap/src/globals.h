@@ -10,8 +10,6 @@
 #include <iostream>
 #include <map>
 
-//drawText dt;
-
 //============================== Constants ===================================
 
 #define TRUNKWIDTH 4
@@ -19,13 +17,25 @@
 #define PRIMWIDTH 3
 #define HIGHWAYWIDTH 5
 
-#define TRUNK 5
 #define HIGHWAY 0
 #define PRIMARY 1
 #define SECONDARY 2
 #define RESIDENTIAL 3
 #define SERVICE 4
+#define TRUNK 5
 #define HIGHWAYRAMP 6
+
+//POI Type Codes
+#define POITOURIST 1
+#define POIFOOD 2
+#define POISHOPS 3
+#define POIUNDEF 0
+
+//Drawing Codes for Train/Subway Routes
+#define TRAINROUTE 3
+#define HIGHTRAINROUTE 6
+#define SUBWAYROUTE 5
+#define HIGHSUBWAYROUTE 10
 
 //============================== Structures ===================================
 
@@ -134,11 +144,14 @@ public:
     // contains whether or not to show 0-none/1-subways/2-trains/3-both
     int showRoute;
    
-    //0 is highway ... 4 is service, 5 is trunk 
+    // Holds the number of each street type in each map 
+    // 0 for Motorway, 1 for Primary ... 4 for Service, 5 for Trunk
     int numStreetType [6];
+    
+    // stores each street in the map along with its streetType (ie Trunk, Motorway etc..) 
     std::vector<std::pair<unsigned, int>> streetType;
     
-    //shows which button is on (0 means don't show, 1 means show)
+    // shows which button is on (0 means don't show, 1 means show)
     int poiButtonStatus [4]; 
 };
 

@@ -122,6 +122,16 @@ void populateData::populateStreetSegInfo(infoStrucs &info){
     streetTypeArray(info);
 }
 
+
+/* classifyStreetType function
+ * - stores all unique streets and their street types 
+ * 
+ * @param i <int> - type of street
+ * @param info <infoStrucs> - object containing all essential map information
+ * 
+ * @return void
+ */
+
 void populateData::classifyStreetType(int i, infoStrucs &info){
     bool found = false;
     unsigned ID = getInfoStreetSegment(i).streetID;
@@ -136,6 +146,15 @@ void populateData::classifyStreetType(int i, infoStrucs &info){
         info.streetType.push_back(std::make_pair(ID, type));
     }
 }
+
+
+/* streetTypeArray function
+ * - stores the number of street types 
+ * 
+ * @param info <infoStrucs> - object containing all essential map information
+ * 
+ * @return void
+ */
 
 void populateData::streetTypeArray(infoStrucs &info){
     for(auto it = info.streetType.begin(); it != info.streetType.end(); it++){
@@ -252,6 +271,7 @@ void populateData::populatePOIInfo(infoStrucs &info){
         info.POIInfo[i].name = getPointOfInterestName(i);
         info.POIInfo[i].type = getPointOfInterestType(i);
         info.POIInfo[i].clicked = false;
+        info.POIInfo[i].poiNum = classifyPOI(info.POIInfo[i].type);
     }
 }
 
@@ -582,4 +602,29 @@ std::string populateData::getOSMRelationInfo(const OSMRelation* relPtr, std::str
         }
     }
     return "";
+}
+
+
+/* classifyPOI function
+ * - classifies POI based using the POI Type 
+ * 
+ * @param type <std::string> - POI Type from the Layer 1 API
+ * 
+ * @return poiType <int> - returns the POI Type number defined in Globals
+ */
+
+int populateData::classifyPOI(std::string type){
+    int poiType = POIUNDEF; 
+    
+    if(std::find(tourist.begin(), tourist.end(), type) != tourist.end()){
+        poiType = POITOURIST; 
+    } else if(std::find(foodDrink.begin(), foodDrink.end(), type) != foodDrink.end()){
+        poiType = POIFOOD;
+    } else if(std::find(shops.begin(), shops.end(), type) != shops.end()){
+        poiType = POISHOPS; 
+    } else {
+        poiType = POIUNDEF; 
+    }
+    
+    return poiType; 
 }

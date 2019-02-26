@@ -46,11 +46,12 @@ void zoom_in(canvas *cnv, point2d zoom_point, double zoom_factor)
   cnv->redraw();
 }
 
-void zoom_location(canvas *cnv, point2d zoom_point, double zoom_factor){
+void zoom_location(canvas *cnv, point2d zoom_point){
     double currentH = cnv->get_camera().get_world().height();
     double currentW = cnv->get_camera().get_world().width();
     double ratioHW = currentH/currentW; //x-y ratio
-    const double zoomAreaW = 0.005;
+    double world = cnv->get_camera().get_initial_world().width();  
+    double zoomAreaW = (0.005*world)/0.57;
     
     zoom_point.x = zoom_point.x-(zoomAreaW/2);
     zoom_point.y = zoom_point.y-(zoomAreaW*ratioHW/2);

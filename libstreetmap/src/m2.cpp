@@ -60,29 +60,26 @@ void newMap(std::string path, ezgl::application *application);
 void initializeMap(); 
 void zoomLocation(ezgl::application *application, std::vector<unsigned> zoomVec, int zoomCode);
 void zoomAllPoints(ezgl::application *application);
-// Callback functions for event handling
 
+//=========================== Global Variables =========================== 
 
-//void act_on_mouse_move(ezgl::application *application, GdkEventButton *event, double x, double y);
-//void act_on_key_press(ezgl::application *application, GdkEventKey *event, char *key_name);
-
-///////
-
-//=========================== Global Variables ===========================
-
-double startArea; //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< this should really be in global.h
-
-std::vector<std::pair<std::string, std::string>> city {std::make_pair("beijing","china"), std::make_pair("cairo","egypt"), std::make_pair("cape-town","south-africa")
-, std::make_pair("golden-horseshoe","canada"), std::make_pair("hamilton","canada"), std::make_pair("hong-kong","china"), std::make_pair("iceland","")
-, std::make_pair("interlaken","switzerland"), std::make_pair("london","england"), std::make_pair("moscow","russia"), std::make_pair("new-delhi","india")
-, std::make_pair("new-york","usa"), std::make_pair("rio-de-janeiro","brazil"), std::make_pair("saint-helena",""), std::make_pair("singapore",""), std::make_pair("sydney","australia")
-, std::make_pair("tehran","iran"), std::make_pair("tokyo","japan"), std::make_pair("toronto","canada")};
+std::vector<std::pair<std::string, std::string>> city {std::make_pair("beijing","china"), 
+        std::make_pair("cairo","egypt"), std::make_pair("cape-town","south-africa"),
+        std::make_pair("golden-horseshoe","canada"), std::make_pair("hamilton","canada"),
+        std::make_pair("hong-kong","china"), std::make_pair("iceland",""), 
+        std::make_pair("interlaken","switzerland"), std::make_pair("london","england"), 
+        std::make_pair("moscow","russia"), std::make_pair("new-delhi","india"), 
+        std::make_pair("new-york","usa"), std::make_pair("rio-de-janeiro","brazil"), 
+        std::make_pair("saint-helena",""), std::make_pair("singapore",""), 
+        std::make_pair("sydney","australia"), std::make_pair("tehran","iran"), 
+        std::make_pair("tokyo","japan"), std::make_pair("toronto","canada")
+};
 
 //=========================== Function Definitions ===========================
 
-/* draw_map function
- * - loads the settings for the application window
- * - calls for initialization of everything needed to draw
+
+/* initializeMap function
+ * - initializes all data for all data structures 
  * 
  * @param none
  * @return void
@@ -93,6 +90,14 @@ void initializeMap(){
     pop.initialize(info, xy);
     dt.initilize();
 }
+
+/* draw_map function
+ * - loads the settings for the application window
+ * - calls for initialization of everything needed to draw
+ * 
+ * @param none
+ * @return void
+ */
 
 void draw_map(){   
     ezgl::application::settings settings;
@@ -120,6 +125,8 @@ void draw_map(){
  */
 
 void draw_main_canvas(ezgl::renderer &g){
+    double startArea;
+    
     g.set_color(219,219,219,255); //light gray for background
     g.fill_rectangle(g.get_visible_world());
     
@@ -128,10 +135,7 @@ void draw_main_canvas(ezgl::renderer &g){
     ezgl::rectangle currentRectangle=g.get_visible_world();
     
     double currentArea=abs((currentRectangle.right()-currentRectangle.left())*(currentRectangle.top()-currentRectangle.bottom()));
-    //double adjustmentFactor=1/(currentArea/startArea);//for some reason it's not letting me take in the visible screen stuff, so I'm just going to do it here
     double screenRatio=(currentArea/startArea);
-//    
-//    std::cout<<adjustmentFactor<<currentArea<<startArea<<'\n';
     
     ft.drawFeatures(getNumFeatures(), info, g ,currentArea, startArea);
     rd.drawStreetRoads(getNumStreetSegments(), xy, info, g, startArea, currentArea, currentRectangle);
@@ -229,6 +233,11 @@ void findButton(GtkWidget *widget, ezgl::application *application){
     // get the user input(s))
     application->get_input_text(name1, name2);
     
+    //======================= change map ======================================
+    /*takes in the city name from name1 and then matches it with the country name 
+     * from the city vector. If a match is found, the city/country is sent to newMap()
+     */
+    
     std::string potentialCityName = name1;
     for(unsigned i=0;i<potentialCityName.length();i++){
         potentialCityName[i]=tolower(potentialCityName[i]);
@@ -251,6 +260,8 @@ void findButton(GtkWidget *widget, ezgl::application *application){
             break;
         } 
     }
+    
+    //======================== Map Element Searching ===========================
     
     if(!changeMap){
         info.textInput1 = name1;
@@ -423,6 +434,17 @@ void showTrainsButton(GtkWidget *widget, ezgl::application *application){
     application->refresh_drawing();
 }
 
+
+/* touristButton function
+ * - toggles on and off Tourist POIs
+ * - and changes button text to match new status
+ * 
+ * @param widget <GtkWidget> -event object to determine mouse action
+ * @param application <ezgl::application> - application object to access window elements
+ * 
+ * @return void
+ */
+
 void touristButton(GtkWidget *widget, ezgl::application *application){
     widget->parent_instance.ref_count;
     
@@ -437,19 +459,41 @@ void touristButton(GtkWidget *widget, ezgl::application *application){
     application->refresh_drawing();
 }
 
+
+/* fdButton function
+ * - toggles on and off Food/Drink POIs
+ * - and changes button text to match new status
+ * 
+ * @param widget <GtkWidget> -event object to determine mouse action
+ * @param application <ezgl::application> - application object to access window elements
+ * 
+ * @return void
+ */
+
 void fdButton(GtkWidget *widget, ezgl::application *application){
     widget->parent_instance.ref_count;
     
     if(info.poiButtonStatus[1] == 0){
         info.poiButtonStatus[1] = 1;
         application->change_button_text("Show Food/Drink POIs", "Hide Food/Drink POIs");
-    }else{
+    } else {
         info.poiButtonStatus[1] = 0;
         application->change_button_text("Hide Food/Drink POIs", "Show Food/Drink POIs");
     }
     
     application->refresh_drawing();
 }
+
+
+/* shopsButton function
+ * - toggles on and off Shopping POIs
+ * - and changes button text to match new status
+ * 
+ * @param widget <GtkWidget> -event object to determine mouse action
+ * @param application <ezgl::application> - application object to access window elements
+ * 
+ * @return void
+ */
 
 void shopsButton(GtkWidget *widget, ezgl::application *application){
     widget->parent_instance.ref_count;
@@ -464,6 +508,17 @@ void shopsButton(GtkWidget *widget, ezgl::application *application){
     
     application->refresh_drawing();
 }
+
+
+/* newMap function
+ * - closes old map, loads new map and then initializes data structures for new map 
+ * - updates the camera and canvas to the dimensions of the new map 
+ * 
+ * @param path <std::string> - city name for path 
+ * @param application <ezgl::application> - application object to access window elements
+ * 
+ * @return void
+ */
 
 void newMap(std::string path, ezgl::application *application){
     path = "/cad2/ece297s/public/maps/" + path + ".streets.bin";
@@ -481,14 +536,19 @@ void newMap(std::string path, ezgl::application *application){
     myCanvas->get_camera().update_widget(myCanvas->width(), myCanvas->height());
     myCanvas->get_camera().set_world(new_world);
     myCanvas->get_camera().set_zoom_fit(new_world);
-//    if(info.SubwayInfo.size()==0){
-//        pop.loadAfterDraw(info);
-//    }
-    //ezgl::camera myCamera = myCanvas->get_camera();
-    //myCamera.set_world(new_world); 
     
     application->refresh_drawing(); 
 }
+
+
+/* helpButton function
+ * - triggers opening of dialogue box and provides message 
+ * 
+ * @param widget <GtkWidget> -event object to determine mouse action
+ * @param application <ezgl::application> - application object to access window elements
+ * 
+ * @return void
+ */
 
 void helpButton(GtkWidget *widget, ezgl::application *application){
     std::string message;
@@ -518,6 +578,17 @@ void helpButton(GtkWidget *widget, ezgl::application *application){
     dialog_box(widget, application, message.c_str());
 }
 
+
+/* zoomLocation function
+ * - determines the position to zoom into when a point is searched or clicked
+ * 
+ * @param application <ezgl::application> - application object to access window elements
+ * @param zoomVec <std::vector<unsigned>> - contains the IDs of the clicked objects/points 
+ * @param zoomCode <int> - contains which type of point was clicked 
+ * 
+ * @return void
+ */
+
 void zoomLocation(ezgl::application *application, std::vector<unsigned> zoomVec, int zoomCode){
     if(zoomVec.size() > 0){
         std::string canvasID = application->get_main_canvas_id(); 
@@ -541,9 +612,18 @@ void zoomLocation(ezgl::application *application, std::vector<unsigned> zoomVec,
         double y = xy.yFromLat(lat);
         
         ezgl::point2d focusPt(x, y); 
-        ezgl::zoom_location(myCanvas, focusPt, 50);
+        ezgl::zoom_location(myCanvas, focusPt);
     }
 }
+
+
+/* zoomAllPoints function
+ * - provides the correct vector and zoomCode for the zoomLocation function  
+ * 
+ * @param application <ezgl::application> - application object to access window elements
+ * 
+ * @return void
+ */
 
 void zoomAllPoints(ezgl::application *application){
     zoomLocation(application, info.lastPOI, 0);

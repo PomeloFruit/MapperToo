@@ -26,7 +26,7 @@ void zoom_out(canvas *cnv, double zoom_factor);
  */
 void zoom_in(canvas *cnv, point2d zoom_point, double zoom_factor);
 
-void zoom_location(canvas *cnv, point2d zoom_point, double zoom_factor);
+void zoom_location(canvas *cnv, point2d zoom_point);
 
 /**
  * Zoom out from a specific point in GTK widget.
