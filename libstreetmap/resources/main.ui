@@ -2,19 +2,17 @@
 <!-- Generated with glade 3.20.0 -->
 <interface>
   <requires lib="gtk+" version="3.6"/>
-  <object class="GtkEntryCompletion" id="NameCompletion1">
-    <property name="model">NameSuggestion</property>
-    <property name="text_column">0</property>
-  </object>
   <object class="GtkListStore" id="NameSuggestion">
     <columns>
       <!-- column-name StreetName -->
       <column type="gchararray"/>
     </columns>
   </object>
+  <object class="GtkEntryCompletion" id="NameCompletion1">
+    <property name="model">NameSuggestion</property>
+  </object>
   <object class="GtkEntryCompletion" id="NameCompletion2">
     <property name="model">NameSuggestion</property>
-    <property name="text_column">0</property>
   </object>
   <object class="GtkWindow" id="MainWindow">
     <property name="visible">True</property>

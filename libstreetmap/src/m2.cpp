@@ -41,9 +41,9 @@ drawText dt;
 
 void draw_main_canvas(ezgl::renderer &g);
 void initial_setup(ezgl::application *application);
-void setCompletionModel(ezgl::application *application);
 void act_on_mouse_press(ezgl::application *application, GdkEventButton *event, double x, double y);
 void act_on_key_press(ezgl::application *application, GdkEventKey *event, char *key_name);
+void setCompletionModel(ezgl::application *application);
 void findButton(GtkWidget *widget, ezgl::application *application);
 void dialog_box(GtkWidget *widget, ezgl::application *application, std::string message);
 void on_dialog_response(GtkDialog *dialog);
@@ -119,30 +119,6 @@ void draw_map(){
     application.run(initial_setup, act_on_mouse_press, NULL, act_on_key_press);
 }
 
-// fills the completion model
-void setCompletionModel(ezgl::application *application){
-    GtkListStore *completeModel = (GtkListStore *) application->get_object("NameSuggestion");
-    GtkEntryCompletion *completionBox1 = (GtkEntryCompletion *) application->get_object("NameCompletion1");
-    GtkEntryCompletion *completionBox2 = (GtkEntryCompletion *) application->get_object("NameCompletion2");
-    GtkTreeIter iter;
-    
-    gtk_list_store_append(completeModel, &iter);
-    gtk_entry_completion_set_text_column(completionBox1, 0);
-    gtk_entry_completion_set_text_column(completionBox2, 0);
-    
-    for(unsigned i=0 ; i< static_cast<unsigned>(getNumStreets()) ; i++){
-        
-        // convert string to char*
-        std::string str = getStreetName(i);
-        char * nameChar = new char[str.size() + 1];
-        std::copy(str.begin(), str.end(), nameChar);
-        nameChar[str.size()] = '\0';
-
-        gtk_list_store_insert(completeModel, &iter, -1);
-        gtk_list_store_set(completeModel, &iter, 0, nameChar, -1);
-    }
-}
-
 
 /* draw_main_canvas function
  * - calls for all draw functions for map elements
@@ -202,6 +178,41 @@ void initial_setup(ezgl::application *application){
     application->create_button("Show Shopping POIs", 12, shopsButton);
     application->create_button("Help", 13, helpButton);
     application->create_button("Sicko Mode", 14, initiateTheSicko); 
+}
+
+
+/* setCompletionModel function
+ * - fills the list store containing all the street names for entry completion
+ * 
+ * @param application <ezgl::application> - application object to access window elements
+ * 
+ * @return void
+ */
+
+void setCompletionModel(ezgl::application *application){
+    GtkListStore *completeModel = (GtkListStore *) application->get_object("NameSuggestion");
+    GtkEntryCompletion *completionBox1 = (GtkEntryCompletion *) application->get_object("NameCompletion1");
+    GtkEntryCompletion *completionBox2 = (GtkEntryCompletion *) application->get_object("NameCompletion2");
+    GtkTreeIter iter;
+    
+    // make sure entry completion is correct
+    gtk_list_store_clear (completeModel);
+    gtk_list_store_append(completeModel, &iter);
+    gtk_entry_completion_set_text_column(completionBox1, 0);
+    gtk_entry_completion_set_text_column(completionBox2, 0);
+    
+    // add all streets
+    for(unsigned i=0 ; i< static_cast<unsigned>(getNumStreets()) ; i++){
+        
+        // convert string to char*
+        std::string str = getStreetName(i);
+        char * nameChar = new char[str.size() + 1];
+        std::copy(str.begin(), str.end(), nameChar);
+        nameChar[str.size()] = '\0';
+
+        gtk_list_store_insert(completeModel, &iter, -1);
+        gtk_list_store_set(completeModel, &iter, 0, nameChar, -1);
+    }
 }
 
 
