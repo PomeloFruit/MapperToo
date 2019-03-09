@@ -74,7 +74,6 @@ std::vector<double> segTravelTimeVector;
 //streetGrid object that stores all POIs and intersections in two 3D vector
 streetGrid streetBlock; 
 
-mapBoundary xyM;
 //========================= Function Implementations =========================
 
 /* load_map function
@@ -94,8 +93,6 @@ bool load_map(std::string path/*map_path*/) {
     //Indicates whether the map has loaded successfully
     load_successful = loadStreetsDatabaseBIN(path);
     std::cout << "Loaded: " << path << std::endl;
-    
-    xyM.initialize();
     
     if(load_successful){
         
