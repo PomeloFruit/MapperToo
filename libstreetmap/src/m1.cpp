@@ -20,6 +20,8 @@
  */
 #include "m1.h"
 #include "m2.h"
+#include "m3.h"
+#include "directionObject.h"
 #include "StreetsDatabaseAPI.h"
 #include "globals.h"
 #include "latLonToXY.h"
@@ -75,6 +77,8 @@ std::vector<double> segTravelTimeVector;
 streetGrid streetBlock; 
 
 //========================= Function Implementations =========================
+
+directionInfo dir;
 
 /* load_map function
  * - populates all appropriate data in global data structures
@@ -223,6 +227,8 @@ bool load_map(std::string path/*map_path*/) {
             intersectionSegIDVector.push_back(intersectionIds);
         }
         
+        dir.fillNodes();
+        
         //initializing the streetGrid object
         streetBlock.populateGrid();
     }    
@@ -249,6 +255,7 @@ void close_map() {
     segTravelTimeVector.clear();
     streetBlock.poiGrid.clear();
     streetBlock.intGrid.clear();
+    dir.Nodes.clear();
     closeStreetDatabase();
     closeOSMDatabase();
 }

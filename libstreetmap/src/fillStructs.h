@@ -40,6 +40,9 @@ public:
     // fills POI information
     void populatePOIInfo(infoStrucs &info);
     
+    // fills POI information
+    void populateNodes(infoStrucs &info);
+    
     // fills subway information
     void populateOSMSubwayInfo(infoStrucs &info);
     
