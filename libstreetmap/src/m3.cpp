@@ -11,6 +11,7 @@
 #include <math.h>
 #include <vector>
 #include <list>
+#include <algorithm>
 #include <queue>
 #include <string>
 #include <limits>
@@ -21,15 +22,6 @@ std::vector<unsigned> bfsPath(Node *sourceNode, const unsigned destID, const dou
 double travelTimeAdd(unsigned existingSeg, unsigned newSeg, const double rt_penalty, 
                                                     const double lt_penalty);
 std::vector<unsigned> getFinalPath(Node *currNode,unsigned start);
-
-
-//std::vector<unsigned> find_path_between_intersections(const unsigned intersect_id_start, 
-//                                                    const unsigned intersect_id_end, 
-//                                                    const double right_turn_penalty, 
-//                                                    const double left_turn_penalty){
-//    
-//    return std::vector<unsigned>();
-//}
 
 
 // Returns a path (route) between the start intersection and the end
@@ -48,150 +40,102 @@ std::vector<unsigned> find_path_between_intersections(const unsigned intersect_i
                                         const double left_turn_penalty){
     
     std::vector<unsigned> path;
-    
     Node start = dir.Nodes[intersect_id_start];
-    std::cout << "-=---3-3-3--3-3-3-33-3--3-3-3-3-3--33" << std::endl;
-    std::cout << "start " << intersect_id_start << "end" << intersect_id_end << std::endl;
-    std::cout << intersect_id_start << "  " << intersect_id_end << " " <<  compute_path_travel_time(path, right_turn_penalty, 
-                                                                    left_turn_penalty) <<  std::endl;
     path = bfsPath(&start, intersect_id_end, right_turn_penalty, left_turn_penalty);
     
     return path;
 }
 
+struct compareQ {
+    bool operator()(const waveElem &a, const waveElem &b){
+        return a.travelTime > b.travelTime;
+    }
+};
+
 std::vector<unsigned> bfsPath(Node *sourceNode, const unsigned destID, 
                                             const double rtPen, const double ltPen) {
-    std::list< waveElem > wavefront;
-
+    std::priority_queue< waveElem, std::vector<waveElem>, compareQ> wavefront;
     std::vector< unsigned > changedNodes;
-    wavefront.push_back(waveElem(NONODE, sourceNode, NOEDGE, 0));
-    int minCycles = sourceNode->outEdges.size();
-    int numCycles = 0;
-    
+    wavefront.push(waveElem(NONODE, sourceNode, NOEDGE, 0));
+  
     while(!wavefront.empty()){
-        numCycles++;
-        if(destID == 1025){
-             std::cout << "before start " << wavefront.size() << std::endl;
-        }
-        // get next intersection node
-        waveElem wave = wavefront.front();
-        wavefront.pop_front();
-        //wave.node->reachingEdge = wave.edgeID;
         
-        //std::cout << "start " << wavefront.size() << std::endl;
+        // get next intersection node
+        waveElem wave = wavefront.top();
+        wavefront.pop();
         
         Node *currNode = wave.node;
-         if(destID == 1025){
-             std::cout << currNode->id << std::endl;
-        }
-      //  std::cout << currNode->id << std::endl;
+
         // if best path from this wave or if wave is at start
         if(wave.travelTime < currNode->bestTime){
+            
             // if this was better path to node, update
-             if(destID == 1025){
-                 std::cout << "pushed " << currNode->id << " using edge " << wave.edgeID << std::endl;
-                 std::cout << "before edge " << currNode->reachingEdge << "after "<< wave.edgeID << std::endl;
-                 std::cout << "before time " << currNode->bestTime << "after "<< wave.travelTime << std::endl;
-            }
-            
-            
             currNode->reachingEdge = wave.edgeID;
             currNode->bestTime = wave.travelTime;
             if(wave.reachingNode != NONODE){
                 currNode->reachingNode = &(dir.Nodes[wave.reachingNode]);
             }
             changedNodes.push_back(currNode->id);
-        }
+            
+            // if at destination
+            if(currNode->id == destID){
                 
-        // found the end
-        if((numCycles >= minCycles) && (currNode->id == destID)){
-            // std::cout << "========================================" << std::endl;
-           // std::cout << "found " << std::endl;
-            if(destID == 1025){
-             std::cout << currNode->id << std::endl;
-        }
-            
-            std::vector<unsigned> path;
-            path = getFinalPath(currNode,sourceNode->id);
-            for(unsigned i=0 ; i<changedNodes.size() ; i++){
-                Node &temp = dir.Nodes[changedNodes[i]];
-                temp.reachingNode = NULL;
-                temp.reachingEdge = NOEDGE;
-                temp.bestTime = NOTIME;
+                //extract the path from the nodes
+                std::vector<unsigned> path;
+                path = getFinalPath(currNode,sourceNode->id);
+                
+                //reset all affected nodes values
+                for(unsigned i=0 ; i<changedNodes.size() ; i++){
+                    Node &temp = dir.Nodes[changedNodes[i]];
+                    temp.reachingNode = NULL;
+                    temp.reachingEdge = NOEDGE;
+                    temp.bestTime = NOTIME;
+                }
+                
+                return path;
             }
-            return path;
-        }
         
-        //std::cout << currNode->outEdges.size() << std::endl;
-        for(unsigned i=0 ; i < currNode->outEdges.size(); i++){
-           
-            //std::cout << "hi ";
-            
-            Node *toNode = currNode->toNodes[i];
-            unsigned toEdge = currNode->outEdges[i];
-            if(destID == 1025){
-             std::cout << wave.edgeID <<  "..to node ... " <<  currNode->toNodes[i]->id << "..to edge.." << toEdge << std::endl;
-        }
-            
+            for(unsigned i=0 ; i < currNode->outEdges.size(); i++){
+                Node *toNode = currNode->toNodes[i];
+                unsigned toEdge = currNode->outEdges[i];
+                
+                // if same segment as current
+                if(wave.edgeID == toEdge){
+                    continue;
+                }
 
-            if(wave.edgeID == toEdge){
-                //std::cout << "error " << std::endl;
-                continue;
+                double toNodeTime;
+                toNodeTime = currNode->bestTime + travelTimeAdd(wave.edgeID,toEdge,rtPen, ltPen);
+                wavefront.push(waveElem(currNode->id, toNode, toEdge, toNodeTime));
             }
-            
-            double toNodeTime;
-            toNodeTime = currNode->bestTime + travelTimeAdd(wave.edgeID,toEdge,rtPen, ltPen);
-            wavefront.push_back(waveElem(currNode->id, toNode, toEdge, toNodeTime));
-            //std::cout << "not skipped " << std::endl;
         }
-        
-       // std::cout << "end " << wavefront.size() << std::endl;
-
     }
-    std::cout << "not found" << std::endl;
     return std::vector<unsigned>();
 }
 
 std::vector<unsigned> getFinalPath(Node *currNode, unsigned start){
-   // std::cout << "====="<<std::endl;
     std::vector<unsigned> reversed;
-    //std::cout << "find path " << std::endl;
-  //  std::cout << getIntersectionName(currNode->id) << std::endl;
+   
     while(currNode!=NULL){
         if(currNode->reachingEdge != NOEDGE){
             reversed.push_back(currNode->reachingEdge);
-            
-            if(getInfoStreetSegment(currNode->reachingEdge).oneWay){
-                ///std::cout << "wowowowieeee" <<std::endl;
-            }
-            
-            
-            if(reversed.size() < 100){
 
-                std::cout << "from " << getInfoStreetSegment(currNode->reachingEdge).from << 
-                        "to " << getInfoStreetSegment(currNode->reachingEdge).to <<
-                        " using " << currNode->reachingEdge << std::endl;
-            }
-            if(getInfoStreetSegment(currNode->reachingEdge).to == start || getInfoStreetSegment(currNode->reachingEdge).from == start){
-                std::cout << "reached finish" <<std::endl;
+            if(getInfoStreetSegment(currNode->reachingEdge).to == start || 
+                    getInfoStreetSegment(currNode->reachingEdge).from == start){
                 break;
             }
         }
         
 
-       // std::cout << "taking seg " << currNode->reachingEdge << ".to get to ." << currNode->id << std::endl;
         currNode = currNode->reachingNode;
-        if(currNode != NULL){
-      //      std::cout << "====taking seg " << currNode->reachingEdge << ".to get to ." << currNode->id << std::endl;
-        }
     }
-    //std::cout << "completed" << reversed.size() << std::endl;
-    std::vector<unsigned> proper;
+
+    std::vector<unsigned> properOrder;
+    
     for(int i=reversed.size()-1; i>=0; i--){
-        proper.push_back(reversed[i]);
-      //  std::cout << reversed[i] << std::endl;
+        properOrder.push_back(reversed[i]);
     }
-    return proper;
+    return properOrder;
 }
 
 
