@@ -17,11 +17,17 @@
 #include <limits>
 #include <iostream>
 
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!double angleSegs;
+
 std::vector<unsigned> bfsPath(Node *sourceNode, const unsigned destID, const double rtPen, const double ltPen);
 
 double travelTimeAdd(unsigned existingSeg, unsigned newSeg, const double rt_penalty, 
                                                     const double lt_penalty);
 std::vector<unsigned> getFinalPath(Node *currNode,unsigned start);
+
+std::vector<std::string> pathToWords(std::vector<unsigned> path);
+
+
 
 
 // Returns a path (route) between the start intersection and the end
@@ -42,7 +48,6 @@ std::vector<unsigned> find_path_between_intersections(const unsigned intersect_i
     std::vector<unsigned> path;
     Node start = dir.Nodes[intersect_id_start];
     path = bfsPath(&start, intersect_id_end, right_turn_penalty, left_turn_penalty);
-    
     return path;
 }
 
@@ -239,6 +244,7 @@ TurnType find_turn_type(unsigned street_segment1, unsigned street_segment2){
     aAngle = atan2(aYSeg,aXSeg);
     bAngle = atan2(bYSeg,bXSeg);
     dAngle = aAngle - bAngle;
+
     
     // if turn angle -PI < dAngle < 0 or if dAngle > PI
     if((dAngle < 0 && dAngle > -M_PI)|| dAngle > M_PI){ 
@@ -286,3 +292,136 @@ double travelTimeAdd(unsigned existingSeg, unsigned newSeg, const double rt_pena
     
     return time;
 }
+
+
+//for now I'm just going to make dAngle a global since I don't really want to write a shitload of new code for shit
+//but that means when I push this the code here will not work because I'm going to un-make it a global
+//as I think it would be better to consult the team on what to do in this situation
+//it seems prudent to split that turn function into maybe 2 anyways
+//but I'm not just gonna do that without asking everyone
+//fuck even this should be split
+/*
+std::vector<std::string> pathToWords(std::vector<unsigned> path){
+    std::vector<std::string> theGospel;
+    if(path.size()==0){
+        std::cout<<"NO PATH FOUND"<<'\n';
+        return theGospel;
+    }
+    const double NOTURN=0.174533;
+    const double SMALLTURN=0.698132;
+    int distance=find_street_segment_length(path[0]);//showing people doubles looks bad
+    InfoStreetSegment segInfoPrev;
+    InfoStreetSegment segInfoCur;
+    std::string toBeInserted="";
+    if(path.size()>1){
+        for(int i=1;i<path.size();i++){
+            std::string toBeInserted="";
+            segInfoPrev = getInfoStreetSegment(path[i-1]);
+            segInfoCur = getInfoStreetSegment(path[i]);
+//            std::cout<<"GETTING NAMES"<<'\n';
+//////////////////////            std::string newStreetName=getStreetName(segInfoCur.streetID);
+//////////////////////            std::string oldStreetName=getStreetName(segInfoPrev.streetID);
+//            std::cout<<"GOT NAMES"<<'\n';
+            std::string newStreetName="gee";
+            std::string oldStreetName="whiz";
+            //if I make a turn:
+            if(segInfoPrev.streetID!=segInfoCur.streetID){
+                if(distance<=1){
+                    TurnType turn=find_turn_type(path[i-1], path[i]);
+                    //I know the turn type and the abs angle
+                    if(angleSegs>M_PI){
+                        angleSegs=angleSegs-M_PI;
+                    }
+
+                    if(angleSegs<NOTURN){
+                        toBeInserted="Continue straight onto "+newStreetName;
+                        theGospel.push_back(toBeInserted);
+                        toBeInserted="";
+                    }
+                    else if(angleSegs<SMALLTURN){
+                        if(turn==TurnType::RIGHT){
+                            toBeInserted="Slight right onto "+newStreetName;
+                            theGospel.push_back(toBeInserted);
+                            toBeInserted="";
+                        }
+                        else{
+                            toBeInserted="Slight left onto "+newStreetName;
+                            theGospel.push_back(toBeInserted);
+                            toBeInserted="";
+                        }
+                    }
+                    else{
+                        if(turn==TurnType::RIGHT){
+                            toBeInserted="Right onto "+newStreetName;
+                            theGospel.push_back(toBeInserted);
+                            toBeInserted="";
+                        }
+                        else{
+                            toBeInserted="Left onto "+newStreetName;
+                            theGospel.push_back(toBeInserted);
+                            toBeInserted="";
+                        }
+                    }  
+                }
+                else{
+                    toBeInserted="Go straight "+std::to_string(distance)+" meters on "+oldStreetName;
+                    theGospel.push_back(toBeInserted);
+                    toBeInserted="";
+                    TurnType turn=find_turn_type(path[i-1], path[i]);
+                    //I know the turn type and the abs angle
+                    if(angleSegs>M_PI){
+                        angleSegs=angleSegs-M_PI;
+                    }
+
+                    if(angleSegs<NOTURN){
+                        toBeInserted="Continue straight onto "+newStreetName;
+                        theGospel.push_back(toBeInserted);
+                        toBeInserted="";
+                    }
+                    else if(angleSegs<SMALLTURN){
+                        if(turn==TurnType::RIGHT){
+                            toBeInserted="Slight right onto "+newStreetName;
+                            theGospel.push_back(toBeInserted);
+                            toBeInserted="";
+                        }
+                        else{
+                            toBeInserted="Slight left onto "+newStreetName;
+                            theGospel.push_back(toBeInserted);
+                            toBeInserted="";
+                        }
+                    }
+                    else{
+                        if(turn==TurnType::RIGHT){
+                            toBeInserted="Right onto "+newStreetName;
+                            theGospel.push_back(toBeInserted);
+                            toBeInserted="";
+                        }
+                        else{
+                            toBeInserted="Left onto "+newStreetName;
+                            theGospel.push_back(toBeInserted);
+                            toBeInserted="";
+                        }
+                    }
+                }
+            }
+            else{
+                distance=distance+find_street_segment_length(path[i]);
+            }
+        }
+    }
+    else{
+        toBeInserted="Go straight "+std::to_string(distance)+" meters on "+"AHH I NEED HELP HERE";
+        theGospel.push_back(toBeInserted);
+    }
+        
+//    std::cout<<"PRINTING NAMES"<<'\n';
+    for(int i=0;i<theGospel.size();i++){
+        std::string toBePrinted=theGospel[i]+'\n';
+        std::cout<<toBePrinted;
+    }
+    std::cout<<"DONE"<<'\n';
+    
+    return theGospel;
+    //////////////////////    angleSegs=abs(dAngle);
+}
+*/

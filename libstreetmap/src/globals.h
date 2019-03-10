@@ -155,6 +155,6 @@ public:
     int poiButtonStatus [4];
     
     // initiates sicko mode
-    int initiateSicko; 
+    int initiateSicko;
 };
 
