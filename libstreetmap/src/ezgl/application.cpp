@@ -34,7 +34,12 @@ void application::activate(GtkApplication *, gpointer user_data)
   // The main parent window needs to be explicitly added to our GTK application.
   GObject *window = ezgl_app->get_object(ezgl_app->m_window_id.c_str());
   gtk_application_add_window(ezgl_app->m_application, GTK_WINDOW(window));
-
+  
+  // Reads from the CSS Style Sheet 
+  GtkCssProvider *cssProvider = gtk_css_provider_new ();
+  gtk_css_provider_load_from_path(cssProvider,"style.css",NULL);
+  gtk_style_context_add_provider_for_screen(gdk_screen_get_default(), GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
+  
   if(ezgl_app->m_register_callbacks != nullptr) {
     ezgl_app->m_register_callbacks(ezgl_app);
   } else {
