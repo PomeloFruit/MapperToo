@@ -415,7 +415,7 @@ void dialog_box(GtkWidget *widget, ezgl::application *application, std::string m
     content_area = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
     label = gtk_label_new(message.c_str());
     gtk_container_add(GTK_CONTAINER(content_area), label);
-    
+       
     // The main purpose of this is to show dialog’s child widget, label
     gtk_widget_show_all(dialog);
     
