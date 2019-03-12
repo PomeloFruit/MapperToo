@@ -11,7 +11,7 @@ waveElem::waveElem(unsigned from, Node* source, unsigned id, double time){
     reachingNode = from;
 }
 
-void directionInfo::fillNodes(){
+void DirectionInfo::fillNodes(){
     int numOfIntersections = getNumIntersections();
     Nodes.resize(numOfIntersections);
     
@@ -25,7 +25,7 @@ void directionInfo::fillNodes(){
     connectNodes();
 }
 
-void directionInfo::connectNodes(){
+void DirectionInfo::connectNodes(){
     int numOfIntersections = getNumIntersections();
     
     for(int i=0 ; i<numOfIntersections ; i++){

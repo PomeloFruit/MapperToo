@@ -6,7 +6,6 @@
 #include "latLonToXY.h"
 #include "StreetsDatabaseAPI.h"
 #include "directionInfo.h"
-#include "directionObject.h"
 
 #include <math.h>
 #include <vector>
@@ -17,12 +16,17 @@
 #include <limits>
 #include <iostream>
 
-//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!double angleSegs;
+#define NOINTERSECTION -100
+#define SAMESTREET -99
 
 std::vector<unsigned> bfsPath(Node *sourceNode, const unsigned destID, const double rtPen, const double ltPen);
 
-double travelTimeAdd(unsigned existingSeg, unsigned newSeg, const double rt_penalty, 
-                                                    const double lt_penalty);
+double travelTimeAdd(unsigned existingSeg, unsigned newSeg, const double rt_penalty, const double lt_penalty);
+
+double findAngleBetweenSegs(unsigned street_segment1, unsigned street_segment2);
+
+double findAngleBetweenThreePoints(LatLon ptFrom, LatLon ptCommon, LatLon ptTo);
+
 std::vector<unsigned> getFinalPath(Node *currNode,unsigned start);
 
 std::vector<std::string> pathToWords(std::vector<unsigned> path);
@@ -46,7 +50,7 @@ std::vector<unsigned> find_path_between_intersections(const unsigned intersect_i
                                         const double left_turn_penalty){
     
     std::vector<unsigned> path;
-    Node start = dir.Nodes[intersect_id_start];
+    Node start = Dir.Nodes[intersect_id_start];
     path = bfsPath(&start, intersect_id_end, right_turn_penalty, left_turn_penalty);
     return path;
 }
@@ -77,8 +81,8 @@ std::vector<unsigned> bfsPath(Node *sourceNode, const unsigned destID,
             // if this was better path to node, update
             currNode->reachingEdge = wave.edgeID;
             currNode->bestTime = wave.travelTime;
-            if(wave.reachingNode != NONODE){
-                currNode->reachingNode = &(dir.Nodes[wave.reachingNode]);
+            if(static_cast<int> (wave.reachingNode) != NONODE){
+                currNode->reachingNode = &(Dir.Nodes[wave.reachingNode]);
             }
             changedNodes.push_back(currNode->id);
             
@@ -91,7 +95,7 @@ std::vector<unsigned> bfsPath(Node *sourceNode, const unsigned destID,
                 
                 //reset all affected nodes values
                 for(unsigned i=0 ; i<changedNodes.size() ; i++){
-                    Node &temp = dir.Nodes[changedNodes[i]];
+                    Node &temp = Dir.Nodes[changedNodes[i]];
                     temp.reachingNode = NULL;
                     temp.reachingEdge = NOEDGE;
                     temp.bestTime = NOTIME;
@@ -122,11 +126,11 @@ std::vector<unsigned> getFinalPath(Node *currNode, unsigned start){
     std::vector<unsigned> reversed;
    
     while(currNode!=NULL){
-        if(currNode->reachingEdge != NOEDGE){
+        if(static_cast<int> (currNode->reachingEdge) != NOEDGE){
             reversed.push_back(currNode->reachingEdge);
 
-            if(getInfoStreetSegment(currNode->reachingEdge).to == start || 
-                    getInfoStreetSegment(currNode->reachingEdge).from == start){
+            if(static_cast<unsigned>(getInfoStreetSegment(currNode->reachingEdge).to) == start || 
+                    static_cast<unsigned>(getInfoStreetSegment(currNode->reachingEdge).from) == start){
                 break;
             }
         }
@@ -150,12 +154,28 @@ std::vector<unsigned> getFinalPath(Node *currNode, unsigned start){
 // ==================================================================================================================
 
 TurnType find_turn_type(unsigned street_segment1, unsigned street_segment2){
+   
+    double angle = findAngleBetweenSegs(street_segment1, street_segment2);
+    
+    // if turn angle -PI < dAngle < 0 or if dAngle > PI
+    if(angle == SAMESTREET){
+        return TurnType::STRAIGHT;        
+    } else if(angle == NOINTERSECTION){
+        return TurnType::NONE;     
+    } else if((angle < 0 && angle > -M_PI)|| angle > M_PI){ 
+        return TurnType::LEFT;
+    } else {
+        return TurnType::RIGHT;
+    }
+}
+
+double findAngleBetweenSegs(unsigned street_segment1, unsigned street_segment2){
     InfoStreetSegment segInfo1, segInfo2;
     segInfo1 = getInfoStreetSegment(street_segment1);
     segInfo2 = getInfoStreetSegment(street_segment2);
     
     if(segInfo1.streetID == segInfo2.streetID){
-        return TurnType::STRAIGHT;        
+        return SAMESTREET;     
     }
     
     int numCurvePts1, numCurvePts2;
@@ -229,10 +249,14 @@ TurnType find_turn_type(unsigned street_segment1, unsigned street_segment2){
         }
         
     } else { // no intersections common
-        return TurnType::NONE;
+        return NOINTERSECTION;
     }
     
-    double aAngle, bAngle, dAngle;
+    return findAngleBetweenThreePoints(ptFrom, ptCommon, ptTo);    
+}
+
+double findAngleBetweenThreePoints(LatLon ptFrom, LatLon ptCommon, LatLon ptTo){
+    double aAngle, bAngle, cAngle;
     double aXSeg, aYSeg, bXSeg, bYSeg;
 
     aXSeg = ptCommon.lon() - ptFrom.lon();
@@ -243,17 +267,10 @@ TurnType find_turn_type(unsigned street_segment1, unsigned street_segment2){
     // calculate angle of entrance seg, exit seg, and find difference
     aAngle = atan2(aYSeg,aXSeg);
     bAngle = atan2(bYSeg,bXSeg);
-    dAngle = aAngle - bAngle;
-
+    cAngle = aAngle - bAngle;
     
-    // if turn angle -PI < dAngle < 0 or if dAngle > PI
-    if((dAngle < 0 && dAngle > -M_PI)|| dAngle > M_PI){ 
-        return TurnType::LEFT;
-    } else {
-        return TurnType::RIGHT;
-    }
+    return cAngle;
 }
-
 
 double compute_path_travel_time(const std::vector<unsigned>& path, const double right_turn_penalty, 
                                                                     const double left_turn_penalty){
@@ -279,7 +296,7 @@ double travelTimeAdd(unsigned existingSeg, unsigned newSeg, const double rt_pena
                                                     const double lt_penalty){
     double time = 0;
     
-    if(existingSeg != NOEDGE){
+    if(static_cast<int>(existingSeg) != NOEDGE){
         TurnType turn = find_turn_type(existingSeg, newSeg);
         if(turn == TurnType::RIGHT){
             time = rt_penalty;
