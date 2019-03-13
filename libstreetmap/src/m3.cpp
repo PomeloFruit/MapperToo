@@ -27,6 +27,8 @@ double findAngleBetweenSegs(unsigned street_segment1, unsigned street_segment2);
 
 double findAngleBetweenThreePoints(LatLon ptFrom, LatLon ptCommon, LatLon ptTo);
 
+double getNewScore(double totDist, unsigned newPoint, LatLon end, double time);
+
 std::vector<unsigned> getFinalPath(Node *currNode,unsigned start);
 
 std::vector<std::string> pathToWords(std::vector<unsigned> path);
@@ -61,11 +63,21 @@ struct compareQ {
     }
 };
 
+struct compareP {
+    bool operator()(const waveElem &a, const waveElem &b){
+        return a.score > b.score;
+    }
+};
+
 std::vector<unsigned> bfsPath(Node *sourceNode, const unsigned destID, 
                                             const double rtPen, const double ltPen) {
-    std::priority_queue< waveElem, std::vector<waveElem>, compareQ> wavefront;
+    std::priority_queue< waveElem, std::vector<waveElem>, compareP> wavefront;
     std::vector< unsigned > changedNodes;
-    wavefront.push(waveElem(NONODE, sourceNode, NOEDGE, 0));
+    wavefront.push(waveElem(NONODE, sourceNode, NOEDGE, 0, 0));
+    
+   LatLon start = Dir.intersectionPos[sourceNode->id];
+    LatLon end = Dir.intersectionPos[destID];
+    double startEndDistance = find_distance_between_two_points(start, end);
   
     while(!wavefront.empty()){
         
@@ -75,12 +87,14 @@ std::vector<unsigned> bfsPath(Node *sourceNode, const unsigned destID,
         
         Node *currNode = wave.node;
 
-        // if best path from this wave or if wave is at start
+        // if best path from this wave
         if(wave.travelTime < currNode->bestTime){
+        //if(wave.score < currNode->bestScore){
             
             // if this was better path to node, update
             currNode->reachingEdge = wave.edgeID;
             currNode->bestTime = wave.travelTime;
+            //currNode->bestScore = wave.score;
             if(static_cast<int> (wave.reachingNode) != NONODE){
                 currNode->reachingNode = &(Dir.Nodes[wave.reachingNode]);
             }
@@ -99,6 +113,7 @@ std::vector<unsigned> bfsPath(Node *sourceNode, const unsigned destID,
                     temp.reachingNode = NULL;
                     temp.reachingEdge = NOEDGE;
                     temp.bestTime = NOTIME;
+                    //temp.bestScore = NOSCORE;
                 }
                 
                 return path;
@@ -114,12 +129,32 @@ std::vector<unsigned> bfsPath(Node *sourceNode, const unsigned destID,
                 }
 
                 double toNodeTime;
+                double score;
                 toNodeTime = currNode->bestTime + travelTimeAdd(wave.edgeID,toEdge,rtPen, ltPen);
-                wavefront.push(waveElem(currNode->id, toNode, toEdge, toNodeTime));
+                score = getNewScore(startEndDistance, toNode->id, end, toNodeTime);
+                wavefront.push(waveElem(currNode->id, toNode, toEdge, toNodeTime, score));
             }
         }
     }
     return std::vector<unsigned>();
+}
+
+double getNewScore(double totDist, unsigned newPoint, LatLon end, double time){
+   // const double KMHEST = 100; //
+  //  const double KMSEST = 36; // 3600 / KMHEST;
+    const double MSEST = 0.036; // KMSEST * 0.001;
+
+    LatLon start = Dir.intersectionPos[newPoint];
+        
+    double pointToEndDistance = find_distance_between_two_points(start, end);
+    
+    double remainingDist = pointToEndDistance;
+    
+    double estTimeToDest = remainingDist*MSEST;
+    
+    double score = time + estTimeToDest;
+    
+    return score;
 }
 
 std::vector<unsigned> getFinalPath(Node *currNode, unsigned start){
@@ -134,7 +169,6 @@ std::vector<unsigned> getFinalPath(Node *currNode, unsigned start){
                 break;
             }
         }
-        
 
         currNode = currNode->reachingNode;
     }

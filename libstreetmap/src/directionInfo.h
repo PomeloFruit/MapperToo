@@ -1,10 +1,12 @@
 #pragma once
 #include <vector>
 #include <string>
+#include "LatLon.h"
 
 #define NONODE -1
 #define NOEDGE -1
 #define NOTIME 9999999999
+#define NOSCORE 9999999999
 
 struct Node {
     std::vector< Node* > toNodes;
@@ -15,6 +17,7 @@ struct Node {
     unsigned reachingEdge;
 
     double bestTime;
+    double bestScore;
 };
 
 struct waveElem {
@@ -22,13 +25,15 @@ struct waveElem {
     Node *node;
     unsigned edgeID;
     double travelTime;
+    double score;
     
-    waveElem(unsigned from, Node* source, unsigned id, double time);
+    waveElem(unsigned from, Node* source, unsigned id, double time, double score);
 };
 
 class DirectionInfo {
 public:
     std::vector< Node > Nodes;
+    std::vector< LatLon > intersectionPos;
     
     void fillNodes();
     void connectNodes();

@@ -2,24 +2,29 @@
 
 #include "StreetsDatabaseAPI.h"
 #include "m1.h"
+#include "LatLon.h"
 #include <vector>
 
-waveElem::waveElem(unsigned from, Node* source, unsigned id, double time){
+waveElem::waveElem(unsigned from, Node* source, unsigned id, double time, double scoreIn){
     node = source;
     edgeID = id;
     travelTime = time;
     reachingNode = from;
+    score = scoreIn;
 }
 
 void DirectionInfo::fillNodes(){
     int numOfIntersections = getNumIntersections();
     Nodes.resize(numOfIntersections);
+    intersectionPos.resize(numOfIntersections);
     
     for(int i=0 ; i<numOfIntersections ; i++){
         Nodes[i].reachingNode = NULL;
         Nodes[i].reachingEdge = NOEDGE;
         Nodes[i].bestTime = NOTIME;
         Nodes[i].id = i;
+        Nodes[i].bestScore = NOSCORE;
+        intersectionPos[i] = getIntersectionPosition(i);
     }
     
     connectNodes();
