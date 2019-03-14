@@ -36,23 +36,23 @@ void roadDrawing::setRoadColourSize(infoStrucs &info, int type, bool highlight, 
                 break;
             case TRUNK:
                 width = PRIMWIDTH + adjustingAdd;
-                g.set_color(255, 101, 0, 170);
+                g.set_color(255, 101, 0, 255);
                 break;
             case PRIMARY: // white and thick
                 width = PRIMWIDTH + adjustingAdd;
-                g.set_color(255, 101, 0, 170);
+                g.set_color(255, 101, 0, 255);
                 break;
             case SECONDARY:
                 width = SECONDARYWIDTH + adjustingAdd;
-                g.set_color(255, 101, 0, 170);
+                g.set_color(255, 101, 0, 255);
                 break;
             case RESIDENTIAL:
                 width = adjustingAdd;
-                g.set_color(255, 101, 0, 170);
+                g.set_color(255, 101, 0, 255);
                 break;
             case SERVICE:
                 width = adjustingAdd;
-                g.set_color(255, 101, 0, 170);
+                g.set_color(255, 101, 0, 255);
                 break;
             default:
                 break;
