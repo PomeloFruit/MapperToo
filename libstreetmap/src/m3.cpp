@@ -80,10 +80,12 @@ struct compareScore {
  * 
  * @return path <std::vector<unsigned>> - the ordered set of street segment ids making
  *                                        up the fastest path between start and end (if exists)
- *                                      - blank vector if no path possible
  */
 
 std::vector<unsigned> getPath(Node *sourceNode, const unsigned destID, const double rtPen, const double ltPen) {
+    std::vector<unsigned> path;
+    path.clear();
+    
     std::priority_queue< waveElem, std::vector<waveElem>, compareScore> wavefront;
     std::vector< unsigned > changedNodes;
     wavefront.push(waveElem(NONODE, sourceNode, NOEDGE, 0, 0));
@@ -110,22 +112,12 @@ std::vector<unsigned> getPath(Node *sourceNode, const unsigned destID, const dou
             }
             changedNodes.push_back(currNode->id);
             
-            // if at destination
+            // if at destination, get the path and exit loop
             if(currNode->id == destID){
                 
                 //extract the path from the nodes
-                std::vector<unsigned> path;
                 path = getFinalPath(currNode,sourceNode->id);
-                
-                //reset all affected nodes values
-                for(unsigned i=0 ; i<changedNodes.size() ; i++){
-                    Node &temp = Dir.Nodes[changedNodes[i]];
-                    temp.reachingNode = NULL;
-                    temp.reachingEdge = NOEDGE;
-                    temp.bestTime = NOTIME;
-                }
-                
-                return path;
+                break;
             }
         
             // add all nodes that can be reached to wavefront
@@ -149,8 +141,15 @@ std::vector<unsigned> getPath(Node *sourceNode, const unsigned destID, const dou
         }
     }
     
-    // if nothing found, return empty vector
-    return std::vector<unsigned>();
+    //reset all affected nodes values
+    for(unsigned i=0 ; i<changedNodes.size() ; i++){
+        Node &temp = Dir.Nodes[changedNodes[i]];
+        temp.reachingNode = NULL;
+        temp.reachingEdge = NOEDGE;
+        temp.bestTime = NOTIME;
+    }
+
+    return path;
 }
 
 

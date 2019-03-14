@@ -43,7 +43,6 @@ void DirectionInfo::fillNodes(){
         Nodes[i].reachingEdge = NOEDGE;
         Nodes[i].bestTime = NOTIME;
         Nodes[i].id = i;
-        Nodes[i].bestScore = NOSCORE;
         intersectionPos[i] = getIntersectionPosition(i);
     }
     

@@ -4,10 +4,12 @@
 #include "ezgl/application.hpp"
 #include "m1.h"
 #include "m2.h"
+#include "m3.h"
 #include "LatLon.h"
 #include "globals.h"
 #include "latLonToXY.h"
 #include <string>
+#include <iostream>
 
 const int RESULTNONE = 0; 
 const int RESULTEMPTY = -1;
@@ -136,9 +138,11 @@ std::string clickActions::clickedOnSubway(double x, double y, mapBoundary &xy, i
 
 std::string clickActions::searchOnMap(infoStrucs &info){
     std::string displayMessage;
-    std::vector<unsigned> street1ID, street2ID, resultID;
+    std::vector<unsigned> street1ID, street2ID, street3ID, street4ID, resultID, resultID2;
     int match1 = 0;
     int match2 = 0;
+    int match3 = 0;
+    int match4 = 0;
     unsigned correct1 = 0;
     unsigned correct2 = 0;
     int start = 0;
@@ -149,174 +153,275 @@ std::string clickActions::searchOnMap(infoStrucs &info){
     match1 = findMatches(street1ID, info.textInput1, info);
     match2 = findMatches(street2ID, info.textInput2, info);
     
+    
     // reset correct input output names to blank
     info.corInput1 = "";
     info.corInput2 = "";
     
-    // if inputs are invalid, get the error message
-    displayMessage = getMessagesFromMatches(match1, match2);
-
-    // find intersections, both inputs have at least one matching name
-    if((match1 > RESULTNONE) && (match2 > RESULTNONE)){
+    if(info.findDirections){
+        
+//        info.corInput3 = "";
+//        info.corInput4 = "";
+        std::string street1, street2;
+        street1 = "Beverley Glen Boulevard";
+        street2 = "Stonebridge Boulevard";
+        std::cout << "Enter name of street 3 ";
+        std::cout << street1 << std::endl;
+        std::cout << "Enter name of street 4 ";
+        std::cout << street2 << std::endl;
+        
+        match3 = findMatches(street3ID, street1, info);//info.textInput3, info);
+        match4 = findMatches(street4ID, street2, info);//info.textInput4, info);
+        
+        std::vector<unsigned> temp;        
+        
+        std::cout << " finding intersection from "<< std::endl;
+        
         for(unsigned i=0 ; i<street1ID.size() ; i++){
             for(unsigned j=0 ; j<street2ID.size() ; j++){
-                
-                std::vector<unsigned> temp;
                 temp = find_intersection_ids_from_street_ids(street1ID[i], street2ID[j]);
-               
+
                 for(unsigned k=0 ; k<temp.size() ; k++){
-                    
+
                     bool found = false;
-                    
+
                     // look for duplicates
                     for(unsigned l=0 ; l<resultID.size() ; l++){
                         if(resultID[l] == temp[k]){
                             found = true;
+                            std::cout << " found intersection from "<< std::endl;
                         }
                     }
-                    
+
                     // save the index of the intersection so we can fill in the full street name later
                     if(!found){
-                        correct1 = i;
-                        correct2 = j;
                         resultID.push_back(temp[k]);
                     }
-                    
+
                 }
-                
             }
         }
         
+        std::cout << " finding intersection to "<< std::endl;
+        
+        for(unsigned i=0 ; i<street3ID.size() ; i++){
+            for(unsigned j=0 ; j<street4ID.size() ; j++){
+                temp = find_intersection_ids_from_street_ids(street3ID[i],street4ID[j]);
+
+                for(unsigned k=0 ; k<temp.size() ; k++){
+
+                    bool found = false;
+
+                    // look for duplicates
+                    for(unsigned l=0 ; l<resultID2.size() ; l++){
+                        if(resultID2[l] == temp[k]){
+                            found = true;
+                            std::cout << " found intersection to "<< std::endl;
+                        }
+                    }
+
+                    // save the index of the intersection so we can fill in the full street name later
+                    if(!found){
+                        resultID2.push_back(temp[k]);
+                    }
+
+                }
+
+            }
+        }
+        
+        std::cout << "finding a path" << std::endl;
+        
         if(resultID.size() > 0){ // if intersection found
+            
+            std::cout << "finding a path part 1" << std::endl;
+            
+            std::vector<unsigned> path;
+            path = find_path_between_intersections(resultID[0], resultID2[0], 0, 0);
+            double travelTime = compute_path_travel_time(path, 0, 0);
+            for(int i=0 ; i<path.size() ; i++){
+                std::cout << path[i] << std::endl;
+            }
+            std::cout << "travel time = " << travelTime << std::endl;
+            
+            
+            clearPreviousHighlights(info);
 
-            // add full name of streets into search field
-            info.corInput1=getStreetName(street1ID[correct1]);
-            info.corInput2=getStreetName(street2ID[correct2]);
+            for(unsigned i=0 ; i<path.size() ; i++){
+                info.StreetSegInfo[path[i]].clicked = true;
+            }
 
-            // call for the intersection to be highlighted
-            highlightIntersection(info, resultID[0]);
+            info.lastSeg = path;
+        } 
 
-            // create a message about the intersection found
-            displayMessage = "Intersection(s) Found: ";
-            displayMessage += getIntersectionName(resultID[0]);
+     //   info.findDirections = false;
+        
+    } else {    
+        // if inputs are invalid, get the error message
+        displayMessage = getMessagesFromMatches(match1, match2);
+
+        // find intersections, both inputs have at least one matching name
+        if((match1 > RESULTNONE) && (match2 > RESULTNONE)){
+            for(unsigned i=0 ; i<street1ID.size() ; i++){
+                for(unsigned j=0 ; j<street2ID.size() ; j++){
+
+                    std::vector<unsigned> temp;
+                    temp = find_intersection_ids_from_street_ids(street1ID[i], street2ID[j]);
+
+                    for(unsigned k=0 ; k<temp.size() ; k++){
+
+                        bool found = false;
+
+                        // look for duplicates
+                        for(unsigned l=0 ; l<resultID.size() ; l++){
+                            if(resultID[l] == temp[k]){
+                                found = true;
+                            }
+                        }
+
+                        // save the index of the intersection so we can fill in the full street name later
+                        if(!found){
+                            correct1 = i;
+                            correct2 = j;
+                            resultID.push_back(temp[k]);
+                        }
+
+                    }
+
+                }
+            }
+
+            if(resultID.size() > 0){ // if intersection found
+
+                // add full name of streets into search field
+                info.corInput1=getStreetName(street1ID[correct1]);
+                info.corInput2=getStreetName(street2ID[correct2]);
+
+                // call for the intersection to be highlighted
+                highlightIntersection(info, resultID[0]);
+
+                // create a message about the intersection found
+                displayMessage = "Intersection(s) Found: ";
+                displayMessage += getIntersectionName(resultID[0]);
+                if(resultID.size()>1){
+                    displayMessage += " (Displaying 1 of " + std::to_string(resultID.size()) + " found)"; 
+                }
+
+                std::cout << "Intersection search result(s):" << std::endl;
+
+                for(unsigned i=0 ; i<resultID.size() ; i++){
+                    std::cout << "(" << (i+1) << " of " << std::to_string(resultID.size()) << " found) "; 
+                    std::cout << getIntersectionName(resultID[i]) << std::endl;
+                }
+
+            } else { // no intersection found
+                displayMessage = "No intersections found.";
+                std::cout << displayMessage << std::endl;
+            }
+
+        // find street from input 1
+        } else if(match1 > RESULTNONE) { 
+            resultID = street1ID;
+
+            displayMessage = "Street Found: ";
+            displayMessage += getStreetName(resultID[0]);
             if(resultID.size()>1){
                 displayMessage += " (Displaying 1 of " + std::to_string(resultID.size()) + " found)"; 
             }
-            
-            std::cout << "Intersection search result(s):" << std::endl;
-            
+
+            info.corInput1 = getStreetName(resultID[0]);
+
+            // if multiple results, tell user which option they are seeing
+
+            std::cout << "Street search result(s):" << std::endl;
+
             for(unsigned i=0 ; i<resultID.size() ; i++){
                 std::cout << "(" << (i+1) << " of " << std::to_string(resultID.size()) << " found) "; 
-                std::cout << getIntersectionName(resultID[i]) << std::endl;
+                std::cout << getStreetName(resultID[i]) << std::endl;
             }
-            
-        } else { // no intersection found
-            displayMessage = "No intersections found.";
-            std::cout << displayMessage << std::endl;
-        }
-    
-    // find street from input 1
-    } else if(match1 > RESULTNONE) { 
-        resultID = street1ID;
-        
-        displayMessage = "Street Found: ";
-        displayMessage += getStreetName(resultID[0]);
-        if(resultID.size()>1){
-            displayMessage += " (Displaying 1 of " + std::to_string(resultID.size()) + " found)"; 
-        }
-        
-        info.corInput1 = getStreetName(resultID[0]);
-                
-        // if multiple results, tell user which option they are seeing
-        
-        std::cout << "Street search result(s):" << std::endl;
-            
-        for(unsigned i=0 ; i<resultID.size() ; i++){
-            std::cout << "(" << (i+1) << " of " << std::to_string(resultID.size()) << " found) "; 
-            std::cout << getStreetName(resultID[i]) << std::endl;
-        }
-        
-        highlightStreet(info, resultID[0]);
 
-    // find street from input 2
-    } else if(match2 > RESULTNONE) { 
-        resultID = street2ID;
-        displayMessage = "Street Found: ";
-        displayMessage += getStreetName(resultID[0]);
-        info.corInput2 = getStreetName(resultID[0]);
-        
-        if(resultID.size()>1){
-            displayMessage += " (Displaying 1 of " + std::to_string(resultID.size()) + " found)"; 
+            highlightStreet(info, resultID[0]);
+
+        // find street from input 2
+        } else if(match2 > RESULTNONE) { 
+            resultID = street2ID;
+            displayMessage = "Street Found: ";
+            displayMessage += getStreetName(resultID[0]);
+            info.corInput2 = getStreetName(resultID[0]);
+
+            if(resultID.size()>1){
+                displayMessage += " (Displaying 1 of " + std::to_string(resultID.size()) + " found)"; 
+            }
+
+            std::cout << "Street 2 search result(s):" << std::endl;
+
+            for(unsigned i=0 ; i<resultID.size() ; i++){
+                std::cout << "(" << (i+1) << " of " << std::to_string(resultID.size()) << " found) " ; 
+                std::cout << getStreetName(resultID[i]) << std::endl;
+            }
+
+            highlightStreet(info, resultID[0]);
+
+        // find POI from input 1
+        } else if(match1 == RESULTPOI) { 
+            resultID = street1ID;
+
+            displayMessage = "Point of Interest Found: ";
+            displayMessage += info.POIInfo[resultID[start]].name;
+            info.corInput1 = info.POIInfo[resultID[start]].name;
+
+            if((resultID.size()-start)>1){
+                displayMessage += " (Displaying 1 of " + std::to_string(resultID.size()-start) + " found)"; 
+            }
+
+            std::cout << "Point of Interest search result(s):" << std::endl;
+
+            for(unsigned i=start ; i<resultID.size() ; i++){
+                std::cout << "(" << (i-start+1) << " of " << std::to_string(resultID.size()-start) << " found) " ; 
+                std::cout << info.POIInfo[resultID[i]].name << std::endl;
+            }
+
+            highlightPOI(info, resultID[start]);
+
+        // find subway station from input 1
+        } else if(match1 == RESULTSUBWAY) { 
+            resultID = street1ID;
+
+            displayMessage = "Subway Found: ";
+            displayMessage += info.SubwayInfo[resultID[start]].name;
+            info.corInput1 = info.SubwayInfo[resultID[start]].name;
+            std::cout<<"Updated corInput1"<<std::endl;
+
+            if((resultID.size()-start)>1){
+                displayMessage += " (Displaying 1 of " + std::to_string(resultID.size()-start) + " found)"; 
+            }
+            for(unsigned i=start ; i<resultID.size() ; i++){
+                std::cout << "(" << (i-start+1) << " of " << std::to_string(resultID.size()-start) << " found) " ; 
+                std::cout << info.SubwayInfo[resultID[i]].name << std::endl;
+            }
+            highlightSubway(info, resultID[start]);
+
+        // find Features from input 1   
+        } else if(match1 == RESULTFEATURE) {     
+            resultID = street1ID;
+
+            displayMessage = "Feature Found: ";
+            displayMessage += info.FeatureInfo[resultID[start]].name;
+            info.corInput1 = info.FeatureInfo[resultID[start]].name;
+
+            if((resultID.size()-start)>1){
+                displayMessage += " (Displaying 1 of " + std::to_string(resultID.size()-start) + " found)"; 
+            }
+
+            std::cout << "Feature search result(s):" << std::endl;
+
+            for(unsigned i=start ; i<resultID.size() ; i++){
+                std::cout << " (" << (i-start+1) << " of " << std::to_string(resultID.size()-start) << " found) "; 
+                std::cout << info.FeatureInfo[resultID[start]].name << std::endl;
+            }
+
+            highlightFeature(info, resultID[start]);
         }
-        
-        std::cout << "Street 2 search result(s):" << std::endl;
-            
-        for(unsigned i=0 ; i<resultID.size() ; i++){
-            std::cout << "(" << (i+1) << " of " << std::to_string(resultID.size()) << " found) " ; 
-            std::cout << getStreetName(resultID[i]) << std::endl;
-        }
-        
-        highlightStreet(info, resultID[0]);
-    
-    // find POI from input 1
-    } else if(match1 == RESULTPOI) { 
-        resultID = street1ID;
-        
-        displayMessage = "Point of Interest Found: ";
-        displayMessage += info.POIInfo[resultID[start]].name;
-        info.corInput1 = info.POIInfo[resultID[start]].name;
-
-        if((resultID.size()-start)>1){
-            displayMessage += " (Displaying 1 of " + std::to_string(resultID.size()-start) + " found)"; 
-        }
-
-        std::cout << "Point of Interest search result(s):" << std::endl;
-
-        for(unsigned i=start ; i<resultID.size() ; i++){
-            std::cout << "(" << (i-start+1) << " of " << std::to_string(resultID.size()-start) << " found) " ; 
-            std::cout << info.POIInfo[resultID[i]].name << std::endl;
-        }
-
-        highlightPOI(info, resultID[start]);
-    
-    // find subway station from input 1
-    } else if(match1 == RESULTSUBWAY) { 
-        resultID = street1ID;
-
-        displayMessage = "Subway Found: ";
-        displayMessage += info.SubwayInfo[resultID[start]].name;
-        info.corInput1 = info.SubwayInfo[resultID[start]].name;
-        std::cout<<"Updated corInput1"<<std::endl;
-
-        if((resultID.size()-start)>1){
-            displayMessage += " (Displaying 1 of " + std::to_string(resultID.size()-start) + " found)"; 
-        }
-        for(unsigned i=start ; i<resultID.size() ; i++){
-            std::cout << "(" << (i-start+1) << " of " << std::to_string(resultID.size()-start) << " found) " ; 
-            std::cout << info.SubwayInfo[resultID[i]].name << std::endl;
-        }
-        highlightSubway(info, resultID[start]);
- 
-    // find Features from input 1   
-    } else if(match1 == RESULTFEATURE) {     
-        resultID = street1ID;
-        
-        displayMessage = "Feature Found: ";
-        displayMessage += info.FeatureInfo[resultID[start]].name;
-        info.corInput1 = info.FeatureInfo[resultID[start]].name;
-
-        if((resultID.size()-start)>1){
-            displayMessage += " (Displaying 1 of " + std::to_string(resultID.size()-start) + " found)"; 
-        }
-
-        std::cout << "Feature search result(s):" << std::endl;
-
-        for(unsigned i=start ; i<resultID.size() ; i++){
-            std::cout << " (" << (i-start+1) << " of " << std::to_string(resultID.size()-start) << " found) "; 
-            std::cout << info.FeatureInfo[resultID[start]].name << std::endl;
-        }
-
-        highlightFeature(info, resultID[start]);
     }
     
     return displayMessage;

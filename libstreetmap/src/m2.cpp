@@ -193,6 +193,8 @@ void setCompletionModel(ezgl::application *application){
     GtkListStore *completeModel = (GtkListStore *) application->get_object("NameSuggestion");
     GtkEntryCompletion *completionBox1 = (GtkEntryCompletion *) application->get_object("NameCompletion1");
     GtkEntryCompletion *completionBox2 = (GtkEntryCompletion *) application->get_object("NameCompletion2");
+    //GtkEntryCompletion *completionBox3 = (GtkEntryCompletion *) application->get_object("NameCompletion3");
+    //GtkEntryCompletion *completionBox4 = (GtkEntryCompletion *) application->get_object("NameCompletion4");
     GtkTreeIter iter;
     
     // make sure entry completion is correct
@@ -200,6 +202,8 @@ void setCompletionModel(ezgl::application *application){
     gtk_list_store_append(completeModel, &iter);
     gtk_entry_completion_set_text_column(completionBox1, 0);
     gtk_entry_completion_set_text_column(completionBox2, 0);
+    //gtk_entry_completion_set_text_column(completionBox3, 0);
+    //gtk_entry_completion_set_text_column(completionBox4, 0);
     
     // add all streets
     for(unsigned i=0 ; i< static_cast<unsigned>(getNumStreets()) ; i++){
@@ -217,23 +221,6 @@ void setCompletionModel(ezgl::application *application){
         // free char* memory
         delete[] nameChar;
     }
-    
-    // add all city names from city vector
-    for(auto it = city.begin(); it != city.end(); it++){
-        
-        // convert string to char*
-        std::string str = it->first;
-        char * nameChar = new char[str.size() + 1];
-        std::copy(str.begin(), str.end(), nameChar);
-        nameChar[str.size()] = '\0';
-
-        // add new row to list store and store street name
-        gtk_list_store_insert(completeModel, &iter, -1);
-        gtk_list_store_set(completeModel, &iter, 0, nameChar, -1);
-        
-        // free char* memory
-        delete[] nameChar;
-    }    
 }
 
 
@@ -329,7 +316,7 @@ void findButton(GtkWidget *widget, ezgl::application *application){
     bool changeMap = false;
     
     // get the user input(s))
-    application->get_input_text(name1, name2);
+    application->get_input_text(name1, name2, name1, name2);
     
     //======================= change map ======================================
     /*takes in the city name from name1 and then matches it with the country name 
@@ -374,7 +361,7 @@ void findButton(GtkWidget *widget, ezgl::application *application){
         if(info.corInput2 != ""){
             name2 = info.corInput2.c_str();
         }
-        application->set_input_text(name1, name2);
+        application->set_input_text(name1, name2, name1, name2);
         
         zoomAllPoints(application);
         

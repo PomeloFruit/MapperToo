@@ -115,9 +115,9 @@ public:
   void connect_feature(button_callback_fn press_find);
   
   //retrieve input text from text fields
-  void get_input_text(const char *&street1, const char *&street2);
+  void get_input_text(const char *&street1, const char *&street2, const char *&street3, const char *&street4);
   
-  void set_input_text(const char *&street1, const char *&street2);
+  void set_input_text(const char *&street1, const char *&street2, const char *&street3, const char *&street4);
 
   /**
    * Add a button

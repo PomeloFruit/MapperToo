@@ -22,7 +22,6 @@ struct Node {
     unsigned reachingEdge;
 
     double bestTime;
-    double bestScore;
 };
 
 struct waveElem {

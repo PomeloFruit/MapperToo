@@ -250,18 +250,28 @@ void application::connect_feature(button_callback_fn press_find){
     g_signal_connect(G_OBJECT(find_button), "clicked", G_CALLBACK(press_find), this);
 }
 
-void application::get_input_text(const char *&street1, const char *&street2){
+void application::get_input_text(const char *&street1, const char *&street2,
+                                 const char *&street3, const char *&street4){
     GtkEntry *street_entry1 = (GtkEntry *) this->get_object("FindStreet1");
     street1 = gtk_entry_get_text(street_entry1);
     GtkEntry *street_entry2 = (GtkEntry *) this->get_object("FindStreet2");
     street2 = gtk_entry_get_text(street_entry2);
+//    GtkEntry *street_entry3 = (GtkEntry *) this->get_object("FindStreet3");
+//    street3 = gtk_entry_get_text(street_entry3);
+//    GtkEntry *street_entry4 = (GtkEntry *) this->get_object("FindStreet4");
+//    street4 = gtk_entry_get_text(street_entry4);
 }
 
-void application::set_input_text(const char *&street1, const char *&street2){
+void application::set_input_text(const char *&street1, const char *&street2,
+                                 const char *&street3, const char *&street4){
     GtkEntry *street_entry1 = (GtkEntry *) this->get_object("FindStreet1");
     gtk_entry_set_text(street_entry1, street1);
     GtkEntry *street_entry2 = (GtkEntry *) this->get_object("FindStreet2");
     gtk_entry_set_text(street_entry2, street2);
+//    GtkEntry *street_entry3 = (GtkEntry *) this->get_object("FindStreet3");
+//    gtk_entry_set_text(street_entry3, street3);
+//    GtkEntry *street_entry4 = (GtkEntry *) this->get_object("FindStreet4");
+//    gtk_entry_set_text(street_entry4, street4);
 }
 
 void application::create_button(const char *button_text,

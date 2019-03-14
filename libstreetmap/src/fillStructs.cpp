@@ -32,7 +32,7 @@ void populateData::initialize(infoStrucs &info, mapBoundary &xy){
         populateOSMSubwayInfo(info);
     }
     
-    info.findDirections = false;
+    info.findDirections = true;
     info.lastIntersection.clear();
     info.lastPOI.clear();
     info.lastSeg.clear();
