@@ -41,7 +41,7 @@ void featureDrawing::setFeatureColour(infoStrucs &info, int type, ezgl::renderer
                 g.set_color(255, 255, 0, 200);
                 break;
             case 5: // island = dark green
-                g.set_color(0, 109, 0, 200);
+                g.set_color(219,219,219,255);
                 break;
             case 6: // building = darkish gray
                 g.set_color(0,0,0,180);
