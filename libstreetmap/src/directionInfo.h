@@ -1,12 +1,17 @@
 #pragma once
+
 #include <vector>
 #include <string>
 #include "LatLon.h"
+
+//============================== Constants ===================================
 
 #define NONODE -1
 #define NOEDGE -1
 #define NOTIME 9999999999
 #define NOSCORE 9999999999
+
+//============================== Structures ===================================
 
 struct Node {
     std::vector< Node* > toNodes;
@@ -27,19 +32,8 @@ struct waveElem {
     double travelTime;
     double score;
     
+    // instanties the waveElem variables
     waveElem(unsigned from, Node* source, unsigned id, double time, double score);
-};
-
-class DirectionInfo {
-public:
-    std::vector< Node > Nodes;
-    std::vector< LatLon > intersectionPos;
-    
-    double secPerMeter;
-    
-    void fillNodes();
-    void connectNodes();
-    void findFastestStreet();
 };
 
 enum class HumanTurnType {
@@ -60,6 +54,30 @@ struct navInstruction{
     std::string turnPrint;
 };
 
+//============================== Class ===================================
+
+// direction info holds all the node data
+class DirectionInfo {
+public:
+    // contains all the nodes (intersections) in the city with all needed info
+    std::vector< Node > Nodes;
+    
+    // contains all the latlon positions of intersections
+    std::vector< LatLon > intersectionPos;
+    
+    // the minimum seconds needed to travel a meter in the city
+    double secPerMeter;
+    
+    // fills all nodes in Nodes    
+    void fillNodes();
+    
+    // connects all nodes to each other, for the outEdges and toNodes
+    void connectNodes();
+    
+    // finds the fastest speed limit in the city, and computes secPerMeter
+    void findFastestStreet();
+};
+
 class HumanInfo {
 public:
     std::vector< navInstruction > humanInstructions;
@@ -77,5 +95,10 @@ public:
     void setDistanceTime();    
 };
 
+//=========================== Global Variables ================================
+
+// first declared in m1.cpp load map
 extern DirectionInfo Dir;
+
+
 extern HumanInfo Hum;

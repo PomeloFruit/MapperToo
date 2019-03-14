@@ -143,6 +143,8 @@ public:
     
     // contains whether or not to show 0-none/1-subways/2-trains/3-both
     int showRoute;
+    
+    bool findDirections;
    
     // Holds the number of each street type in each map 
     // 0 for Motorway, 1 for Primary ... 4 for Service, 5 for Trunk

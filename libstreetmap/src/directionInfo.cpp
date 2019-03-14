@@ -5,6 +5,15 @@
 #include "LatLon.h"
 #include <vector>
 
+
+/* waveElem constructor
+ * - fills waveElem variables with parameters
+ * 
+ * @param none
+ * 
+ * @return void
+ */
+
 waveElem::waveElem(unsigned from, Node* source, unsigned id, double time, double scoreIn){
     node = source;
     edgeID = id;
@@ -12,6 +21,17 @@ waveElem::waveElem(unsigned from, Node* source, unsigned id, double time, double
     reachingNode = from;
     score = scoreIn;
 }
+
+
+/* fillNodes function
+ * - creates a node for every intersection on the map
+ * - fills all nodes with pre determined default values
+ * - gets the latlon position of the intersection for quick access later
+ * 
+ * @param none
+ * 
+ * @return void
+ */
 
 void DirectionInfo::fillNodes(){
     int numOfIntersections = getNumIntersections();
@@ -31,6 +51,16 @@ void DirectionInfo::fillNodes(){
     findFastestStreet();
 }
 
+
+/* connectNodes function
+ * - adds pointers to outEdges and toNodes for connected nodes
+ * - goes through all intersection and adds all reachable to nodes from every node
+ * 
+ * @param none
+ * 
+ * @return void
+ */
+
 void DirectionInfo::connectNodes(){
     int numOfIntersections = getNumIntersections();
     
@@ -47,12 +77,12 @@ void DirectionInfo::connectNodes(){
             segFrom = getInfoStreetSegment(tempSegs[j]).from;
             bool oneWay = getInfoStreetSegment(tempSegs[j]).oneWay;
             
-            if(segTo == i){
-                if(!oneWay){
+            if(segTo == i){ // if connected segment reaches intersection at 'to' point
+                if(!oneWay){ // make sure that it can travel to->from on segment
                     Nodes[i].toNodes.push_back(&Nodes[segFrom]);
                     Nodes[i].outEdges.push_back(tempSegs[j]);
                 }
-            } else if(segFrom == i){
+            } else if(segFrom == i){ // if connected segment reaches intersection at 'from' point
                 Nodes[i].toNodes.push_back(&Nodes[segTo]);
                 Nodes[i].outEdges.push_back(tempSegs[j]);
             }
@@ -61,6 +91,15 @@ void DirectionInfo::connectNodes(){
 }
 
 
+/* findFastestStreet function
+ * - goes through all the street segments and finds the maximum speed limit
+ * - computes the minimum seconds to travel a meter in the map
+ *  (very important for A* success to underestimate travel times)
+ * 
+ * @param none
+ * 
+ * @return void
+ */
 
 void DirectionInfo::findFastestStreet(){
     double fastestKmH = 0;

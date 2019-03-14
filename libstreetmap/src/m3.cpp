@@ -16,8 +16,12 @@
 #include <limits>
 #include <iostream>
 
+//=============================== Constants ===============================
+
 #define NOINTERSECTION -100
 #define SAMESTREET -99
+
+//=========================== Function Prototypes ===========================
 
 std::vector<unsigned> getPath(Node *sourceNode, const unsigned destID, const double rtPen, const double ltPen);
 
@@ -31,25 +35,23 @@ double getNewScore(unsigned newPoint, LatLon end, double time);
 
 std::vector<unsigned> getFinalPath(Node *currNode,unsigned start);
 
-std::vector<std::string> pathToWords(std::vector<unsigned> path);
+//=========================== Function Definitions ===========================
 
-
-
-
-// Returns a path (route) between the start intersection and the end
-// intersection, if one exists. This routine should return the shortest path
-// between the given intersections, where the time penalties to turn right and
-// left are given by right_turn_penalty and left_turn_penalty, respectively (in
-// seconds).  If no path exists, this routine returns an empty (size == 0)
-// vector.  If more than one path exists, the path with the shortest travel
-// time is returned. The path is returned as a vector of street segment ids;
-// traversing these street segments, in the returned order, would take one from
-// the start to the end intersection.
-
+/* find_path_between_intersections function
+ * - finds the fastest path between start and end intersection id
+ * - computes fastest path taking into account left/right turn penalties
+ * 
+ * @param intersect_id_start <unsigned> - intersection Id of start intersection
+ * @param intersect_id_end <unsigned> - intersection Id of end intersection
+ * @param right_turn_penalty <double> - time penalty for doing a right turn (seconds)
+ * @param left_turn_penalty <double> - time penalty for doing a left turn (seconds)
+ * 
+ * @return path <std::vector<unsigned>> - the ordered set of street segment ids making
+ *                                        up the fastest path between start and end
+ */
 
 std::vector<unsigned> find_path_between_intersections(const unsigned intersect_id_start, 
-        const unsigned intersect_id_end, const double right_turn_penalty, 
-                                        const double left_turn_penalty){
+        const unsigned intersect_id_end, const double right_turn_penalty, const double left_turn_penalty){
     
     std::vector<unsigned> path;
     Node start = Dir.Nodes[intersect_id_start];
@@ -58,22 +60,37 @@ std::vector<unsigned> find_path_between_intersections(const unsigned intersect_i
 }
 
 
-// contains compare operator for sorting priority queue
-// sorts queue using scores in waveElem
+// structure contains compare operator for sorting priority queue
+// sorts queue using scores in waveElem such that lowest score is placed at front of queue
 struct compareScore {
     bool operator()(const waveElem &a, const waveElem &b){
         return a.score > b.score;
     }
 };
 
-std::vector<unsigned> getPath(Node *sourceNode, const unsigned destID, 
-                                            const double rtPen, const double ltPen) {
+
+/* find_path_between_intersections function
+ * - finds the fastest path between start and end intersection id
+ * - computes fastest path taking into account left/right turn penalties
+ * 
+ * @param sourceNode <Node *> - pointer to the start intersection node
+ * @param destID <unsigned> - intersection Id of end intersection
+ * @param rtPen <double> - time penalty for doing a right turn (seconds)
+ * @param ltPen <double> - time penalty for doing a left turn (seconds)
+ * 
+ * @return path <std::vector<unsigned>> - the ordered set of street segment ids making
+ *                                        up the fastest path between start and end (if exists)
+ *                                      - blank vector if no path possible
+ */
+
+std::vector<unsigned> getPath(Node *sourceNode, const unsigned destID, const double rtPen, const double ltPen) {
     std::priority_queue< waveElem, std::vector<waveElem>, compareScore> wavefront;
     std::vector< unsigned > changedNodes;
     wavefront.push(waveElem(NONODE, sourceNode, NOEDGE, 0, 0));
     
     LatLon end = Dir.intersectionPos[destID];
   
+    // repeat until all possible paths are checked or path is found
     while(!wavefront.empty()){
         
         // get next intersection node
@@ -138,12 +155,18 @@ std::vector<unsigned> getPath(Node *sourceNode, const unsigned destID,
 
 
 /* getNewScore function
- * - calculates the A* values for priority queue sorting
- * - adds time taken to reach Node + ETA to destination
- * - always underestimates the time needed to reach destination
+ * - calculates the A* score values for priority queue sorting
+ * - adds time taken to reach Node + (underestimated) ETA to destination
+ * - always underestimates the time to reach destination using fastest speed limit in city
  *      - ensures A* will always find fastest path
- *      - uses max KmH within city
+ * 
+ * @param newPoint <unsigned> - intersection ID of the new node addition
+ * @param end <LatLon> - latlon position point of the destination intersections
+ * @param time <double> - time it took to reach the current node before adding new node
+ * 
+ * @return score <double> - the score of the new wave element
  */
+
 double getNewScore(unsigned newPoint, LatLon end, double time){
     LatLon start = Dir.intersectionPos[newPoint];
         
@@ -156,52 +179,84 @@ double getNewScore(unsigned newPoint, LatLon end, double time){
     return score;
 }
 
+
+/* getFinalPath function
+ * - backtracks on the path used to reach currNode (destination node)
+ * - inserts backtracked segment to the front of list, so that directions go from start to end
+ * 
+ * @param currNode <Node *> - pointer to the destination intersection 
+ * @param start <unsigned> - intersection ID for the start intersection
+ * 
+ * @return finalPath <std::vector<unsigned>> - an ordered list of street segment ids to get from
+ *                                               start to end intersection
+ */
+
 std::vector<unsigned> getFinalPath(Node *currNode, unsigned start){
-    std::vector<unsigned> reversed;
+    std::vector<unsigned> finalPath;
    
     while(currNode!=NULL){
         if(static_cast<int> (currNode->reachingEdge) != NOEDGE){
-            reversed.push_back(currNode->reachingEdge);
+            // add segment used to reach node to front of list
+            finalPath.insert(finalPath.begin(), currNode->reachingEdge);
 
+            // if backtracked back to start, we are done
             if(static_cast<unsigned>(getInfoStreetSegment(currNode->reachingEdge).to) == start || 
                     static_cast<unsigned>(getInfoStreetSegment(currNode->reachingEdge).from) == start){
                 break;
             }
         }
-
+        
+        // backtrack one node
         currNode = currNode->reachingNode;
     }
-
-    std::vector<unsigned> properOrder;
     
-    for(int i=reversed.size()-1; i>=0; i--){
-        properOrder.push_back(reversed[i]);
-    }
-    return properOrder;
+    return finalPath;
 }
 
+
+/* find_turn_type function
+ * - finds the turn type based on angle between entrance and exit segments
+ * - based on header determined turn types
+ * 
+ * @param street_segment1 <unsigned> - street segment ID of entrance to intersection
+ * @param street_segment2 <unsigned> - street segment ID of exit from intersection
+ * 
+ * @return <TurnType> - the turn type between seg1(in) and seg2(out)
+ */
 
 TurnType find_turn_type(unsigned street_segment1, unsigned street_segment2){
    
     double angle = findAngleBetweenSegs(street_segment1, street_segment2);
     
     // if turn angle -PI < dAngle < 0 or if dAngle > PI
-    if(angle == SAMESTREET){
+    if(angle == SAMESTREET){ // same id
         return TurnType::STRAIGHT;        
-    } else if(angle == NOINTERSECTION){
+    } else if(angle == NOINTERSECTION){ // segments dont intersect
         return TurnType::NONE;     
-    } else if((angle < 0 && angle > -M_PI)|| angle > M_PI){ 
+    } else if((angle < 0 && angle > -M_PI)|| angle > M_PI){ //negative angle
         return TurnType::LEFT;
     } else {
         return TurnType::RIGHT;
     }
 }
 
+
+/* findAngleBetweenSegs function
+ * - finds the angle between seg1(in) and seg2(out), taking into account directions
+ * - if no intersection or segments are part of the same street, will return a defined constant
+ * 
+ * @param street_segment1 <unsigned> - street segment ID of entrance to intersection
+ * @param street_segment2 <unsigned> - street segment ID of exit from intersection
+ * 
+ * @return <double> - the angle between seg1(in) and seg2(out), or codes for same street/no intersection
+ */
+
 double findAngleBetweenSegs(unsigned street_segment1, unsigned street_segment2){
     InfoStreetSegment segInfo1, segInfo2;
     segInfo1 = getInfoStreetSegment(street_segment1);
     segInfo2 = getInfoStreetSegment(street_segment2);
     
+    // same street id on both segs, same street
     if(segInfo1.streetID == segInfo2.streetID){
         return SAMESTREET;     
     }
@@ -212,6 +267,8 @@ double findAngleBetweenSegs(unsigned street_segment1, unsigned street_segment2){
     numCurvePts2 = segInfo2.curvePointCount;
     LatLon ptFrom, ptCommon, ptTo;
     
+    // all the possible combinations of point-point interactions
+    // determines which direction traveling in the segs (from->to / to->from)
     if(segInfo1.from == segInfo2.from){
         
         if(numCurvePts1 > 0){
@@ -283,10 +340,24 @@ double findAngleBetweenSegs(unsigned street_segment1, unsigned street_segment2){
     return findAngleBetweenThreePoints(ptFrom, ptCommon, ptTo);    
 }
 
+
+/* findAngleBetweenThreePoints function
+ * - finds the angle between ptFrom->ptCommon and ptCommon->ptTo
+ * - calculates the angle in relation to the x axis of both entrance and exit segments
+ * - finds the difference between the entrance and exit, representing turn angle
+ * 
+ * @param ptFrom <LatLon> - latlon position of the closest straight line point to intersection
+ * @param ptCommon <LatLon> - latlon position of the intersection point
+ * @param ptTo <LatLon> - latlon position of the closest straight line point from intersection
+ * 
+ * @return cAngle <double> - the angle between ptFrom->ptCommon and ptCommon->ptTo
+ */
+
 double findAngleBetweenThreePoints(LatLon ptFrom, LatLon ptCommon, LatLon ptTo){
     double aAngle, bAngle, cAngle;
     double aXSeg, aYSeg, bXSeg, bYSeg;
 
+    // calculate the length of entrance and exit in x and y directions
     aXSeg = ptCommon.lon() - ptFrom.lon();
     aYSeg = ptCommon.lat() - ptFrom.lat();
     bXSeg = ptTo.lon() - ptCommon.lon();
@@ -300,8 +371,19 @@ double findAngleBetweenThreePoints(LatLon ptFrom, LatLon ptCommon, LatLon ptTo){
     return cAngle;
 }
 
-double compute_path_travel_time(const std::vector<unsigned>& path, const double right_turn_penalty, 
-                                                                    const double left_turn_penalty){
+
+/* compute_path_travel_time function
+ * - finds the travel time on the path with left/right turn penalties
+ * - adds all segment travel times, and adds all turn penalties needed between different segs
+ * 
+ * @param path <std::vector<unsigned>> - a ordered list of all the street segments making up the path
+ * @param right_turn_penalty <double> - the time penalty to add for making a right turn
+ * @param left_turn_penalty <double> - the time penalty to add for making a left turn
+ * 
+ * @return time <double> - the time to travel the path, 0 if no continuous path exists
+ */
+
+double compute_path_travel_time(const std::vector<unsigned>& path, const double right_turn_penalty, const double left_turn_penalty){
     double time = 0;
     
     // no path exists, so return 0
@@ -320,10 +402,22 @@ double compute_path_travel_time(const std::vector<unsigned>& path, const double 
     return time;
 }
 
-double travelTimeAdd(unsigned existingSeg, unsigned newSeg, const double rt_penalty, 
-                                                    const double lt_penalty){
+
+/* travelTimeAdd function
+ * - finds the travel time of newSeg in addition to the turn time delay to get there
+ * 
+ * @param existingSeg <unsigned> - segment id for entrance to intersection
+ * @param newSeg <unsigned> - segment id of exit to intersection (addition to path)
+ * @param rt_penalty <double> - the time penalty to add for making a right turn
+ * @param lt_penalty <double> - the time penalty to add for making a left turn
+ * 
+ * @return time <double> - the time to travel the extra segment
+ */
+
+double travelTimeAdd(unsigned existingSeg, unsigned newSeg, const double rt_penalty, const double lt_penalty){
     double time = 0;
     
+    // add turn delay time (if any) to time between existing and new seg)
     if(static_cast<int>(existingSeg) != NOEDGE){
         TurnType turn = find_turn_type(existingSeg, newSeg);
         if(turn == TurnType::RIGHT){
@@ -333,140 +427,8 @@ double travelTimeAdd(unsigned existingSeg, unsigned newSeg, const double rt_pena
         }
     }
     
+    // add travel time along the new segment
     time = time + find_street_segment_travel_time(newSeg);
     
     return time;
 }
-
-
-//for now I'm just going to make dAngle a global since I don't really want to write a shitload of new code for shit
-//but that means when I push this the code here will not work because I'm going to un-make it a global
-//as I think it would be better to consult the team on what to do in this situation
-//it seems prudent to split that turn function into maybe 2 anyways
-//but I'm not just gonna do that without asking everyone
-//fuck even this should be split
-/*
-std::vector<std::string> pathToWords(std::vector<unsigned> path){
-    std::vector<std::string> theGospel;
-    if(path.size()==0){
-        std::cout<<"NO PATH FOUND"<<'\n';
-        return theGospel;
-    }
-    const double NOTURN=0.174533;
-    const double SMALLTURN=0.698132;
-    int distance=find_street_segment_length(path[0]);//showing people doubles looks bad
-    InfoStreetSegment segInfoPrev;
-    InfoStreetSegment segInfoCur;
-    std::string toBeInserted="";
-    if(path.size()>1){
-        for(int i=1;i<path.size();i++){
-            std::string toBeInserted="";
-            segInfoPrev = getInfoStreetSegment(path[i-1]);
-            segInfoCur = getInfoStreetSegment(path[i]);
-//            std::cout<<"GETTING NAMES"<<'\n';
-//////////////////////            std::string newStreetName=getStreetName(segInfoCur.streetID);
-//////////////////////            std::string oldStreetName=getStreetName(segInfoPrev.streetID);
-//            std::cout<<"GOT NAMES"<<'\n';
-            std::string newStreetName="gee";
-            std::string oldStreetName="whiz";
-            //if I make a turn:
-            if(segInfoPrev.streetID!=segInfoCur.streetID){
-                if(distance<=1){
-                    TurnType turn=find_turn_type(path[i-1], path[i]);
-                    //I know the turn type and the abs angle
-                    if(angleSegs>M_PI){
-                        angleSegs=angleSegs-M_PI;
-                    }
-
-                    if(angleSegs<NOTURN){
-                        toBeInserted="Continue straight onto "+newStreetName;
-                        theGospel.push_back(toBeInserted);
-                        toBeInserted="";
-                    }
-                    else if(angleSegs<SMALLTURN){
-                        if(turn==TurnType::RIGHT){
-                            toBeInserted="Slight right onto "+newStreetName;
-                            theGospel.push_back(toBeInserted);
-                            toBeInserted="";
-                        }
-                        else{
-                            toBeInserted="Slight left onto "+newStreetName;
-                            theGospel.push_back(toBeInserted);
-                            toBeInserted="";
-                        }
-                    }
-                    else{
-                        if(turn==TurnType::RIGHT){
-                            toBeInserted="Right onto "+newStreetName;
-                            theGospel.push_back(toBeInserted);
-                            toBeInserted="";
-                        }
-                        else{
-                            toBeInserted="Left onto "+newStreetName;
-                            theGospel.push_back(toBeInserted);
-                            toBeInserted="";
-                        }
-                    }  
-                }
-                else{
-                    toBeInserted="Go straight "+std::to_string(distance)+" meters on "+oldStreetName;
-                    theGospel.push_back(toBeInserted);
-                    toBeInserted="";
-                    TurnType turn=find_turn_type(path[i-1], path[i]);
-                    //I know the turn type and the abs angle
-                    if(angleSegs>M_PI){
-                        angleSegs=angleSegs-M_PI;
-                    }
-
-                    if(angleSegs<NOTURN){
-                        toBeInserted="Continue straight onto "+newStreetName;
-                        theGospel.push_back(toBeInserted);
-                        toBeInserted="";
-                    }
-                    else if(angleSegs<SMALLTURN){
-                        if(turn==TurnType::RIGHT){
-                            toBeInserted="Slight right onto "+newStreetName;
-                            theGospel.push_back(toBeInserted);
-                            toBeInserted="";
-                        }
-                        else{
-                            toBeInserted="Slight left onto "+newStreetName;
-                            theGospel.push_back(toBeInserted);
-                            toBeInserted="";
-                        }
-                    }
-                    else{
-                        if(turn==TurnType::RIGHT){
-                            toBeInserted="Right onto "+newStreetName;
-                            theGospel.push_back(toBeInserted);
-                            toBeInserted="";
-                        }
-                        else{
-                            toBeInserted="Left onto "+newStreetName;
-                            theGospel.push_back(toBeInserted);
-                            toBeInserted="";
-                        }
-                    }
-                }
-            }
-            else{
-                distance=distance+find_street_segment_length(path[i]);
-            }
-        }
-    }
-    else{
-        toBeInserted="Go straight "+std::to_string(distance)+" meters on "+"AHH I NEED HELP HERE";
-        theGospel.push_back(toBeInserted);
-    }
-        
-//    std::cout<<"PRINTING NAMES"<<'\n';
-    for(int i=0;i<theGospel.size();i++){
-        std::string toBePrinted=theGospel[i]+'\n';
-        std::cout<<toBePrinted;
-    }
-    std::cout<<"DONE"<<'\n';
-    
-    return theGospel;
-    //////////////////////    angleSegs=abs(dAngle);
-}
-*/
