@@ -28,6 +28,7 @@ void DirectionInfo::fillNodes(){
     }
     
     connectNodes();
+    findFastestStreet();
 }
 
 void DirectionInfo::connectNodes(){
@@ -39,7 +40,7 @@ void DirectionInfo::connectNodes(){
         Nodes[i].toNodes.clear();
         Nodes[i].outEdges.clear();
         
-        for(int j=0 ; j<tempSegs.size() ; j++){
+        for(int j=0 ; j<static_cast<int>(tempSegs.size()) ; j++){
             
             int segTo, segFrom;
             segTo = getInfoStreetSegment(tempSegs[j]).to;
@@ -57,4 +58,20 @@ void DirectionInfo::connectNodes(){
             }
         }
     }
+}
+
+
+
+void DirectionInfo::findFastestStreet(){
+    double fastestKmH = 0;
+    
+    // search through all segments for fastest speed limit
+    for(int i=0 ; i<getNumStreetSegments() ; i++){
+        if(getInfoStreetSegment(i).speedLimit > fastestKmH){
+            fastestKmH = getInfoStreetSegment(i).speedLimit;
+        }
+    }
+    
+    // 3600 (s/h) / (Km/h) = (s/km) ->> (s/km) * 0.001 (km/m) = (s/m)
+    secPerMeter = (3600 / fastestKmH) * 0.001;
 }

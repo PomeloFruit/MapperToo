@@ -19,7 +19,7 @@
 #define NOINTERSECTION -100
 #define SAMESTREET -99
 
-std::vector<unsigned> bfsPath(Node *sourceNode, const unsigned destID, const double rtPen, const double ltPen);
+std::vector<unsigned> getPath(Node *sourceNode, const unsigned destID, const double rtPen, const double ltPen);
 
 double travelTimeAdd(unsigned existingSeg, unsigned newSeg, const double rt_penalty, const double lt_penalty);
 
@@ -27,7 +27,7 @@ double findAngleBetweenSegs(unsigned street_segment1, unsigned street_segment2);
 
 double findAngleBetweenThreePoints(LatLon ptFrom, LatLon ptCommon, LatLon ptTo);
 
-double getNewScore(double totDist, unsigned newPoint, LatLon end, double time);
+double getNewScore(unsigned newPoint, LatLon end, double time);
 
 std::vector<unsigned> getFinalPath(Node *currNode,unsigned start);
 
@@ -53,31 +53,26 @@ std::vector<unsigned> find_path_between_intersections(const unsigned intersect_i
     
     std::vector<unsigned> path;
     Node start = Dir.Nodes[intersect_id_start];
-    path = bfsPath(&start, intersect_id_end, right_turn_penalty, left_turn_penalty);
+    path = getPath(&start, intersect_id_end, right_turn_penalty, left_turn_penalty);
     return path;
 }
 
-struct compareQ {
-    bool operator()(const waveElem &a, const waveElem &b){
-        return a.travelTime > b.travelTime;
-    }
-};
 
-struct compareP {
+// contains compare operator for sorting priority queue
+// sorts queue using scores in waveElem
+struct compareScore {
     bool operator()(const waveElem &a, const waveElem &b){
         return a.score > b.score;
     }
 };
 
-std::vector<unsigned> bfsPath(Node *sourceNode, const unsigned destID, 
+std::vector<unsigned> getPath(Node *sourceNode, const unsigned destID, 
                                             const double rtPen, const double ltPen) {
-    std::priority_queue< waveElem, std::vector<waveElem>, compareP> wavefront;
+    std::priority_queue< waveElem, std::vector<waveElem>, compareScore> wavefront;
     std::vector< unsigned > changedNodes;
     wavefront.push(waveElem(NONODE, sourceNode, NOEDGE, 0, 0));
     
-   LatLon start = Dir.intersectionPos[sourceNode->id];
     LatLon end = Dir.intersectionPos[destID];
-    double startEndDistance = find_distance_between_two_points(start, end);
   
     while(!wavefront.empty()){
         
@@ -89,12 +84,10 @@ std::vector<unsigned> bfsPath(Node *sourceNode, const unsigned destID,
 
         // if best path from this wave
         if(wave.travelTime < currNode->bestTime){
-        //if(wave.score < currNode->bestScore){
             
             // if this was better path to node, update
             currNode->reachingEdge = wave.edgeID;
             currNode->bestTime = wave.travelTime;
-            //currNode->bestScore = wave.score;
             if(static_cast<int> (wave.reachingNode) != NONODE){
                 currNode->reachingNode = &(Dir.Nodes[wave.reachingNode]);
             }
@@ -113,12 +106,12 @@ std::vector<unsigned> bfsPath(Node *sourceNode, const unsigned destID,
                     temp.reachingNode = NULL;
                     temp.reachingEdge = NOEDGE;
                     temp.bestTime = NOTIME;
-                    //temp.bestScore = NOSCORE;
                 }
                 
                 return path;
             }
         
+            // add all nodes that can be reached to wavefront
             for(unsigned i=0 ; i < currNode->outEdges.size(); i++){
                 Node *toNode = currNode->toNodes[i];
                 unsigned toEdge = currNode->outEdges[i];
@@ -128,29 +121,35 @@ std::vector<unsigned> bfsPath(Node *sourceNode, const unsigned destID,
                     continue;
                 }
 
-                double toNodeTime;
-                double score;
-                toNodeTime = currNode->bestTime + travelTimeAdd(wave.edgeID,toEdge,rtPen, ltPen);
-                score = getNewScore(startEndDistance, toNode->id, end, toNodeTime);
+                // calculate score and time for the waveElem
+                double toNodeTime, score;
+                toNodeTime = currNode->bestTime + travelTimeAdd(wave.edgeID,toEdge,rtPen,ltPen);
+                score = getNewScore(toNode->id, end, toNodeTime);
+                
+                // add node to wavefront
                 wavefront.push(waveElem(currNode->id, toNode, toEdge, toNodeTime, score));
             }
         }
     }
+    
+    // if nothing found, return empty vector
     return std::vector<unsigned>();
 }
 
-double getNewScore(double totDist, unsigned newPoint, LatLon end, double time){
-   // const double KMHEST = 100; //
-  //  const double KMSEST = 36; // 3600 / KMHEST;
-    const double MSEST = 0.036; // KMSEST * 0.001;
 
+/* getNewScore function
+ * - calculates the A* values for priority queue sorting
+ * - adds time taken to reach Node + ETA to destination
+ * - always underestimates the time needed to reach destination
+ *      - ensures A* will always find fastest path
+ *      - uses max KmH within city
+ */
+double getNewScore(unsigned newPoint, LatLon end, double time){
     LatLon start = Dir.intersectionPos[newPoint];
         
     double pointToEndDistance = find_distance_between_two_points(start, end);
-    
-    double remainingDist = pointToEndDistance;
-    
-    double estTimeToDest = remainingDist*MSEST;
+   
+    double estTimeToDest = pointToEndDistance * Dir.secPerMeter;
     
     double score = time + estTimeToDest;
     
@@ -181,11 +180,6 @@ std::vector<unsigned> getFinalPath(Node *currNode, unsigned start){
     return properOrder;
 }
 
-
-
-
-// completed and tested
-// ==================================================================================================================
 
 TurnType find_turn_type(unsigned street_segment1, unsigned street_segment2){
    

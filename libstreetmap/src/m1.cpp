@@ -42,6 +42,10 @@ typedef std::vector<unsigned> IDVector;
 
 //=========================== Forward Declarations ===========================
 
+void fillSegStuff();
+void fillStreetStuff();
+void fillIntersectionStuff();
+
 double find_street_length_preload(unsigned street_id);
 double find_street_segment_length_preload(unsigned street_segment_id);
 double find_street_segment_travel_time_preload(unsigned street_segment_id);
@@ -104,11 +108,7 @@ bool load_map(std::string path/*map_path*/) {
         path_osm = path.substr(0, path.size()-(STREETEXT.size()+1));
         path_osm = path_osm + OSMEXT;
         loadOSMDatabaseBIN(path_osm);
-        
-        //collision list will be used to prevent duplicates intersections existing inside
-        //intersectionOnStreet
-        std::vector<unsigned> collisionList(getNumIntersections(), 0);
-        
+                
         std::cout << "Loaded: " << path_osm << std::endl;
         
         //clears all global data structures before filling with new data
@@ -122,118 +122,129 @@ bool load_map(std::string path/*map_path*/) {
         streetBlock.poiGrid.clear();
         streetBlock.intGrid.clear();
                 
-        //==== streetIDMap & segLengthVector & segTravelTimeVector ====
-        int segStreetID;
+        fillSegStuff();
+        fillIntersectionStuff();
+        fillStreetStuff();
         
-        for(unsigned i=0; i<unsigned(getNumStreetSegments()); i++){
-            
-            segStreetID = getInfoStreetSegment(i).streetID;
-                      
-            // inserts segmentID into vector at respective streetID position
-            // within streetIDMap
-            if(streetIDMap.count(segStreetID) == 0){
-                streetIDMap.insert(std::make_pair(segStreetID,IDVector()));
-                streetIDMap[segStreetID].clear(); 
-            }
-            streetIDMap[segStreetID].push_back(i);
-            
-            // calculates and add segment length to segLengthVector vector
-            // calculates and add travel time of segment to segTravelTimeVector vector
-            segLengthVector.push_back(find_street_segment_length_preload(i));
-            segTravelTimeVector.push_back(find_street_segment_travel_time_preload(i));
-        }
-        
-        //==== partialStreetNameMap & streetLengthVector & streetIntersectionsVector ====
-        std::string currentStreetName;
-        IDVector allSegments; 
-        IDVector::iterator intersectionIt;
-        IDVector intersectionOnStreet;
-        unsigned intersectionID1,intersectionID2;
-        int numSegments;
-
-        for(unsigned i=0; i<unsigned(getNumStreets()); i++){
-            allSegments = find_street_street_segments(i); 
-            numSegments = allSegments.size(); 
-            intersectionOnStreet.clear();
-            currentStreetName = getStreetName(i);
-
-            //converts street name to lower case
-            std::transform(currentStreetName.begin(), currentStreetName.end(), 
-                                        currentStreetName.begin(), ::tolower);
-            
-            
-            //Creates the partialStreetNameMap and inserts all street segments 
-            //that contain the same partial street name
-            
-            
-            for(int j = 1; j <= int(currentStreetName.length()); j++){
-                std::string temp = currentStreetName.substr(0, j); 
-                
-                if(partialStreetNameMap.count(temp) == 0){
-                    partialStreetNameMap.insert(std::make_pair(temp,IDVector()));
-                    partialStreetNameMap[temp].clear();
-                }
-                partialStreetNameMap[temp].push_back(i); 
-            }
-            
-            
-            streetLengthVector.push_back(find_street_length_preload(i));
-            
-            
-            //Creates the streetIntersectionsVector 
-            //Inserts intersectionOnStreet, a vector of intersections ids on a 
-            //street into streetIntersectionsVector
-            for(int j = 0; j < numSegments; j++){
-                intersectionID1 = getInfoStreetSegment(allSegments[j]).from;
-                intersectionID2 = getInfoStreetSegment(allSegments[j]).to; 
-                
-                if(collisionList[intersectionID1]==0){
-                    intersectionOnStreet.push_back(intersectionID1);
-                    collisionList[intersectionID1]++;
-                }
-                if(collisionList[intersectionID2]==0){
-                    intersectionOnStreet.push_back(intersectionID2);
-                    collisionList[intersectionID2]++;
-                }
-            }
-            for(unsigned j=0;j<intersectionOnStreet.size();j++){
-                collisionList[intersectionOnStreet[j]]=0;
-            }
-            streetIntersectionsVector.push_back(intersectionOnStreet); 
-        }
-        
-        //====intersectionSegNameVector & intersectionSegIDVector====
-        /* Here 2 vectors are created one to populate with street segment ID's 
-         * and the other with street names both of those vectors are populated 
-         * in the for loop and are then pushed into the larger global variables
-         * the value at which the global variables (intersectionSegNameVector 
-         * & intersectionSegIDVector) are indexed corresponding to the intersectionID
-         */
-        int numOfSegs;
-        IDVector intersectionIds;
-        std::vector<std::string> segNames;
-        
-        for(int i=0;i<getNumIntersections();i++){
-            numOfSegs=getIntersectionStreetSegmentCount(i);
-            segNames.clear();
-            intersectionIds.clear();
-
-            for(int j=0;j<numOfSegs;j++){
-                segNames.push_back(getStreetName((getInfoStreetSegment(getIntersectionStreetSegment(j, i))).streetID));
-                intersectionIds.push_back(getIntersectionStreetSegment(j, i));           
-                
-            }
-            intersectionSegNameVector.push_back(segNames);
-            intersectionSegIDVector.push_back(intersectionIds);
-        }
-        
-        Dir.fillNodes();
-        
-        //initializing the streetGrid object
         streetBlock.populateGrid();
+        Dir.fillNodes();
     }    
     
     return load_successful;
+}
+
+void fillSegStuff(){
+    //==== streetIDMap & segLengthVector & segTravelTimeVector ====
+    int segStreetID;
+
+    for(unsigned i=0; i<unsigned(getNumStreetSegments()); i++){
+
+        segStreetID = getInfoStreetSegment(i).streetID;
+
+        // inserts segmentID into vector at respective streetID position
+        // within streetIDMap
+        if(streetIDMap.count(segStreetID) == 0){
+            streetIDMap.insert(std::make_pair(segStreetID,IDVector()));
+            streetIDMap[segStreetID].clear(); 
+        }
+        streetIDMap[segStreetID].push_back(i);
+
+        // calculates and add segment length to segLengthVector vector
+        // calculates and add travel time of segment to segTravelTimeVector vector
+        segLengthVector.push_back(find_street_segment_length_preload(i));
+        segTravelTimeVector.push_back(find_street_segment_travel_time_preload(i));
+    }
+}
+
+void fillStreetStuff(){
+    //==== partialStreetNameMap & streetLengthVector & streetIntersectionsVector ====
+    
+    //collision list will be used to prevent duplicates intersections existing inside intersectionOnStreet
+    std::vector<unsigned> collisionList(getNumIntersections(), 0);
+    std::string currentStreetName;
+    IDVector allSegments; 
+    IDVector::iterator intersectionIt;
+    IDVector intersectionOnStreet;
+    unsigned intersectionID1,intersectionID2;
+    int numSegments;
+
+    for(unsigned i=0; i<unsigned(getNumStreets()); i++){
+        allSegments = find_street_street_segments(i); 
+        numSegments = allSegments.size(); 
+        intersectionOnStreet.clear();
+        currentStreetName = getStreetName(i);
+
+        //converts street name to lower case
+        std::transform(currentStreetName.begin(), currentStreetName.end(), 
+                                    currentStreetName.begin(), ::tolower);
+
+
+        //Creates the partialStreetNameMap and inserts all street segments 
+        //that contain the same partial street name
+
+
+        for(int j = 1; j <= int(currentStreetName.length()); j++){
+            std::string temp = currentStreetName.substr(0, j); 
+
+            if(partialStreetNameMap.count(temp) == 0){
+                partialStreetNameMap.insert(std::make_pair(temp,IDVector()));
+                partialStreetNameMap[temp].clear();
+            }
+            partialStreetNameMap[temp].push_back(i); 
+        }
+
+
+        streetLengthVector.push_back(find_street_length_preload(i));
+
+
+        //Creates the streetIntersectionsVector 
+        //Inserts intersectionOnStreet, a vector of intersections ids on a 
+        //street into streetIntersectionsVector
+        for(int j = 0; j < numSegments; j++){
+            intersectionID1 = getInfoStreetSegment(allSegments[j]).from;
+            intersectionID2 = getInfoStreetSegment(allSegments[j]).to; 
+
+            if(collisionList[intersectionID1]==0){
+                intersectionOnStreet.push_back(intersectionID1);
+                collisionList[intersectionID1]++;
+            }
+            if(collisionList[intersectionID2]==0){
+                intersectionOnStreet.push_back(intersectionID2);
+                collisionList[intersectionID2]++;
+            }
+        }
+        for(unsigned j=0;j<intersectionOnStreet.size();j++){
+            collisionList[intersectionOnStreet[j]]=0;
+        }
+        streetIntersectionsVector.push_back(intersectionOnStreet); 
+    }
+}
+
+void fillIntersectionStuff(){
+    //====intersectionSegNameVector & intersectionSegIDVector====
+    /* Here 2 vectors are created one to populate with street segment ID's 
+     * and the other with street names both of those vectors are populated 
+     * in the for loop and are then pushed into the larger global variables
+     * the value at which the global variables (intersectionSegNameVector 
+     * & intersectionSegIDVector) are indexed corresponding to the intersectionID
+     */
+    int numOfSegs;
+    IDVector intersectionIds;
+    std::vector<std::string> segNames;
+
+    for(int i=0;i<getNumIntersections();i++){
+        numOfSegs=getIntersectionStreetSegmentCount(i);
+        segNames.clear();
+        intersectionIds.clear();
+
+        for(int j=0;j<numOfSegs;j++){
+            segNames.push_back(getStreetName((getInfoStreetSegment(getIntersectionStreetSegment(j, i))).streetID));
+            intersectionIds.push_back(getIntersectionStreetSegment(j, i));           
+
+        }
+        intersectionSegNameVector.push_back(segNames);
+        intersectionSegIDVector.push_back(intersectionIds);
+    }
 }
 
 

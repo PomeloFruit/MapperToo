@@ -35,8 +35,11 @@ public:
     std::vector< Node > Nodes;
     std::vector< LatLon > intersectionPos;
     
+    double secPerMeter;
+    
     void fillNodes();
     void connectNodes();
+    void findFastestStreet();
 };
 
 enum class HumanTurnType {
