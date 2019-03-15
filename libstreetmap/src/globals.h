@@ -136,7 +136,7 @@ public:
     std::vector<unsigned> lastIntersection, lastPOI, lastSeg, lastFeature, lastSubway;
     
     // contains the input from the text fields
-    std::string textInput1, textInput2;
+    std::string textInput1, textInput2, textInput3, textInput4;
     
     // contains the output to the text fields/ corrected names
     std::string corInput1, corInput2;

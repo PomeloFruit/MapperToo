@@ -160,18 +160,17 @@ std::string clickActions::searchOnMap(infoStrucs &info){
     
     if(info.findDirections){
         
-//        info.corInput3 = "";
-//        info.corInput4 = "";
+        //info.corInput3 = "";
         std::string street1, street2;
         street1 = "Beverley Glen Boulevard";
         street2 = "Stonebridge Boulevard";
         std::cout << "Enter name of street 3 ";
-        std::cout << street1 << std::endl;
+        std::cout << info.textInput3 << std::endl;
         std::cout << "Enter name of street 4 ";
-        std::cout << street2 << std::endl;
+        std::cout << info.textInput4 << std::endl;
         
-        match3 = findMatches(street3ID, street1, info);//info.textInput3, info);
-        match4 = findMatches(street4ID, street2, info);//info.textInput4, info);
+        match3 = findMatches(street3ID, info.textInput3, info);
+        match4 = findMatches(street4ID, info.textInput4, info);
         
         std::vector<unsigned> temp;        
         
@@ -343,7 +342,9 @@ std::string clickActions::searchOnMap(infoStrucs &info){
             highlightStreet(info, resultID[0]);
 
         // find street from input 2
-        } else if(match2 > RESULTNONE) { 
+        } 
+        
+        else if(match2 > RESULTNONE) { 
             resultID = street2ID;
             displayMessage = "Street Found: ";
             displayMessage += getStreetName(resultID[0]);
@@ -363,7 +364,9 @@ std::string clickActions::searchOnMap(infoStrucs &info){
             highlightStreet(info, resultID[0]);
 
         // find POI from input 1
-        } else if(match1 == RESULTPOI) { 
+        } 
+        
+        else if(match1 == RESULTPOI) { 
             resultID = street1ID;
 
             displayMessage = "Point of Interest Found: ";

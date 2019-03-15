@@ -1,18 +1,45 @@
 .searchFrame{
-	background-color: #fafafa;
+	background-color: #fbfbfb;
 	border:2px solid;
 	border-radius: 5px;
-	border-color: #d9d9d9;
+	border-color: #cccccc;
+	box-shadow: 1px 1px 3px #808080; 
 }
 .searchInput{
-	border:1px solid; 
-	border-radius:5px; 
-	border-color: #d9d9d9;
-	box-shadow: 10px 10px 40px #e6e6e6 inset;
+	border:0px solid; 
+	box-shadow: 40px 40px 40px #f1f1f1 inset;
 }
 .findButton{
 	box-shadow: 10px 10px 40px #f1f1f1 inset;
+	border-radius:1px;	
+	border: 0px solid; 
+}
+.searchButton{
+	box-shadow: 10px 10px 40px #f1f1f1 inset;
+	border: 0px solid; 
+}
+.menuButton{
+	box-shadow: 10px 10px 40px #f2f2f2 inset;
 	border: 1px solid; 
-	border-radius: 5px;
+	border-radius: 3px;
 	border-color: #d9d9d9; 
+}
+.poiGrid{
+	background-color: #eeeee8;
+	border:2px solid;
+	border-radius: 5px;
+	border-color: #cccccc;
+	box-shadow: 1px 1px 3px #808080; 
+}
+.poiButton{
+	box-shadow: 10px 10px 40px #eeeee8 inset;
+	border-radius:0px;	
+	border: 0px solid; 
+}
+.directionGrid{
+	background-color: #92aee7;
+	border:2px solid;
+	border-radius: 5px;
+	border-color: #6d93df;
+	box-shadow: 1px 1px 3px #808080; 
 }

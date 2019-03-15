@@ -44,7 +44,8 @@ void initial_setup(ezgl::application *application);
 void act_on_mouse_press(ezgl::application *application, GdkEventButton *event, double x, double y);
 void act_on_key_press(ezgl::application *application, GdkEventKey *event, char *key_name);
 void setCompletionModel(ezgl::application *application);
-void findButton(GtkWidget *widget, ezgl::application *application);
+void findButton(GtkWidget *, ezgl::application *application);
+void directionButton(GtkWidget *, ezgl::application *application);
 void dialog_box(GtkWidget *widget, ezgl::application *application, std::string message);
 void on_dialog_response(GtkDialog *dialog);
 
@@ -53,9 +54,9 @@ void showSubwayButton(GtkWidget *widget, ezgl::application *application);
 void hideTrainsButton(GtkWidget *widget, ezgl::application *application);
 void showTrainsButton(GtkWidget *widget, ezgl::application *application);
 
-void touristButton(GtkWidget *widget, ezgl::application *application);
-void fdButton(GtkWidget *widget, ezgl::application *application);
-void shopsButton(GtkWidget *widget, ezgl::application *application);
+void touristButton(GtkWidget *, ezgl::application *application);
+void fdButton(GtkWidget *, ezgl::application *application);
+void shopsButton(GtkWidget *, ezgl::application *application);
 void helpButton(GtkWidget *widget, ezgl::application *application);
 void initiateTheSicko(GtkWidget *widget, ezgl::application *application); 
 
@@ -79,6 +80,8 @@ std::vector<std::pair<std::string, std::string>> city {std::make_pair("beijing",
         std::make_pair("sydney","australia"), std::make_pair("tehran","iran"), 
         std::make_pair("tokyo","japan"), std::make_pair("toronto","canada")
 };
+
+bool showTime [10]; 
 
 //=========================== Function Definitions ===========================
 
@@ -169,15 +172,20 @@ void draw_main_canvas(ezgl::renderer &g){
 void initial_setup(ezgl::application *application){
     setCompletionModel(application);
     application->update_message("Left-click for Points of Interest | Right-click for Intersections | <ctrl> + Left-click for Subways ");
-    application->connect_feature(findButton);
     
-    application->create_button("Show Subways",8,showSubwayButton);
-    application->create_button("Show Trains",9,showTrainsButton);
-    application->create_button("Show Tourist POIs", 10, touristButton); 
-    application->create_button("Show Food/Drink POIs", 11, fdButton); 
-    application->create_button("Show Shopping POIs", 12, shopsButton);
-    application->create_button("Help", 13, helpButton);
-    application->create_button("Sicko Mode", 14, initiateTheSicko); 
+    //============================================ MODIFY THE SHOW SUBWAY AND SHOW TRAIN BUTTON FUNCTIONS==========================================
+    //when done modifying, put the showTransitButton function into the last position------------------> here
+    application->connect_feature(findButton, directionButton, touristButton, fdButton, shopsButton, shopsButton);
+    
+    
+    
+    //application->create_button("Show Subways",8,showSubwayButton);
+    //application->create_button("Show Trains",9,showTrainsButton);
+    //application->create_button("Show Tourist POIs", 10, touristButton); 
+    //application->create_button("Show Food/Drink POIs", 11, fdButton); 
+    //application->create_button("Show Shopping POIs", 12, shopsButton);
+    //application->create_button("Help", 13, helpButton);
+    //application->create_button("Sicko Mode", 14, initiateTheSicko); 
 }
 
 
@@ -206,10 +214,10 @@ void setCompletionModel(ezgl::application *application){
     //gtk_entry_completion_set_text_column(completionBox4, 0);
     
     // add all streets
-    for(unsigned i=0 ; i< static_cast<unsigned>(getNumStreets()) ; i++){
+    for(unsigned i=0 ; i< static_cast<unsigned>(getNumIntersections()) ; i++){
         
         // convert string to char*
-        std::string str = getStreetName(i);
+        std::string str = getIntersectionName(i);
         char * nameChar = new char[str.size() + 1];
         std::copy(str.begin(), str.end(), nameChar);
         nameChar[str.size()] = '\0';
@@ -302,21 +310,18 @@ void act_on_key_press(ezgl::application *application, GdkEventKey *, char *key_n
  * @return void
  */
 
-void findButton(GtkWidget *widget, ezgl::application *application){
-
-    //cancels warning / not needed at all
-    if(widget != NULL){
-        widget->parent_instance.ref_count;
-    }    
+void findButton(GtkWidget *, ezgl::application *application){ 
         
     const char *name1;
     const char *name2;
+    const char *name3; 
+    
     std::string message;
     std::string path_name; 
     bool changeMap = false;
     
     // get the user input(s))
-    application->get_input_text(name1, name2, name1, name2);
+    application->get_input_text(name1, name2, name3);
     
     //======================= change map ======================================
     /*takes in the city name from name1 and then matches it with the country name 
@@ -349,25 +354,85 @@ void findButton(GtkWidget *widget, ezgl::application *application){
     //======================== Map Element Searching ===========================
     
     if(!changeMap){
-        info.textInput1 = name1;
-        info.textInput2 = name2;
+        //split up the input if there is '&' 
+        //make first part as textInput1 and second part as textInput2
+        std::string input1, input2, input3, street1, street2, street3, street4; 
+        input1 = name1;
+        input2 = name2;
+        input3 = name3; 
+        
+        std::cout<<"SearchBar 1: " << input1 << " SearchBar 2: " << input2 << " SearchBar 3: " << input3 << std::endl;
+        
+        //splitting up the input from the first search bar into street 1 and street 2
+        //not sure if there are extra spaces in the separated street names 
+        //not sure if it will affect the other functions
+        int split = (int)input1.find("&"); 
+        
+        for(int i = 0; i < split; i++){
+            street1 = street1 + input1[i]; 
+        }
+        for(unsigned i = split + 1; i < input1.length(); i++){
+            street2 = street2 + input1[i];
+        }
+        
+        //splitting up the input from the third search bar into street 3 and street 4
+        split = (int)input3.find("&"); 
+        
+        for(int i = 0; i < split; i++){
+            street3 = street3 + input3[i]; 
+        }
+        for(unsigned i = split + 1; i < input3.length(); i++){
+            street4 = street4 + input3[i];
+        }
 
+        info.textInput1 = street1;
+        info.textInput2 = street2;
+        info.textInput3 = street3;
+        info.textInput4 = street4; 
+        
+        
         message = ck.searchOnMap(info);
 
         // auto-correct the input
+        
+        //======================================================================
+        //Currently, the 1st search bar can accept two streets and separates them 
+        //Search bar 2 and search bar 3 are connected, but auto complete feature is not there
+        
+        
         if(info.corInput1 != ""){
-            name1 = info.corInput1.c_str();
+            street1 = info.corInput1;
         }
         if(info.corInput2 != ""){
-            name2 = info.corInput2.c_str();
+            street2 = info.corInput2;
         }
-        application->set_input_text(name1, name2, name1, name2);
+        
+        //Auto corrects input by adding the two street suggestions together
+        //Not sure if this is the correct thing to do
+        street1 = street1 + " & " + street2; 
+        name1 = street1.c_str(); 
+        
+        application->set_input_text(name1, name2, name3);
         
         zoomAllPoints(application);
         
         // reflect the changes
         application->update_message(message);
         application->refresh_drawing();
+    }
+}
+
+void directionButton(GtkWidget *, ezgl::application *application){
+    
+    GtkWidget *directionPanel = (GtkWidget*)application->get_object("directionBackground");
+    if(showTime[0] == false){
+        showTime[0] = true; 
+        gtk_widget_show(directionPanel);
+        
+        
+    }else if (showTime[0] == true){
+        showTime[0] = false;
+        gtk_widget_hide(directionPanel);
     }
 }
 
@@ -532,15 +597,12 @@ void showTrainsButton(GtkWidget *widget, ezgl::application *application){
  * @return void
  */
 
-void touristButton(GtkWidget *widget, ezgl::application *application){
-    widget->parent_instance.ref_count;
+void touristButton(GtkWidget *, ezgl::application *application){
     
     if(info.poiButtonStatus[0] == 0){
         info.poiButtonStatus[0] = 1;
-        application->change_button_text("Show Tourist POIs", "Hide Tourist POIs");
     }else{
         info.poiButtonStatus[0] = 0;
-        application->change_button_text("Hide Tourist POIs", "Show Tourist POIs");
     }
     
     application->refresh_drawing();
@@ -557,15 +619,12 @@ void touristButton(GtkWidget *widget, ezgl::application *application){
  * @return void
  */
 
-void fdButton(GtkWidget *widget, ezgl::application *application){
-    widget->parent_instance.ref_count;
-    
+void fdButton(GtkWidget *, ezgl::application *application){
+
     if(info.poiButtonStatus[1] == 0){
         info.poiButtonStatus[1] = 1;
-        application->change_button_text("Show Food/Drink POIs", "Hide Food/Drink POIs");
     } else {
         info.poiButtonStatus[1] = 0;
-        application->change_button_text("Hide Food/Drink POIs", "Show Food/Drink POIs");
     }
     
     application->refresh_drawing();
@@ -582,15 +641,12 @@ void fdButton(GtkWidget *widget, ezgl::application *application){
  * @return void
  */
 
-void shopsButton(GtkWidget *widget, ezgl::application *application){
-    widget->parent_instance.ref_count;
-    
+void shopsButton(GtkWidget *, ezgl::application *application){
+
     if(info.poiButtonStatus[2] == 0){
         info.poiButtonStatus[2] = 1;
-        application->change_button_text("Show Shopping POIs", "Hide Shopping POIs");
     }else{
         info.poiButtonStatus[2] = 0;
-        application->change_button_text("Hide Shopping POIs", "Show Shopping POIs");
     }
     
     application->refresh_drawing();

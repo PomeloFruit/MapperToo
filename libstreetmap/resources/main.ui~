@@ -2,6 +2,22 @@
 <!-- Generated with glade 3.20.0 -->
 <interface>
   <requires lib="gtk+" version="3.20"/>
+  <object class="GtkImage" id="DirectionImage">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="pixbuf">direction.png</property>
+    <style>
+      <class name="image"/>
+    </style>
+  </object>
+  <object class="GtkImage" id="FindImage">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="pixbuf">search.png</property>
+    <style>
+      <class name="image"/>
+    </style>
+  </object>
   <object class="GtkListStore" id="NameSuggestion">
     <columns>
       <!-- column-name StreetName -->
@@ -13,6 +29,55 @@
   </object>
   <object class="GtkEntryCompletion" id="NameCompletion2">
     <property name="model">NameSuggestion</property>
+  </object>
+  <object class="GtkListStore" id="NameSuggestion1">
+    <columns>
+      <!-- column-name StreetName -->
+      <column type="gchararray"/>
+    </columns>
+  </object>
+  <object class="GtkImage" id="ProceedImage">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="pixbuf">close.png</property>
+  </object>
+  <object class="GtkImage" id="ZoomFitImage">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="pixbuf">zoomfit.png</property>
+  </object>
+  <object class="GtkImage" id="ZoomInImage">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="pixbuf">zoomin.png</property>
+    <style>
+      <class name="menuButton"/>
+    </style>
+  </object>
+  <object class="GtkImage" id="ZoomOutImage">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="pixbuf">zoomout.png</property>
+  </object>
+  <object class="GtkImage" id="foodDrinkIcon">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="pixbuf">food.png</property>
+  </object>
+  <object class="GtkImage" id="shopIcon">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="pixbuf">shop bag.png</property>
+  </object>
+  <object class="GtkImage" id="touristIcon">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="pixbuf">tourist.png</property>
+  </object>
+  <object class="GtkImage" id="transitIcon">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="pixbuf">train.png</property>
   </object>
   <object class="GtkWindow" id="MainWindow">
     <property name="visible">True</property>
@@ -62,16 +127,82 @@
           </packing>
         </child>
         <child type="overlay">
-          <object class="GtkGrid" id="InnerGrid">
+          <object class="GtkGrid" id="InnerGrid1">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
+            <property name="can_focus">True</property>
             <property name="halign">end</property>
-            <property name="valign">center</property>
+            <property name="valign">end</property>
+            <property name="margin_right">15</property>
+            <property name="margin_bottom">45</property>
             <child>
-              <object class="GtkButton" id="UpButton">
+              <object class="GtkButton" id="ZoomInButton">
                 <property name="use_action_appearance">False</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="image">ZoomInImage</property>
+                <style>
+                  <class name="menuButton"/>
+                </style>
+              </object>
+              <packing>
+                <property name="left_attach">0</property>
+                <property name="top_attach">4</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="ZoomOutButton">
+                <property name="use_action_appearance">False</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="image">ZoomOutImage</property>
+                <style>
+                  <class name="menuButton"/>
+                </style>
+              </object>
+              <packing>
+                <property name="left_attach">0</property>
+                <property name="top_attach">5</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="ZoomFitButton">
+                <property name="use_action_appearance">False</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="image">ZoomFitImage</property>
+                <style>
+                  <class name="menuButton"/>
+                </style>
+              </object>
+              <packing>
+                <property name="left_attach">0</property>
+                <property name="top_attach">6</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="ProceedButton">
+                <property name="use_action_appearance">False</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="image">ProceedImage</property>
+                <style>
+                  <class name="menuButton"/>
+                </style>
+              </object>
+              <packing>
+                <property name="left_attach">0</property>
+                <property name="top_attach">7</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="UpButton">
+                <property name="use_action_appearance">False</property>
+                <property name="sensitive">False</property>
+                <property name="can_focus">False</property>
                 <property name="receives_default">True</property>
                 <child>
                   <object class="GtkArrow">
@@ -82,15 +213,15 @@
                 </child>
               </object>
               <packing>
-                <property name="left_attach">1</property>
-                <property name="top_attach">1</property>
+                <property name="left_attach">0</property>
+                <property name="top_attach">0</property>
               </packing>
             </child>
             <child>
               <object class="GtkButton" id="DownButton">
                 <property name="use_action_appearance">False</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
+                <property name="sensitive">False</property>
+                <property name="can_focus">False</property>
                 <property name="receives_default">True</property>
                 <child>
                   <object class="GtkArrow">
@@ -101,15 +232,15 @@
                 </child>
               </object>
               <packing>
-                <property name="left_attach">1</property>
-                <property name="top_attach">3</property>
+                <property name="left_attach">0</property>
+                <property name="top_attach">1</property>
               </packing>
             </child>
             <child>
               <object class="GtkButton" id="LeftButton">
                 <property name="use_action_appearance">False</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
+                <property name="sensitive">False</property>
+                <property name="can_focus">False</property>
                 <property name="receives_default">True</property>
                 <child>
                   <object class="GtkArrow">
@@ -121,14 +252,14 @@
               </object>
               <packing>
                 <property name="left_attach">0</property>
-                <property name="top_attach">2</property>
+                <property name="top_attach">3</property>
               </packing>
             </child>
             <child>
               <object class="GtkButton" id="RightButton">
                 <property name="use_action_appearance">False</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
+                <property name="sensitive">False</property>
+                <property name="can_focus">False</property>
                 <property name="receives_default">True</property>
                 <child>
                   <object class="GtkArrow">
@@ -138,89 +269,9 @@
                 </child>
               </object>
               <packing>
-                <property name="left_attach">2</property>
+                <property name="left_attach">0</property>
                 <property name="top_attach">2</property>
               </packing>
-            </child>
-            <child>
-              <object class="GtkButton" id="ZoomInButton">
-                <property name="label" translatable="yes">Zoom In</property>
-                <property name="use_action_appearance">False</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-              </object>
-              <packing>
-                <property name="left_attach">0</property>
-                <property name="top_attach">4</property>
-                <property name="width">3</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButton" id="ZoomOutButton">
-                <property name="label" translatable="yes">Zoom Out</property>
-                <property name="use_action_appearance">False</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-              </object>
-              <packing>
-                <property name="left_attach">0</property>
-                <property name="top_attach">5</property>
-                <property name="width">3</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButton" id="ZoomFitButton">
-                <property name="label" translatable="yes">Zoom Fit</property>
-                <property name="use_action_appearance">False</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-              </object>
-              <packing>
-                <property name="left_attach">0</property>
-                <property name="top_attach">6</property>
-                <property name="width">3</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButton" id="ProceedButton">
-                <property name="label" translatable="yes">Exit Map</property>
-                <property name="use_action_appearance">False</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-              </object>
-              <packing>
-                <property name="left_attach">0</property>
-                <property name="top_attach">7</property>
-                <property name="width">3</property>
-              </packing>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
             </child>
           </object>
           <packing>
@@ -229,9 +280,106 @@
           </packing>
         </child>
         <child type="overlay">
-          <object class="GtkFrame">
-            <property name="width_request">514</property>
-            <property name="height_request">139</property>
+          <object class="GtkButtonBox" id="PoiGrid">
+            <property name="name">100</property>
+            <property name="width_request">422</property>
+            <property name="height_request">98</property>
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="halign">start</property>
+            <property name="valign">start</property>
+            <property name="margin_left">36</property>
+            <property name="margin_top">97</property>
+            <property name="border_width">0</property>
+            <property name="spacing">15</property>
+            <property name="homogeneous">True</property>
+            <property name="layout_style">center</property>
+            <child>
+              <object class="GtkToggleButton" id="Shop">
+                <property name="label" translatable="yes">Shops</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="image">shopIcon</property>
+                <property name="image_position">top</property>
+                <style>
+                  <class name="poiButton"/>
+                </style>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkToggleButton" id="Tourist">
+                <property name="label" translatable="yes">Attractions</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="image">touristIcon</property>
+                <property name="image_position">top</property>
+                <style>
+                  <class name="poiButton"/>
+                </style>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="pack_type">end</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkToggleButton" id="FoodDrink">
+                <property name="label" translatable="yes">Food</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="image">foodDrinkIcon</property>
+                <property name="image_position">top</property>
+                <style>
+                  <class name="poiButton"/>
+                </style>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkToggleButton" id="Subway">
+                <property name="label" translatable="yes">Transit</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="image">transitIcon</property>
+                <property name="image_position">top</property>
+                <style>
+                  <class name="poiButton"/>
+                </style>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">3</property>
+              </packing>
+            </child>
+            <style>
+              <class name="poiGrid"/>
+            </style>
+          </object>
+          <packing>
+            <property name="pass_through">True</property>
+            <property name="index">4</property>
+          </packing>
+        </child>
+        <child type="overlay">
+          <object class="GtkFrame" id="SearchFrame">
+            <property name="width_request">495</property>
+            <property name="height_request">108</property>
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="halign">start</property>
@@ -252,24 +400,16 @@
                     <property name="valign">start</property>
                     <property name="column_homogeneous">True</property>
                     <child>
-                      <object class="GtkLabel">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">Name of Street | POI | Feature | Subway || City Name (to Change Map) </property>
-                      </object>
-                      <packing>
-                        <property name="left_attach">0</property>
-                        <property name="top_attach">0</property>
-                      </packing>
-                    </child>
-                    <child>
                       <object class="GtkSearchEntry" id="FindStreet1">
+                        <property name="width_request">350</property>
+                        <property name="height_request">44</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
+                        <property name="halign">start</property>
                         <property name="primary_icon_name">edit-find-symbolic</property>
                         <property name="primary_icon_activatable">False</property>
                         <property name="primary_icon_sensitive">False</property>
-                        <property name="placeholder_text" translatable="yes">Enter Name to Search</property>
+                        <property name="placeholder_text" translatable="yes">Search (Streets, POI, Features, Subways, Cities)</property>
                         <property name="completion">NameCompletion1</property>
                         <style>
                           <class name="searchInput"/>
@@ -277,25 +417,7 @@
                       </object>
                       <packing>
                         <property name="left_attach">0</property>
-                        <property name="top_attach">1</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkSearchEntry" id="FindStreet2">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="primary_icon_name">edit-find-symbolic</property>
-                        <property name="primary_icon_activatable">False</property>
-                        <property name="primary_icon_sensitive">False</property>
-                        <property name="placeholder_text" translatable="yes">Second Street (only for Intersection Search)</property>
-                        <property name="completion">NameCompletion2</property>
-                        <style>
-                          <class name="searchInput"/>
-                        </style>
-                      </object>
-                      <packing>
-                        <property name="left_attach">0</property>
-                        <property name="top_attach">2</property>
+                        <property name="top_attach">0</property>
                       </packing>
                     </child>
                   </object>
@@ -314,12 +436,182 @@
           </object>
           <packing>
             <property name="pass_through">True</property>
-            <property name="index">3</property>
+            <property name="index">5</property>
+          </packing>
+        </child>
+        <child type="overlay">
+          <object class="GtkFrame" id="directionBackground">
+            <property name="width_request">464</property>
+            <property name="can_focus">False</property>
+            <property name="halign">start</property>
+            <property name="margin_left">15</property>
+            <property name="margin_top">97</property>
+            <property name="margin_bottom">45</property>
+            <property name="label_xalign">0</property>
+            <property name="shadow_type">none</property>
+            <child>
+              <object class="GtkAlignment">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="left_padding">12</property>
+                <child>
+                  <object class="GtkGrid" id="directionGrid">
+                    <property name="width_request">435</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="halign">start</property>
+                    <property name="margin_bottom">15</property>
+                    <child>
+                      <object class="GtkSearchEntry" id="FindStreet2">
+                        <property name="width_request">275</property>
+                        <property name="height_request">47</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="valign">end</property>
+                        <property name="primary_icon_name">user-home-symbolic.symbolic</property>
+                        <property name="primary_icon_activatable">False</property>
+                        <property name="primary_icon_sensitive">False</property>
+                        <property name="placeholder_text" translatable="yes">Choose Starting Location</property>
+                        <property name="completion">NameCompletion2</property>
+                        <style>
+                          <class name="searchButton"/>
+                        </style>
+                      </object>
+                      <packing>
+                        <property name="left_attach">0</property>
+                        <property name="top_attach">0</property>
+                        <property name="width">20</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkSearchEntry" id="FindStreet3">
+                        <property name="width_request">435</property>
+                        <property name="height_request">46</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="halign">center</property>
+                        <property name="valign">end</property>
+                        <property name="margin_top">5</property>
+                        <property name="margin_bottom">10</property>
+                        <property name="primary_icon_name">find-location-symbolic.symbolic</property>
+                        <property name="primary_icon_activatable">False</property>
+                        <property name="primary_icon_sensitive">False</property>
+                        <property name="placeholder_text" translatable="yes">Choose Destination</property>
+                        <style>
+                          <class name="searchInput"/>
+                        </style>
+                      </object>
+                      <packing>
+                        <property name="left_attach">0</property>
+                        <property name="top_attach">1</property>
+                        <property name="width">20</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child type="label">
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+              </object>
+            </child>
+            <style>
+              <class name="directionGrid"/>
+            </style>
+          </object>
+          <packing>
+            <property name="index">5</property>
+          </packing>
+        </child>
+        <child type="overlay">
+          <object class="GtkButton" id="DirectionButton">
+            <property name="width_request">40</property>
+            <property name="height_request">20</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="can_default">True</property>
+            <property name="has_default">True</property>
+            <property name="receives_default">True</property>
+            <property name="halign">start</property>
+            <property name="valign">start</property>
+            <property name="margin_left">421</property>
+            <property name="margin_top">32</property>
+            <property name="image">DirectionImage</property>
+            <property name="image_position">bottom</property>
+            <signal name="clicked" handler="gtk_widget_hide" object="StatusBar" swapped="no"/>
+            <style>
+              <class name="searchButton"/>
+            </style>
+          </object>
+          <packing>
+            <property name="pass_through">True</property>
+            <property name="index">5</property>
           </packing>
         </child>
         <child type="overlay">
           <object class="GtkButton" id="FindButton">
-            <property name="label" translatable="yes">Find</property>
             <property name="width_request">40</property>
             <property name="height_request">20</property>
             <property name="visible">True</property>
@@ -327,24 +619,20 @@
             <property name="receives_default">True</property>
             <property name="halign">start</property>
             <property name="valign">start</property>
-            <property name="margin_left">445</property>
-            <property name="margin_top">47</property>
+            <property name="margin_left">378</property>
+            <property name="margin_top">32</property>
+            <property name="image">FindImage</property>
             <property name="image_position">bottom</property>
             <style>
               <class name="findButton"/>
             </style>
           </object>
           <packing>
-            <property name="index">3</property>
+            <property name="pass_through">True</property>
+            <property name="index">5</property>
           </packing>
         </child>
       </object>
     </child>
-  </object>
-  <object class="GtkListStore" id="NameSuggestion1">
-    <columns>
-      <!-- column-name StreetName -->
-      <column type="gchararray"/>
-    </columns>
   </object>
 </interface>
