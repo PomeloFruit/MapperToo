@@ -201,8 +201,7 @@ void setCompletionModel(ezgl::application *application){
     GtkListStore *completeModel = (GtkListStore *) application->get_object("NameSuggestion");
     GtkEntryCompletion *completionBox1 = (GtkEntryCompletion *) application->get_object("NameCompletion1");
     GtkEntryCompletion *completionBox2 = (GtkEntryCompletion *) application->get_object("NameCompletion2");
-    //GtkEntryCompletion *completionBox3 = (GtkEntryCompletion *) application->get_object("NameCompletion3");
-    //GtkEntryCompletion *completionBox4 = (GtkEntryCompletion *) application->get_object("NameCompletion4");
+    GtkEntryCompletion *completionBox3 = (GtkEntryCompletion *) application->get_object("NameCompletion3");
     GtkTreeIter iter;
     
     // make sure entry completion is correct
@@ -210,8 +209,7 @@ void setCompletionModel(ezgl::application *application){
     gtk_list_store_append(completeModel, &iter);
     gtk_entry_completion_set_text_column(completionBox1, 0);
     gtk_entry_completion_set_text_column(completionBox2, 0);
-    //gtk_entry_completion_set_text_column(completionBox3, 0);
-    //gtk_entry_completion_set_text_column(completionBox4, 0);
+    gtk_entry_completion_set_text_column(completionBox3, 0);
     
     // add all streets
     for(unsigned i=0 ; i< static_cast<unsigned>(getNumIntersections()) ; i++){
@@ -368,27 +366,43 @@ void findButton(GtkWidget *, ezgl::application *application){
         //not sure if it will affect the other functions
         int split = (int)input1.find("&"); 
         
-        for(int i = 0; i < split; i++){
+        for(int i = 0; i < split-1; i++){
             street1 = street1 + input1[i]; 
         }
-        for(unsigned i = split + 1; i < input1.length(); i++){
+        for(unsigned i = split + 2; i < input1.length(); i++){
             street2 = street2 + input1[i];
         }
         
-        //splitting up the input from the third search bar into street 3 and street 4
-        split = (int)input3.find("&"); 
+        if(info.findDirections){     
+            split = (int)input2.find("&"); 
         
-        for(int i = 0; i < split; i++){
-            street3 = street3 + input3[i]; 
-        }
-        for(unsigned i = split + 1; i < input3.length(); i++){
-            street4 = street4 + input3[i];
+            for(int i = 0; i < split-1; i++){
+                street1 = street1 + input2[i]; 
+            }
+            for(unsigned i = split + 2; i < input2.length(); i++){
+                street2 = street2 + input2[i];
+            }
+            
+            //splitting up the input from the third search bar into street 3 and street 4
+            split = (int)input3.find("&"); 
+
+            for(int i = 0; i < split-1; i++){
+                street3 = street3 + input3[i]; 
+            }
+            for(unsigned i = split + 2; i < input3.length(); i++){
+                street4 = street4 + input3[i];
+            }
         }
 
         info.textInput1 = street1;
         info.textInput2 = street2;
         info.textInput3 = street3;
         info.textInput4 = street4; 
+        
+        std::cout<<info.textInput1<<"end"<<std::endl;
+        std::cout<<info.textInput2<<"end"<<std::endl;
+        std::cout<<info.textInput3<<"end"<<std::endl;
+        std::cout<<info.textInput4<<"end"<<std::endl;
         
         
         message = ck.searchOnMap(info);
@@ -426,11 +440,13 @@ void directionButton(GtkWidget *, ezgl::application *application){
     
     GtkWidget *directionPanel = (GtkWidget*)application->get_object("directionBackground");
     if(showTime[0] == false){
+        info.findDirections = true;
         showTime[0] = true; 
         gtk_widget_show(directionPanel);
         
         
     }else if (showTime[0] == true){
+        info.findDirections = false;
         showTime[0] = false;
         gtk_widget_hide(directionPanel);
     }

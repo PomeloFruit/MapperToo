@@ -153,28 +153,18 @@ std::string clickActions::searchOnMap(infoStrucs &info){
     match1 = findMatches(street1ID, info.textInput1, info);
     match2 = findMatches(street2ID, info.textInput2, info);
     
-    
     // reset correct input output names to blank
     info.corInput1 = "";
     info.corInput2 = "";
     
     if(info.findDirections){
         
-        //info.corInput3 = "";
-        std::string street1, street2;
-        street1 = "Beverley Glen Boulevard";
-        street2 = "Stonebridge Boulevard";
-        std::cout << "Enter name of street 3 ";
-        std::cout << info.textInput3 << std::endl;
-        std::cout << "Enter name of street 4 ";
-        std::cout << info.textInput4 << std::endl;
-        
         match3 = findMatches(street3ID, info.textInput3, info);
         match4 = findMatches(street4ID, info.textInput4, info);
         
         std::vector<unsigned> temp;        
         
-        std::cout << " finding intersection from "<< std::endl;
+        std::cout << " finding intersection from "<< street1ID.size() << street2ID.size() << std::endl;
         
         for(unsigned i=0 ; i<street1ID.size() ; i++){
             for(unsigned j=0 ; j<street2ID.size() ; j++){
@@ -201,7 +191,7 @@ std::string clickActions::searchOnMap(infoStrucs &info){
             }
         }
         
-        std::cout << " finding intersection to "<< std::endl;
+        std::cout << " finding intersection to "<<street3ID.size() << street4ID.size() <<std::endl;
         
         for(unsigned i=0 ; i<street3ID.size() ; i++){
             for(unsigned j=0 ; j<street4ID.size() ; j++){
@@ -229,7 +219,7 @@ std::string clickActions::searchOnMap(infoStrucs &info){
             }
         }
         
-        std::cout << "finding a path" << std::endl;
+        std::cout << "finding a path" << resultID.size() << std::endl;
         
         if(resultID.size() > 0){ // if intersection found
             
