@@ -85,13 +85,18 @@ public:
     std::string totDistancePrint;
     std::string totTimePrint;
     
-    void fillInfo();//calls me other shit yarr harr
-    void fillDistance();
-    void fillStreets();
-    void fillTurn();
+    void fillInfo(std::vector<unsigned> path);//calls me other shit yarr harr
+    void fillDistance(std::vector<unsigned> path);
+    void fillStreets(std::vector<unsigned> path);
+    void fillTurn(std::vector<unsigned> path);
     
-    void setStartStop();
-    void setDistanceTime();    
+    void setStartStop(std::string start, std::string stop);
+    void setDistanceTime(int distance, double time);
+    
+    double findAngleBetweenSegs(unsigned street_segment1, unsigned street_segment2);
+    double findAngleBetweenThreePoints(LatLon ptFrom, LatLon ptCommon, LatLon ptTo);
+
+    void clear();
 };
 
 //=========================== Global Variables ================================
@@ -99,5 +104,5 @@ public:
 // first declared in m1.cpp load map
 extern DirectionInfo Dir;
 
-
+//first declared in m2.cpp just after searchOnMap
 extern HumanInfo Hum;

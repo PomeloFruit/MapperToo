@@ -244,7 +244,6 @@ std::string clickActions::searchOnMap(infoStrucs &info){
         } 
 
      //   info.findDirections = false;
-        
     } else {    
         // if inputs are invalid, get the error message
         displayMessage = getMessagesFromMatches(match1, match2);

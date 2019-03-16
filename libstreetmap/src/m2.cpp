@@ -11,6 +11,8 @@
 #include "drawText.h"
 #include "grid.h"
 
+#include "directionInfo.h"
+
 #include "StreetsDatabaseAPI.h"
 #include "OSMDatabaseAPI.h"
 #include "OSMID.h"
@@ -36,7 +38,7 @@ featureDrawing ft;
 roadDrawing rd;
 clickActions ck;
 drawText dt;
-
+HumanInfo Hum;
 //=========================== Function Prototypes ===========================
 
 void draw_main_canvas(ezgl::renderer &g);
@@ -406,7 +408,10 @@ void findButton(GtkWidget *, ezgl::application *application){
         
         
         message = ck.searchOnMap(info);
-
+        //so I'm going to populate the thing here after clearing it ok
+        Hum.clear();
+        Hum.fillInfo(info.lastSeg);
+        Hum.setStartStop(input2, input3);
         // auto-correct the input
         
         //======================================================================
