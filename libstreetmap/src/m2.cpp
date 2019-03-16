@@ -48,6 +48,7 @@ void act_on_key_press(ezgl::application *application, GdkEventKey *event, char *
 void setCompletionModel(ezgl::application *application);
 void findButton(GtkWidget *, ezgl::application *application);
 void directionButton(GtkWidget *, ezgl::application *application);
+void closeButton(GtkWidget *, ezgl::application *application);
 void dialog_box(GtkWidget *widget, ezgl::application *application, std::string message);
 void on_dialog_response(GtkDialog *dialog);
 
@@ -82,8 +83,6 @@ std::vector<std::pair<std::string, std::string>> city {std::make_pair("beijing",
         std::make_pair("sydney","australia"), std::make_pair("tehran","iran"), 
         std::make_pair("tokyo","japan"), std::make_pair("toronto","canada")
 };
-
-bool showTime [10]; 
 
 //=========================== Function Definitions ===========================
 
@@ -177,7 +176,7 @@ void initial_setup(ezgl::application *application){
     
     //============================================ MODIFY THE SHOW SUBWAY AND SHOW TRAIN BUTTON FUNCTIONS==========================================
     //when done modifying, put the showTransitButton function into the last position------------------> here
-    application->connect_feature(findButton, directionButton, touristButton, fdButton, shopsButton, shopsButton);
+    application->connect_feature(findButton, directionButton, touristButton, fdButton, shopsButton, shopsButton, closeButton);
     
     
     
@@ -443,17 +442,48 @@ void findButton(GtkWidget *, ezgl::application *application){
 
 void directionButton(GtkWidget *, ezgl::application *application){
     
-    GtkWidget *directionPanel = (GtkWidget*)application->get_object("directionBackground");
-    if(showTime[0] == false){
+    GtkWidget *directionBackground = (GtkWidget*)application->get_object("directionBackground");
+    GtkWidget *directionGridOuter = (GtkWidget*)application->get_object("directionGridOuter");
+    GtkWidget *directionClose = (GtkWidget*)application->get_object("closeOverlay");
+    
+    GtkWidget *poiGrid  = (GtkWidget*)application->get_object("PoiGrid");
+    GtkWidget *searchFrame  = (GtkWidget*)application->get_object("SearchFrame");
+    GtkWidget *findButton = (GtkWidget*)application->get_object("FindButton");
+    GtkWidget *directionButton  = (GtkWidget*)application->get_object("SearchButton");
+    if(info.findDirections == false){
         info.findDirections = true;
-        showTime[0] = true; 
-        gtk_widget_show(directionPanel);
+        gtk_widget_hide(poiGrid); 
+        gtk_widget_hide(searchFrame); 
+        gtk_widget_hide(findButton); 
+        gtk_widget_hide(directionButton); 
         
+        gtk_widget_show(directionBackground);
+        gtk_widget_show(directionGridOuter);
+        gtk_widget_show(directionClose);   
+    }
+}
+
+
+void closeButton(GtkWidget *, ezgl::application *application){
+    
+    GtkWidget *directionBackground = (GtkWidget*)application->get_object("directionBackground");
+    GtkWidget *directionGridOuter = (GtkWidget*)application->get_object("directionGridOuter");
+    GtkWidget *directionClose = (GtkWidget*)application->get_object("closeOverlay");
+    
+    GtkWidget *poiGrid  = (GtkWidget*)application->get_object("PoiGrid");
+    GtkWidget *searchFrame  = (GtkWidget*)application->get_object("SearchFrame");
+    GtkWidget *findButton = (GtkWidget*)application->get_object("FindButton");
+    GtkWidget *directionButton  = (GtkWidget*)application->get_object("SearchButton");
+    if(info.findDirections == true){
+        info.findDirections = false; 
+        gtk_widget_hide(directionBackground);
+        gtk_widget_hide(directionGridOuter);
+        gtk_widget_hide(directionClose);   
         
-    }else if (showTime[0] == true){
-        info.findDirections = false;
-        showTime[0] = false;
-        gtk_widget_hide(directionPanel);
+        gtk_widget_show(poiGrid); 
+        gtk_widget_show(searchFrame); 
+        gtk_widget_show(findButton); 
+        gtk_widget_show(directionButton); 
     }
 }
 
