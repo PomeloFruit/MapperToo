@@ -85,7 +85,7 @@ public:
     std::string totDistancePrint;
     std::string totTimePrint;
     
-    void fillInfo();
+    void fillInfo();//calls me other shit yarr harr
     void fillDistance();
     void fillStreets();
     void fillTurn();

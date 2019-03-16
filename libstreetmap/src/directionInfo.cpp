@@ -2,7 +2,11 @@
 
 #include "StreetsDatabaseAPI.h"
 #include "m1.h"
+<<<<<<< HEAD
 #include "LatLon.h"
+=======
+#include "m3.h"
+>>>>>>> Committing to rewrite function that gives strings to print
 #include <vector>
 
 
@@ -69,7 +73,11 @@ void DirectionInfo::connectNodes(){
         Nodes[i].toNodes.clear();
         Nodes[i].outEdges.clear();
         
+<<<<<<< HEAD
         for(int j=0 ; j<static_cast<int>(tempSegs.size()) ; j++){
+=======
+        for(int j=0 ; static_cast<unsigned> (j)<tempSegs.size() ; j++){
+>>>>>>> Committing to rewrite function that gives strings to print
             
             int segTo, segFrom;
             segTo = getInfoStreetSegment(tempSegs[j]).to;
@@ -89,6 +97,7 @@ void DirectionInfo::connectNodes(){
     }
 }
 
+<<<<<<< HEAD
 
 /* findFastestStreet function
  * - goes through all the street segments and finds the maximum speed limit
@@ -112,4 +121,24 @@ void DirectionInfo::findFastestStreet(){
     
     // 3600 (s/h) / (Km/h) = (s/km) ->> (s/km) * 0.001 (km/m) = (s/m)
     secPerMeter = (3600 / fastestKmH) * 0.001;
+=======
+void HumanInfo::fillInfo(){
+    
+    fillDistance();
+    fillStreets();
+    fillTurn();
+    
+    setStartStop();
+    setDistanceTime();
+}
+
+void HumanInfo::fillDistance(){
+    
+    double distance;
+    for(int i=0;i<path.size();i++){
+        distance=distance+find_street_segment_length();
+    }
+    int intDistance=static_cast<int> (distance);
+    
+>>>>>>> Committing to rewrite function that gives strings to print
 }
