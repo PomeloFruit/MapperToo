@@ -246,7 +246,7 @@ void application::update_message(std::string const &message)
 
 void application::connect_feature(button_callback_fn press_find, button_callback_fn press_direction, 
         button_callback_fn press_tourist, button_callback_fn press_food, button_callback_fn press_shop,
-        button_callback_fn press_transit, button_callback_fn press_close){
+        button_callback_fn press_transit){
     // Connect press_zoom_out function to the Zoom-out button
     GtkWidget *find_button = (GtkWidget *) this->get_object("FindButton");
     g_signal_connect(G_OBJECT(find_button), "clicked", G_CALLBACK(press_find), this);
@@ -265,9 +265,6 @@ void application::connect_feature(button_callback_fn press_find, button_callback
     
     GtkWidget *transit_button = (GtkWidget *) this->get_object("Subway");
     g_signal_connect(G_OBJECT(transit_button), "toggled", G_CALLBACK(press_transit), this);
-    
-    GtkWidget *close_button = (GtkWidget *) this->get_object("closeOverlay");
-    g_signal_connect(G_OBJECT(close_button), "clicked", G_CALLBACK(press_close), this);
 }
 
 void application::get_input_text(const char *&street1, const char *&street2,
