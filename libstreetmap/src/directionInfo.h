@@ -86,9 +86,10 @@ public:
     std::string totTimePrint;
     
     void fillInfo(std::vector<unsigned> path);//calls me other shit yarr harr
-    void fillDistance(std::vector<unsigned> path);
-    void fillStreets(std::vector<unsigned> path);
-    void fillTurn(std::vector<unsigned> path);
+    void fillDistance(std::vector<unsigned> path, std::vector<std::pair<unsigned, unsigned>> changedStreetIDSegs);
+    void fillStreets(std::vector<unsigned> path, std::vector<std::pair<unsigned, unsigned>> changedStreetIDSegs);
+    void fillTurn(std::vector<unsigned> path, std::vector<std::pair<unsigned, unsigned>> changedStreetIDSegs);
+    void setDistanceTimeStreet(int distance, int index);
     
     void setStartStop(std::string start, std::string stop);
     void setDistanceTime(int distance, double time);

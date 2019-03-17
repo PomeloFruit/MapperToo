@@ -361,11 +361,32 @@ void clickActions::searchForDirections(infoStrucs &info){
         Hum.setStartStop(info.corInput2, info.corInput3);
         // ================================================================================================================ ian this needs to make sense in command window before alan takes it
         for(int i=0;i<Hum.humanInstructions.size() ; i++){
-            std::cout << Hum.humanInstructions.at(i).onStreet << " " << 
-                    Hum.humanInstructions.at(i).turnPrint << " onto " << 
-                    Hum.humanInstructions.at(i).nextStreet << " for " << 
-                    Hum.humanInstructions.at(i).distancePrint << std::endl;
+            if(i==Hum.humanInstructions.size()-1){
+                std::cout <<"Continue on "<< Hum.humanInstructions.at(i).onStreet << " for " <<
+                Hum.humanInstructions.at(i).distancePrint<<
+                " to arrive at your destination "<< std::endl;  
+            }
+            else if(i==0){
+                std::cout <<"Proceed on "<< Hum.humanInstructions.at(i).onStreet << " for " <<
+                Hum.humanInstructions.at(i).distancePrint<<" then ";
+                if(Hum.humanInstructions.at(i).turnPrint=="straight"){         
+                   std::cout <<"continue " << Hum.humanInstructions.at(i).turnPrint
+                    <<" "<<Hum.humanInstructions.at(i).nextStreet << std::endl;
+                } else{   
+                   std::cout <<"turn " << Hum.humanInstructions.at(i).turnPrint
+                   <<" onto "<<Hum.humanInstructions.at(i).nextStreet << std::endl;
+                }
+                
+            }
+            
+            else{
+                std::cout <<"Continue on "<< Hum.humanInstructions.at(i).onStreet << " for " <<
+                Hum.humanInstructions.at(i).distancePrint<<" then go "<<
+                Hum.humanInstructions.at(i).turnPrint << " onto " << 
+                Hum.humanInstructions.at(i).nextStreet << std::endl;
+            }
         }
+
         
         // highlight the path found
         clearPreviousHighlights(info);

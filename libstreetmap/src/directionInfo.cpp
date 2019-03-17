@@ -8,8 +8,10 @@
 #include <vector>
 #include <math.h>
 #include <iostream>
+#include <sstream>
+#include <iomanip>
 
-#define SLIGHTTURNANGLE 0.523599 //30 degrees in radians
+#define SLIGHTTURNANGLE M_PI/2 //45 degrees in radians
 #define NOTURNANGLE 0.261799
 #define NOINTERSECTION -100
 #define SAMESTREET -99
@@ -126,62 +128,126 @@ void DirectionInfo::findFastestStreet(){
 
 
 void HumanInfo::fillInfo(std::vector<unsigned> path){
-    
-    for(int i=0 ;i<path.size();i++){
-        navInstruction filler;
-        Hum.humanInstructions.push_back(filler);
-    }
-    clear();
-    fillDistance(path);
-    fillStreets(path);
-    fillTurn(path);    
-    
-}
-
-void HumanInfo::fillDistance(std::vector<unsigned> path){
-    double distance=0;
-    double time=0;
-
-    for(int i=0 ; i<path.size() ; i++){
-
-        double tempDistance=find_street_segment_length(path[i]);
-
-        distance=distance+tempDistance;
-        Hum.humanInstructions[i].distance=tempDistance;
-
-        time=time+tempDistance/find_street_segment_travel_time(path[i]);
-    }
-
-        int intDistance=static_cast<int> (distance);
-    int rem = intDistance % 10;
-    intDistance=rem >= 5 ? (intDistance - rem + 10) : (intDistance - rem);
-    setDistanceTime(intDistance, time);
-}
-
-void HumanInfo::fillStreets(std::vector<unsigned> path){
     if(path.size()>0){
         InfoStreetSegment prevInfo=getInfoStreetSegment(path[0]);
-        std::string prevName=getStreetName(prevInfo.streetID);
+        InfoStreetSegment curInfo;
+        unsigned prevID=path[0];
+        int numStreetsOnPath=1;
+        std::vector<std::pair<unsigned, unsigned>> changedStreetIDSegs;
         for(int i=1;i<path.size();i++){
-            InfoStreetSegment curInfo=getInfoStreetSegment(path[i]);
-            std::string curName=getStreetName(curInfo.streetID);
-            Hum.humanInstructions[i-1].onStreet=prevName;
-            Hum.humanInstructions[i-1].nextStreet=curName;
-            prevName=curName;
+            curInfo=getInfoStreetSegment(path[i]);
+            if(prevInfo.streetID!=curInfo.streetID){
+                if(getStreetName(getInfoStreetSegment(prevID).streetID)!=getStreetName(curInfo.streetID)){
+                    std::cout<< getStreetName(getInfoStreetSegment(prevID).streetID)<<" "<< getStreetName(curInfo.streetID)<<" "<<prevID<<" "<<path[i]<<'\n';
+                    changedStreetIDSegs.push_back(std::make_pair(prevID, path[i]));
+                    numStreetsOnPath++;
+                }
+            }
+            prevID=path[i];
         }
-        if(path.size()==1){
-            Hum.humanInstructions[0].onStreet=prevName;
-            Hum.humanInstructions[0].nextStreet=prevName;
+//        if(numStreetsOnPath>2){
+//            numStreetsOnPath--;
+//        }
+        
+        clear();
+        for(int i=0;i<numStreetsOnPath;i++){
+            navInstruction filler;
+            Hum.humanInstructions.push_back(filler);
+        }
+        fillDistance(path, changedStreetIDSegs);
+        fillStreets(path, changedStreetIDSegs);
+        fillTurn(path, changedStreetIDSegs);
+    }
+}
 
+void HumanInfo::fillDistance(std::vector<unsigned> path, std::vector<std::pair<unsigned, unsigned>> changedStreetIDSegs){
+    double distance=0;
+    double totalDistance=0;
+    double totalTime=0;
+    double time=0;
+    int numStreetsChanged=0;
+    int curMarker=static_cast<int> (path[0]);
+    int nextMarker=-1;
+    if(changedStreetIDSegs.size()>0){
+        nextMarker=changedStreetIDSegs[0].first;
+    }
+    if(path.size()>1){
+        for(int i=0 ; i<path.size() ; i++){
+            curMarker=static_cast<int> (path[i]);
+            double tempDistance=find_street_segment_length(path[i]);
+            distance=distance+tempDistance;
+
+            time=time+tempDistance/find_street_segment_travel_time(path[i]);
+            
+            if(changedStreetIDSegs.size()>0&&(curMarker==nextMarker)){
+                totalDistance=totalDistance+distance;
+                totalTime=totalTime+time;
+                Hum.humanInstructions[numStreetsChanged].distance=distance;
+                int intDistance=static_cast<int> (distance);
+                int rem = intDistance % 10;
+                intDistance=rem >= 5 ? (intDistance - rem + 10) : (intDistance - rem);
+                setDistanceTimeStreet(intDistance, numStreetsChanged);
+                distance=0;
+                time=0;
+                numStreetsChanged++;
+                std::cout<<numStreetsChanged<<" "<<changedStreetIDSegs.size()<<'\n';
+                if(numStreetsChanged<=changedStreetIDSegs.size()){
+                    
+                    if((numStreetsChanged)!=changedStreetIDSegs.size()){
+                        nextMarker=static_cast<int> (changedStreetIDSegs[numStreetsChanged].first);
+                    }
+                    else{
+                        nextMarker=static_cast<int> (path[path.size()-1]);
+                    }
+                }
+            }
         }
+    }
+    else if(path.size()==1){
+        totalDistance=find_street_segment_travel_time(path[0]);
+    }
+    if(changedStreetIDSegs.size()==0){
+        totalDistance=distance;
+        totalTime=time;
+    }
+    int intDistance=static_cast<int> (totalDistance);
+    if(numStreetsChanged==0){
+        setDistanceTimeStreet(intDistance, numStreetsChanged);
+    }
+    intDistance=static_cast<int> (totalDistance);
+    int rem = intDistance % 10;
+    intDistance=rem >= 5 ? (intDistance - rem + 10) : (intDistance - rem);
+    setDistanceTime(intDistance, totalTime);
+}
+
+void HumanInfo::fillStreets(std::vector<unsigned> path, std::vector<std::pair<unsigned, unsigned>> changedStreetIDSegs){
+    
+    for(int i=0;i<changedStreetIDSegs.size();i++){
+        InfoStreetSegment prevInfo=getInfoStreetSegment(changedStreetIDSegs[i].first);
+        InfoStreetSegment curInfo=getInfoStreetSegment(changedStreetIDSegs[i].second);
+        std::string prevName=getStreetName(prevInfo.streetID);
+        std::string curName=getStreetName(curInfo.streetID);
+        Hum.humanInstructions[i].onStreet=prevName;
+        Hum.humanInstructions[i].nextStreet=curName;
+    }
+    if(changedStreetIDSegs.size()==0){
+        InfoStreetSegment curInfo=getInfoStreetSegment(path[0]);
+        std::string curName=getStreetName(curInfo.streetID);
+        Hum.humanInstructions[0].onStreet=curName;
+        Hum.humanInstructions[0].nextStreet=curName;
+    } else{
+        InfoStreetSegment curInfo=getInfoStreetSegment(changedStreetIDSegs[changedStreetIDSegs.size()-1].second);
+        std::string curName=getStreetName(curInfo.streetID);
+        Hum.humanInstructions[changedStreetIDSegs.size()].onStreet=curName;
+        Hum.humanInstructions[changedStreetIDSegs.size()].nextStreet=curName;
     }
 }
 
 
-void HumanInfo::fillTurn(std::vector<unsigned> path){
-    if(path.size()>1){
-        for(int i=1;i<path.size();i++){
-            double angle=findAngleBetweenSegs(path[i-1], path[i]);
+void HumanInfo::fillTurn(std::vector<unsigned> path, std::vector<std::pair<unsigned, unsigned>> changedStreetIDSegs){
+    if(changedStreetIDSegs.size()>0){
+        for(int i=0;i<changedStreetIDSegs.size();i++){
+            double angle=findAngleBetweenSegs(changedStreetIDSegs[i].first, changedStreetIDSegs[i].second);
             double angleSeverity=abs(angle);
             int turnSeverity;
             if(angleSeverity>M_PI){
@@ -198,24 +264,37 @@ void HumanInfo::fillTurn(std::vector<unsigned> path){
             }
             // if turn angle -PI < dAngle < 0 or if dAngle > PI
             if(angle == SAMESTREET || NOTURN){ // same id
-                Hum.humanInstructions[i-1].turnType=HumanTurnType::STRAIGHT;     
+                std::string insert="straight";
+                Hum.humanInstructions[i].turnType=HumanTurnType::STRAIGHT;
+                Hum.humanInstructions[i].turnPrint=insert;
             } else if(angle == NOINTERSECTION){ // segments dont intersect
-                Hum.humanInstructions[i-1].turnType=HumanTurnType::NONE;     
+                std::string insert="AHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH";
+                Hum.humanInstructions[i].turnType=HumanTurnType::NONE;
+                Hum.humanInstructions[i].turnPrint=insert;
             } else if(((angle < 0 && angle > -M_PI)|| angle > M_PI)&&(turnSeverity==REGULARTURN)){ //negative angle
-                Hum.humanInstructions[i-1].turnType=HumanTurnType::LEFT;
+                std::string insert="left";
+                Hum.humanInstructions[i].turnType=HumanTurnType::LEFT;
+                Hum.humanInstructions[i].turnPrint=insert;
             } else if(turnSeverity==REGULARTURN) {
-                Hum.humanInstructions[i-1].turnType=HumanTurnType::RIGHT;
+                std::string insert="right";
+                Hum.humanInstructions[i].turnType=HumanTurnType::RIGHT;
+                Hum.humanInstructions[i].turnPrint=insert;
             } else if((angle < 0 && angle > -M_PI)|| angle > M_PI){
-                Hum.humanInstructions[i-1].turnType=HumanTurnType::SLIGHTLEFT;
-            } else{
-                Hum.humanInstructions[i-1].turnType=HumanTurnType::SLIGHTRIGHT;
+                std::string insert="slightly left";
+                Hum.humanInstructions[i].turnType=HumanTurnType::SLIGHTLEFT;
+                Hum.humanInstructions[i].turnPrint=insert;
+            } else{std::string insert="slightly right";
+                Hum.humanInstructions[i].turnType=HumanTurnType::SLIGHTRIGHT;
+                Hum.humanInstructions[i].turnPrint=insert;
             }
 
         }
     }
-    else if(path.size()==1){
-        Hum.humanInstructions[0].turnType=HumanTurnType::STRAIGHT;
-    }
+    //the last turn
+    std::cout<<"I'm straight c:"<<'\n';
+    Hum.humanInstructions[changedStreetIDSegs.size()].turnType=HumanTurnType::STRAIGHT;
+    std::string insert="straight";
+    Hum.humanInstructions[changedStreetIDSegs.size()].turnPrint=insert;
 }
 
 void HumanInfo::setStartStop(std::string start, std::string stop){
@@ -227,10 +306,17 @@ void HumanInfo::setStartStop(std::string start, std::string stop){
 void HumanInfo::setDistanceTime(int distance, double time){
     time=ceil(time);
     if(distance>=1000){
-        Hum.totDistancePrint=std::to_string(distance)+" KM";
+        double tempDistance=static_cast<double> (distance);
+        tempDistance=tempDistance/100;
+        tempDistance=round(tempDistance);
+        tempDistance=tempDistance/10;
+        std::stringstream editor;
+        editor<<std::fixed<<std::setprecision(1)<<tempDistance;
+        std::string insert=editor.str();
+        Hum.totDistancePrint=insert+" km";
     }
     else{
-        Hum.totDistancePrint=std::to_string(distance)+" M";
+        Hum.totDistancePrint=std::to_string(distance)+" m";
     }
     
     int intTime=static_cast<int> (time);
@@ -252,6 +338,22 @@ void HumanInfo::setDistanceTime(int distance, double time){
     
 }
 
+void HumanInfo::setDistanceTimeStreet(int distance, int index){
+    if(distance>=1000){
+        double tempDistance=static_cast<double> (distance);
+        tempDistance=tempDistance/100;
+        tempDistance=round(tempDistance);
+        tempDistance=tempDistance/10;
+        std::stringstream editor;
+        editor<<std::fixed<<std::setprecision(1)<<tempDistance;
+        std::string insert=editor.str();
+        Hum.humanInstructions[index].distancePrint=insert+" km";
+    }
+    else{
+        Hum.humanInstructions[index].distancePrint=std::to_string(distance)+" m";
+    }
+}
+
 
 void HumanInfo::clear(){
     Hum.endIntersection.clear();
@@ -265,4 +367,5 @@ void HumanInfo::clear(){
         Hum.humanInstructions[i].onStreet.clear();
         Hum.humanInstructions[i].turnPrint.clear();
     }
+    Hum.humanInstructions.clear();
 }
