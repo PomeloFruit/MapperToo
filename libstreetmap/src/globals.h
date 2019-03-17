@@ -139,7 +139,7 @@ public:
     std::string textInput1, textInput2, textInput3, textInput4;
     
     // contains the output to the text fields/ corrected names
-    std::string corInput1, corInput2;
+    std::string corInput1, corInput2, corInput3;
     
     // contains whether or not to show 0-none/1-subways/2-trains/3-both
     int showRoute;

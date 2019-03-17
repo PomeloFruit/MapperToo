@@ -38,7 +38,7 @@ featureDrawing ft;
 roadDrawing rd;
 clickActions ck;
 drawText dt;
-HumanInfo Hum;
+
 //=========================== Function Prototypes ===========================
 
 void draw_main_canvas(ezgl::renderer &g);
@@ -47,20 +47,17 @@ void act_on_mouse_press(ezgl::application *application, GdkEventButton *event, d
 void act_on_key_press(ezgl::application *application, GdkEventKey *event, char *key_name);
 void setCompletionModel(ezgl::application *application);
 void findButton(GtkWidget *, ezgl::application *application);
+void recoverStreetsFromInput(std::string input, std::string &retStreet1, std::string &retStreet2);
 void directionButton(GtkWidget *, ezgl::application *application);
-void dialog_box(GtkWidget *widget, ezgl::application *application, std::string message);
+void dialog_box(GtkWidget *, ezgl::application *application, std::string message);
 void on_dialog_response(GtkDialog *dialog);
 
-void hideSubwayButton(GtkWidget *widget, ezgl::application *application);
-void showSubwayButton(GtkWidget *widget, ezgl::application *application);
-void hideTrainsButton(GtkWidget *widget, ezgl::application *application);
-void showTrainsButton(GtkWidget *widget, ezgl::application *application);
-
+void transitButton(GtkWidget *, ezgl::application *application);
 void touristButton(GtkWidget *, ezgl::application *application);
 void fdButton(GtkWidget *, ezgl::application *application);
 void shopsButton(GtkWidget *, ezgl::application *application);
 void helpButton(GtkWidget *widget, ezgl::application *application);
-void initiateTheSicko(GtkWidget *widget, ezgl::application *application); 
+void initiateTheSicko(GtkWidget *, ezgl::application *application); 
 
 void newMap(std::string path, ezgl::application *application);
 void initializeMap(); 
@@ -174,20 +171,8 @@ void draw_main_canvas(ezgl::renderer &g){
 void initial_setup(ezgl::application *application){
     setCompletionModel(application);
     application->update_message("Left-click for Points of Interest | Right-click for Intersections | <ctrl> + Left-click for Subways ");
-    
-    //============================================ MODIFY THE SHOW SUBWAY AND SHOW TRAIN BUTTON FUNCTIONS==========================================
-    //when done modifying, put the showTransitButton function into the last position------------------> here
-    application->connect_feature(findButton, directionButton, touristButton, fdButton, shopsButton, shopsButton);
-    
-    
-    
-    //application->create_button("Show Subways",8,showSubwayButton);
-    //application->create_button("Show Trains",9,showTrainsButton);
-    //application->create_button("Show Tourist POIs", 10, touristButton); 
-    //application->create_button("Show Food/Drink POIs", 11, fdButton); 
-    //application->create_button("Show Shopping POIs", 12, shopsButton);
-    //application->create_button("Help", 13, helpButton);
-    //application->create_button("Sicko Mode", 14, initiateTheSicko); 
+
+    application->connect_feature(findButton, directionButton, touristButton, fdButton, shopsButton, transitButton);
 }
 
 
@@ -213,7 +198,7 @@ void setCompletionModel(ezgl::application *application){
     gtk_entry_completion_set_text_column(completionBox2, 0);
     gtk_entry_completion_set_text_column(completionBox3, 0);
     
-    // add all streets
+    // add all intersections
     for(unsigned i=0 ; i< static_cast<unsigned>(getNumIntersections()) ; i++){
         
         // convert string to char*
@@ -324,7 +309,7 @@ void findButton(GtkWidget *, ezgl::application *application){
     application->get_input_text(name1, name2, name3);
     
     //======================= change map ======================================
-    /*takes in the city name from name1 and then matches it with the country name 
+    /* takes in the city name from name1 and then matches it with the country name 
      * from the city vector. If a match is found, the city/country is sent to newMap()
      */
     
@@ -351,109 +336,79 @@ void findButton(GtkWidget *, ezgl::application *application){
         } 
     }
     
+    if(changeMap){
+        return;
+    }
+    
     //======================== Map Element Searching ===========================
     
-    if(!changeMap){
-        //split up the input if there is '&' 
-        //make first part as textInput1 and second part as textInput2
-        std::string input1, input2, input3, street1, street2, street3, street4; 
-        input1 = name1;
-        input2 = name2;
-        input3 = name3; 
-        
-        std::cout<<"SearchBar 1: " << input1 << " SearchBar 2: " << input2 << " SearchBar 3: " << input3 << std::endl;
-        
-        //splitting up the input from the first search bar into street 1 and street 2
-        //not sure if there are extra spaces in the separated street names 
-        //not sure if it will affect the other functions
-        int split = (int)input1.find("&"); 
-        
-        for(int i = 0; i < split-1; i++){
-            street1 = street1 + input1[i]; 
-        }
-        for(unsigned i = split + 2; i < input1.length(); i++){
-            street2 = street2 + input1[i];
-        }
-        
-        if(info.findDirections){     
-            split = (int)input2.find("&"); 
-        
-            for(int i = 0; i < split-1; i++){
-                street1 = street1 + input2[i]; 
-            }
-            for(unsigned i = split + 2; i < input2.length(); i++){
-                street2 = street2 + input2[i];
-            }
-            
-            //splitting up the input from the third search bar into street 3 and street 4
-            split = (int)input3.find("&"); 
-
-            for(int i = 0; i < split-1; i++){
-                street3 = street3 + input3[i]; 
-            }
-            for(unsigned i = split + 2; i < input3.length(); i++){
-                street4 = street4 + input3[i];
-            }
-        }
-
-        info.textInput1 = street1;
-        info.textInput2 = street2;
-        info.textInput3 = street3;
-        info.textInput4 = street4; 
-        
-        std::cout<<info.textInput1<<"end"<<std::endl;
-        std::cout<<info.textInput2<<"end"<<std::endl;
-        std::cout<<info.textInput3<<"end"<<std::endl;
-        std::cout<<info.textInput4<<"end"<<std::endl;
-        
-        
+    //split up the input if there is '&' 
+    if(info.findDirections){
+        recoverStreetsFromInput(name2, info.textInput1, info.textInput2);
+        recoverStreetsFromInput(name3, info.textInput3, info.textInput4);
+        ck.searchForDirections(info);
+        message = "";
+    } else {
+        recoverStreetsFromInput(name1, info.textInput1, info.textInput2);
         message = ck.searchOnMap(info);
-        //so I'm going to populate the thing here after clearing it ok
-        Hum.clear();
-        Hum.fillInfo(info.lastSeg);
-        Hum.setStartStop(input2, input3);
-        // auto-correct the input
-        
-        //======================================================================
-        //Currently, the 1st search bar can accept two streets and separates them 
-        //Search bar 2 and search bar 3 are connected, but auto complete feature is not there
-        
-        
-        if(info.corInput1 != ""){
-            street1 = info.corInput1;
-        }
-        if(info.corInput2 != ""){
-            street2 = info.corInput2;
-        }
-        
-        //Auto corrects input by adding the two street suggestions together
-        //Not sure if this is the correct thing to do
-        street1 = street1 + " & " + street2; 
-        name1 = street1.c_str(); 
-        
-        application->set_input_text(name1, name2, name3);
-        
-        zoomAllPoints(application);
-        
-        // reflect the changes
-        application->update_message(message);
-        application->refresh_drawing();
     }
+
+    if(info.corInput1 != ""){
+        name1 = info.corInput1.c_str();
+    }
+    if(info.corInput2 != ""){
+        name2 = info.corInput2.c_str();
+    }
+    if(info.corInput3 != ""){
+        name3 = info.corInput3.c_str();
+    }
+
+    application->set_input_text(name1, name2, name3);
+    
+    zoomAllPoints(application);
+
+    // reflect the changes
+    application->update_message(message);
+    application->refresh_drawing();
 }
 
-void directionButton(GtkWidget *, ezgl::application *application){
+
+/* recoverStreetsFromInput function
+ * - looks for & in the input and seperates the 2 streets from the input field
+ * - returns the streets seperated by reference in retStreet1/2
+ * 
+ * @param input <std::string> - user input into the search bar
+ * @param retStreet1 <std::string> - street 1 in the input
+ * @param retStreet2 <std::string> - street 2 from the intersection
+ * 
+ * @return void
+ */
+
+void recoverStreetsFromInput(std::string input, std::string &retStreet1, std::string &retStreet2){
+    //split the input from the search bars into individual street names if applicable
+    int splitEnd, splitStart, tempCombsNum;
+    std::vector<std::string> tempCombs = {" & ", " &", "& ", "&" };
+    tempCombsNum = 0;
     
-    GtkWidget *directionPanel = (GtkWidget*)application->get_object("directionBackground");
-    if(showTime[0] == false){
-        info.findDirections = true;
-        showTime[0] = true; 
-        gtk_widget_show(directionPanel);
-        
-        
-    }else if (showTime[0] == true){
-        info.findDirections = false;
-        showTime[0] = false;
-        gtk_widget_hide(directionPanel);
+    retStreet1 = "";
+    retStreet2 = "";
+    
+    do {
+        splitEnd = (int)input.find(tempCombs[tempCombsNum]);
+        splitStart = splitEnd + tempCombs[tempCombsNum].size();
+        tempCombsNum ++;
+    } while(splitEnd == -1);
+    
+    // intersection inputted, so need to split it up
+    if(splitEnd != -1){
+        for(int i = 0; i < splitEnd; i++){
+            retStreet1 = retStreet1 + input[i]; 
+        }
+        for(unsigned i = splitStart; i < input.length(); i++){
+            retStreet2 = retStreet2 + input[i];
+        }
+    } else {
+        retStreet1 = input;
     }
 }
 
@@ -468,14 +423,11 @@ void directionButton(GtkWidget *, ezgl::application *application){
  * @return void
  */
 
-void dialog_box(GtkWidget *widget, ezgl::application *application, std::string message){
+void dialog_box(GtkWidget *, ezgl::application *application, std::string message){
     GObject *window; // the parent window over which to add the dialog
     GtkWidget *content_area; // the content area of the dialog (i.e. where to put stuff in the dialog)
     GtkWidget *label; // the label we will create to display a message in the content area
     GtkWidget *dialog; // the dialog box we will create
-    
-    //cancels warning / not needed at all
-    widget->parent_instance.ref_count;
     
     // get a pointer to the main application window
     window = application->get_object(application->get_main_window_id().c_str());
@@ -511,8 +463,8 @@ void on_dialog_response(GtkDialog *dialog){
 }
 
 
-/* hideSubwayButton function
- * - calls to change button from hide to show
+/* directionButton function
+ * - calls to show/hide the directions panel
  * 
  * @param widget <GtkWidget> -event object to determine mouse action
  * @param application <ezgl::application> - application object to access window elements
@@ -520,22 +472,25 @@ void on_dialog_response(GtkDialog *dialog){
  * @return void
  */
 
-void hideSubwayButton(GtkWidget *widget, ezgl::application *application){
+void directionButton(GtkWidget *, ezgl::application *application){
     
-    //cancels warning / not needed at all
-    widget->parent_instance.ref_count;
+    GtkWidget *directionPanel = (GtkWidget*)application->get_object("directionBackground");
+    if(showTime[0] == false){
+        info.findDirections = true;
+        showTime[0] = true; 
+        gtk_widget_show(directionPanel);
         
-    info.showRoute = info.showRoute - 1;
-
-    application->destroy_button("Hide Subways");
-    application->create_button("Show Subways",8,showSubwayButton);
-    
-    application->refresh_drawing();
+        
+    }else if (showTime[0] == true){
+        info.findDirections = false;
+        showTime[0] = false;
+        gtk_widget_hide(directionPanel);
+    }
 }
 
 
-/* showSubwayButton function
- * - calls to change button from show to hide
+/* transitButton function
+ * - calls to show/hide the transit information
  * 
  * @param widget <GtkWidget> -event object to determine mouse action
  * @param application <ezgl::application> - application object to access window elements
@@ -543,66 +498,18 @@ void hideSubwayButton(GtkWidget *widget, ezgl::application *application){
  * @return void
  */
 
-void showSubwayButton(GtkWidget *widget, ezgl::application *application){
+void transitButton(GtkWidget *, ezgl::application *application){
     if(info.SubwayInfo.size()==0){
         pop.loadAfterDraw(info);
     }
     
-    //cancels warning / not needed at all
-    widget->parent_instance.ref_count;
-        
-    info.showRoute = info.showRoute + 1;
-    
-    application->destroy_button("Show Subways");
-    application->create_button("Hide Subways",8,hideSubwayButton);
-    
-    application->refresh_drawing();
-}
-
-
-/* hideTrainsButton function
- * - calls to change button from hide to show
- * 
- * @param widget <GtkWidget> -event object to determine mouse action
- * @param application <ezgl::application> - application object to access window elements
- * 
- * @return void
- */
-
-void hideTrainsButton(GtkWidget *widget, ezgl::application *application){
-    
-    //cancels warning / not needed at all
-    widget->parent_instance.ref_count;
-        
-    info.showRoute = info.showRoute - 2;
-    
-    application->destroy_button("Hide Trains");
-    application->create_button("Show Trains",9,showTrainsButton);
-    
-    application->refresh_drawing();
-}
-
-
-/* showTrainsButton function
- * - calls to change button from show to hide
- * 
- * @param widget <GtkWidget> -event object to determine mouse action
- * @param application <ezgl::application> - application object to access window elements
- * 
- * @return void
- */
-
-void showTrainsButton(GtkWidget *widget, ezgl::application *application){
-    if(info.SubwayInfo.size()==0){
-        pop.loadAfterDraw(info);
+    if(info.poiButtonStatus[3] == 0){
+        info.poiButtonStatus[3] = 1;
+        info.showRoute = info.showRoute + 1;
+    } else {
+        info.poiButtonStatus[3] = 0;
+        info.showRoute = info.showRoute - 1;
     }
-    //cancels warning / not needed at all
-    widget->parent_instance.ref_count;
-        
-    info.showRoute = info.showRoute + 2;
-    
-    application->destroy_button("Show Trains");
-    application->create_button("Hide Trains",9,hideTrainsButton);
     
     application->refresh_drawing();
 }
@@ -939,14 +846,13 @@ void zoomAllPoints(ezgl::application *application){
  * - literally the best function ever 
  * - Drake shows up  
  *
- *  * @param widget <GtkWidget> -event object to determine mouse action
+ * @param widget <GtkWidget> -event object to determine mouse action
  * @param application <ezgl::application> - application object to access window elements
  * 
  * @return void
  */
 
-void initiateTheSicko(GtkWidget *widget, ezgl::application *application){
-    widget->parent_instance.ref_count;
+void initiateTheSicko(GtkWidget *, ezgl::application *application){
     std::string message;
     
     if(info.initiateSicko == 0){
@@ -962,7 +868,7 @@ void initiateTheSicko(GtkWidget *widget, ezgl::application *application){
             "Your life will never be the same!\n";
     }
     
-    dialog_box(widget, application, message.c_str());
+    dialog_box(NULL, application, message.c_str());
             
     application->refresh_drawing();
 }

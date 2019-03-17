@@ -93,9 +93,6 @@ public:
     void setStartStop(std::string start, std::string stop);
     void setDistanceTime(int distance, double time);
     
-    double findAngleBetweenSegs(unsigned street_segment1, unsigned street_segment2);
-    double findAngleBetweenThreePoints(LatLon ptFrom, LatLon ptCommon, LatLon ptTo);
-
     void clear();
 };
 

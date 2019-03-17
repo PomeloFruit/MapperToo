@@ -23,9 +23,15 @@ public:
     // returns message with information on POI if any
     std::string clickedOnSubway(double x, double y, mapBoundary &xy, infoStrucs &info);
     
+    // finds the intersections from all streets in street1 + streeet2 vectors
+    std::vector<unsigned> findIntersectionsFromStreets(std::vector<unsigned> street1ID, std::vector<unsigned> street2ID);
+    
     // find item being searched, can be street/intersection/POI/Feature/subway
     // return message what was found or error if not found
     std::string searchOnMap(infoStrucs &info);
+    
+    // finds a path between two intersections and returns it on the screen
+    void searchForDirections(infoStrucs &info);
     
     // find the nearest subway station to pt
     unsigned findNearestSubway(infoStrucs &info, LatLon pt);

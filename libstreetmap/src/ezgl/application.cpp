@@ -275,8 +275,6 @@ void application::get_input_text(const char *&street1, const char *&street2,
     street2 = gtk_entry_get_text(street_entry2);
     GtkEntry *street_entry3 = (GtkEntry *) this->get_object("FindStreet3");
     street3 = gtk_entry_get_text(street_entry3);
-//    GtkEntry *street_entry4 = (GtkEntry *) this->get_object("FindStreet4");
-//    street4 = gtk_entry_get_text(street_entry4);
 }
 
 void application::set_input_text(const char *&street1, const char *&street2,
@@ -287,8 +285,6 @@ void application::set_input_text(const char *&street1, const char *&street2,
     gtk_entry_set_text(street_entry2, street2);
     GtkEntry *street_entry3 = (GtkEntry *) this->get_object("FindStreet3");
     gtk_entry_set_text(street_entry3, street3);
-//    GtkEntry *street_entry4 = (GtkEntry *) this->get_object("FindStreet4");
-//    gtk_entry_set_text(street_entry4, street4);
 }
 
 void application::create_button(const char *button_text,
