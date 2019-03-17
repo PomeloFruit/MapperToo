@@ -114,13 +114,17 @@ public:
   //connect features that were created not default
   void connect_feature(button_callback_fn press_find, button_callback_fn press_direction, 
         button_callback_fn press_tourist, button_callback_fn press_food, button_callback_fn press_shop,
-        button_callback_fn press_transit);
+        button_callback_fn press_transit, button_callback_fn press_close);
   
   //retrieve input text from text fields
   void get_input_text(const char *&street1, const char *&street2, const char *&street3);
   
   void set_input_text(const char *&street1, const char *&street2, const char *&street3);
 
+  void create_direction();//const char *instruction, int direction, int step, int prevStep);
+  
+  void destroy_direction(int steps);
+  
   /**
    * Add a button
    *

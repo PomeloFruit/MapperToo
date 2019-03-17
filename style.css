@@ -43,3 +43,28 @@
 	border-color: #6d93df;
 	box-shadow: 1px 1px 3px #808080; 
 }
+.closeButton{
+	box-shadow: 10px 10px 40px #f2f2f2 inset;
+	border: 1px solid; 
+	border-radius: 3px;
+	border-color: #666666; 
+}
+.directionScroll{
+	border: 0px solid;
+}
+.time{
+	font-family: Roboto;
+	font-weight: bold;
+	font-size: 20px;
+	color: white;
+}
+.distance{
+	font-family: Roboto;
+	font-size: 20px;
+	color: white;
+}
+.direction{
+	font-family: Roboto;
+	font-size: 15px;
+	color: black;
+}

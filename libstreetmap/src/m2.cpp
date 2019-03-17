@@ -48,6 +48,7 @@ void act_on_key_press(ezgl::application *application, GdkEventKey *event, char *
 void setCompletionModel(ezgl::application *application);
 void findButton(GtkWidget *, ezgl::application *application);
 void recoverStreetsFromInput(std::string input, std::string &retStreet1, std::string &retStreet2);
+void closeButton(GtkWidget *, ezgl::application *application);
 void directionButton(GtkWidget *, ezgl::application *application);
 void dialog_box(GtkWidget *, ezgl::application *application, std::string message);
 void on_dialog_response(GtkDialog *dialog);
@@ -80,8 +81,7 @@ std::vector<std::pair<std::string, std::string>> city {std::make_pair("beijing",
         std::make_pair("tokyo","japan"), std::make_pair("toronto","canada")
 };
 
-bool showTime [10]; 
-
+bool showTime [10];
 //=========================== Function Definitions ===========================
 
 
@@ -172,7 +172,10 @@ void initial_setup(ezgl::application *application){
     setCompletionModel(application);
     application->update_message("Left-click for Points of Interest | Right-click for Intersections | <ctrl> + Left-click for Subways ");
 
-    application->connect_feature(findButton, directionButton, touristButton, fdButton, shopsButton, transitButton);
+    application->connect_feature(findButton, directionButton, touristButton, fdButton, shopsButton, transitButton, closeButton);
+    
+    //================================= need to change this later ========================================
+    application->create_direction();
 }
 
 
@@ -413,6 +416,71 @@ void recoverStreetsFromInput(std::string input, std::string &retStreet1, std::st
 }
 
 
+/* directionButton function
+ * - calls to show/hide the directions panel
+ * 
+ * @param widget <GtkWidget> -event object to determine mouse action
+ * @param application <ezgl::application> - application object to access window elements
+ * 
+ * @return void
+ */
+
+void directionButton(GtkWidget *, ezgl::application *application){
+    
+    GtkWidget *directionBackground = (GtkWidget*)application->get_object("directionBackground");
+    GtkWidget *closeOverlay = (GtkWidget*)application->get_object("closeOverlay");
+    GtkWidget *directionGrid = (GtkWidget*)application->get_object("directionBackground2");
+    
+    GtkWidget *searchFrame = (GtkWidget*)application->get_object("SearchFrame");
+    GtkWidget *directionButton = (GtkWidget*)application->get_object("DirectionButton");
+    GtkWidget *poiGrid = (GtkWidget*)application->get_object("PoiGrid");
+    GtkWidget *findButton = (GtkWidget*)application->get_object("FindButton");
+    
+    
+    if(showTime[0] == false){
+        info.findDirections = true;
+        showTime[0] = true; 
+        
+        gtk_widget_show(directionBackground);
+        gtk_widget_show(closeOverlay);
+        gtk_widget_show(directionGrid);
+        
+        gtk_widget_hide(searchFrame);
+        gtk_widget_hide(directionButton);
+        gtk_widget_hide(findButton);
+        gtk_widget_hide(poiGrid);
+        
+    }
+}
+
+
+void closeButton(GtkWidget *, ezgl::application *application){
+    
+    GtkWidget *directionBackground = (GtkWidget*)application->get_object("directionBackground");
+    GtkWidget *closeOverlay = (GtkWidget*)application->get_object("closeOverlay");
+    GtkWidget *directionGrid = (GtkWidget*)application->get_object("directionBackground2");
+    
+    GtkWidget *searchFrame = (GtkWidget*)application->get_object("SearchFrame");
+    GtkWidget *directionButton = (GtkWidget*)application->get_object("DirectionButton");
+    GtkWidget *poiGrid = (GtkWidget*)application->get_object("PoiGrid");
+    GtkWidget *findButton = (GtkWidget*)application->get_object("FindButton");
+    
+    if(showTime[0] == true){
+        info.findDirections = false;
+        showTime[0] = false; 
+        
+        gtk_widget_hide(directionBackground);
+        gtk_widget_hide(closeOverlay);
+        gtk_widget_hide(directionGrid);
+        
+        gtk_widget_show(searchFrame);
+        gtk_widget_show(directionButton);
+        gtk_widget_show(findButton);
+        gtk_widget_show(poiGrid);
+    }
+}
+
+
 /* dialog_box function
  * - calls for message to be displayed in the dialog box
  * 
@@ -460,32 +528,6 @@ void dialog_box(GtkWidget *, ezgl::application *application, std::string message
 
 void on_dialog_response(GtkDialog *dialog){
     gtk_widget_destroy(GTK_WIDGET (dialog));
-}
-
-
-/* directionButton function
- * - calls to show/hide the directions panel
- * 
- * @param widget <GtkWidget> -event object to determine mouse action
- * @param application <ezgl::application> - application object to access window elements
- * 
- * @return void
- */
-
-void directionButton(GtkWidget *, ezgl::application *application){
-    
-    GtkWidget *directionPanel = (GtkWidget*)application->get_object("directionBackground");
-    if(showTime[0] == false){
-        info.findDirections = true;
-        showTime[0] = true; 
-        gtk_widget_show(directionPanel);
-        
-        
-    }else if (showTime[0] == true){
-        info.findDirections = false;
-        showTime[0] = false;
-        gtk_widget_hide(directionPanel);
-    }
 }
 
 

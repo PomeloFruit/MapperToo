@@ -3,6 +3,11 @@
 // A flag to disable event loop (default is false)
 bool disable_event_loop = false;
 
+// File paths for direction image icons
+const char* straightPath = "libstreetmap/resources/straight.png";
+const char* rightPath = "libstreetmap/resources/right turn.png";
+const char* leftPath = "libstreetmap/resources/left_turn.png";
+
 namespace ezgl {
 
 void application::startup(GtkApplication *, gpointer user_data)
@@ -246,7 +251,7 @@ void application::update_message(std::string const &message)
 
 void application::connect_feature(button_callback_fn press_find, button_callback_fn press_direction, 
         button_callback_fn press_tourist, button_callback_fn press_food, button_callback_fn press_shop,
-        button_callback_fn press_transit){
+        button_callback_fn press_transit, button_callback_fn press_close){
     // Connect press_zoom_out function to the Zoom-out button
     GtkWidget *find_button = (GtkWidget *) this->get_object("FindButton");
     g_signal_connect(G_OBJECT(find_button), "clicked", G_CALLBACK(press_find), this);
@@ -265,6 +270,9 @@ void application::connect_feature(button_callback_fn press_find, button_callback
     
     GtkWidget *transit_button = (GtkWidget *) this->get_object("Subway");
     g_signal_connect(G_OBJECT(transit_button), "toggled", G_CALLBACK(press_transit), this);
+    
+    GtkWidget *close_button = (GtkWidget *) this->get_object("closeOverlay");
+    g_signal_connect(G_OBJECT(close_button), "clicked", G_CALLBACK(press_close), this);
 }
 
 void application::get_input_text(const char *&street1, const char *&street2,
@@ -285,6 +293,65 @@ void application::set_input_text(const char *&street1, const char *&street2,
     gtk_entry_set_text(street_entry2, street2);
     GtkEntry *street_entry3 = (GtkEntry *) this->get_object("FindStreet3");
     gtk_entry_set_text(street_entry3, street3);
+}
+
+//
+//void application::create_direction(const char *time, const char *distance){
+//    GtkWidget *eta = 
+//    
+//    
+//}
+
+void application::destroy_direction(int steps){
+    GtkGrid* dGrid = (GtkGrid*) get_object("directionGrid");
+    for(int i = 0; i < steps; i++){
+        gtk_grid_remove_row(dGrid, 0);
+    }
+}
+
+
+void application::create_direction(){//const char *instruction, int direction, int step, int prevStep){
+    GtkGrid* dGrid = (GtkGrid*) get_object("directionGrid");
+//    const char* path = ""; 
+    
+//    if(direction == 0){
+//        path = straightPath;
+//    }else if (direction == 1){
+//        path = rightPath;
+//    }else if (direction == 2){
+//        path = leftPath;
+//    }
+//    
+//    GtkWidget *directionText = gtk_label_new(instruction);
+//    GtkWidget *directionIcon = gtk_image_new_from_file(path);
+//    
+//    gtk_grid_attach(dGrid, directionIcon, 0, step, 1, 1);
+//    gtk_grid_attach(dGrid, directionText, 1, step, 1, 1);
+//    
+//    gtk_widget_show(directionText);
+//    gtk_widget_show(directionIcon);
+    
+    const char* text = "I love nuts"; 
+    
+    GtkWidget *new_text1 = gtk_label_new(text);
+    GtkWidget *new_text2 = gtk_label_new(text);
+    GtkWidget *new_text3 = gtk_label_new(text);
+    GtkWidget *new_image1 = gtk_image_new_from_file(straightPath);
+    GtkWidget *new_image2 = gtk_image_new_from_file(leftPath);
+    GtkWidget *new_image3 = gtk_image_new_from_file(rightPath);
+    
+    gtk_grid_attach(dGrid, new_text1, 1, 0, 1, 1);  
+    gtk_grid_attach(dGrid, new_image1, 0, 0, 1, 1);
+    gtk_grid_attach(dGrid, new_text2, 1, 1, 1, 1);
+    gtk_grid_attach(dGrid, new_image2, 0, 1, 1, 1);
+    gtk_grid_attach(dGrid, new_text3, 1, 2, 1, 1);
+    gtk_grid_attach(dGrid, new_image3, 0, 2, 1, 1); 
+    gtk_widget_show(new_text1);
+    gtk_widget_show(new_text2);
+    gtk_widget_show(new_text3);
+    gtk_widget_show(new_image1);
+    gtk_widget_show(new_image2);
+    gtk_widget_show(new_image3);
 }
 
 void application::create_button(const char *button_text,
