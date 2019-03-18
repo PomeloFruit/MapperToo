@@ -3,10 +3,10 @@
 // A flag to disable event loop (default is false)
 bool disable_event_loop = false;
 
-// File paths for direction image icons
-const char* straightPath = "libstreetmap/resources/straight.png";
-const char* rightPath = "libstreetmap/resources/right turn.png";
-const char* leftPath = "libstreetmap/resources/left_turn.png";
+    // File paths for direction image icons
+    const char* straightPath = "libstreetmap/resources/straight.png";
+    const char* rightPath = "libstreetmap/resources/right turn.png";
+    const char* leftPath = "libstreetmap/resources/left_turn.png";
 
 namespace ezgl {
 
@@ -313,7 +313,7 @@ void application::destroy_direction(int steps){
 void application::create_direction(const char *instruction, int direction, int step){
     GtkGrid* dGrid = (GtkGrid*) get_object("directionGrid");
     const char* path = ""; 
-    
+
     if(direction == 0){
         path = straightPath;
     }else if (direction == 1){
@@ -330,28 +330,6 @@ void application::create_direction(const char *instruction, int direction, int s
     
     gtk_widget_show(directionText);
     gtk_widget_show(directionIcon);
-    
-//    const char* text = "I love tasty nuts"; 
-//    
-//    GtkWidget *new_text1 = gtk_label_new(text);
-//    GtkWidget *new_text2 = gtk_label_new(text);
-//    GtkWidget *new_text3 = gtk_label_new(text);
-//    GtkWidget *new_image1 = gtk_image_new_from_file(straightPath);
-//    GtkWidget *new_image2 = gtk_image_new_from_file(leftPath);
-//    GtkWidget *new_image3 = gtk_image_new_from_file(rightPath);
-//    
-//    gtk_grid_attach(dGrid, new_text1, 1, 0, 1, 1);  
-//    gtk_grid_attach(dGrid, new_image1, 0, 0, 1, 1);
-//    gtk_grid_attach(dGrid, new_text2, 1, 1, 1, 1);
-//    gtk_grid_attach(dGrid, new_image2, 0, 1, 1, 1);
-//    gtk_grid_attach(dGrid, new_text3, 1, 2, 1, 1);
-//    gtk_grid_attach(dGrid, new_image3, 0, 2, 1, 1); 
-//    gtk_widget_show(new_text1);
-//    gtk_widget_show(new_text2);
-//    gtk_widget_show(new_text3);
-//    gtk_widget_show(new_image1);
-//    gtk_widget_show(new_image2);
-//    gtk_widget_show(new_image3);
 }
 
 void application::create_button(const char *button_text,

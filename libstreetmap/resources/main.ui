@@ -72,16 +72,6 @@
     <property name="can_focus">False</property>
     <property name="pixbuf">food.png</property>
   </object>
-  <object class="GtkImage" id="left">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="pixbuf">left_turn.png</property>
-  </object>
-  <object class="GtkImage" id="right">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="pixbuf">right turn.png</property>
-  </object>
   <object class="GtkImage" id="searchDirectionImage">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -91,11 +81,6 @@
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <property name="pixbuf">shop bag.png</property>
-  </object>
-  <object class="GtkImage" id="straight">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="pixbuf">straight.png</property>
   </object>
   <object class="GtkImage" id="touristIcon">
     <property name="visible">True</property>
@@ -674,7 +659,7 @@
                         <property name="can_focus">False</property>
                         <property name="halign">start</property>
                         <property name="valign">start</property>
-                        <property name="margin_left">15</property>
+                        <property name="margin_left">16</property>
                         <property name="row_spacing">5</property>
                         <property name="column_spacing">25</property>
                         <property name="row_homogeneous">True</property>
