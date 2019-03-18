@@ -17,7 +17,8 @@ const int RESULTEMPTY = -1;
 const int RESULTPOI = -2;
 const int RESULTSUBWAY = -3;
 const int RESULTFEATURE = -4;
-
+#define LEFTTURNPENALTY 0
+#define RIGHTTURNPENALTY 0
 HumanInfo Hum;
 
 /* clickedOnIntersection function
@@ -350,8 +351,8 @@ void clickActions::searchForDirections(infoStrucs &info){
 
         // get the fastest path and travel time
         std::vector<unsigned> path;
-        path = find_path_between_intersections(resultID[start], resultID2[start], 0, 0); //================================================ need to determine left right turn times
-        double travelTime = compute_path_travel_time(path, 0, 0); //================================================ need to determine left right turn times
+        path = find_path_between_intersections(resultID[start], resultID2[start], LEFTTURNPENALTY, RIGHTTURNPENALTY); //================================================ need to determine left right turn times
+        double travelTime = compute_path_travel_time(path, LEFTTURNPENALTY, RIGHTTURNPENALTY); //================================================ need to determine left right turn times
         
         std::cout << "hi" << std::endl;
         
@@ -359,33 +360,6 @@ void clickActions::searchForDirections(infoStrucs &info){
         Hum.clear();
         Hum.fillInfo(path);
         Hum.setStartStop(info.corInput2, info.corInput3);
-        // ================================================================================================================ ian this needs to make sense in command window before alan takes it
-        for(int i=0;i<Hum.humanInstructions.size() ; i++){
-            if(i==Hum.humanInstructions.size()-1){
-                std::cout <<"Continue on "<< Hum.humanInstructions.at(i).onStreet << " for " <<
-                Hum.humanInstructions.at(i).distancePrint<<
-                " to arrive at your destination "<< std::endl;  
-            }
-            else if(i==0){
-                std::cout <<"Proceed on "<< Hum.humanInstructions.at(i).onStreet << " for " <<
-                Hum.humanInstructions.at(i).distancePrint<<" then ";
-                if(Hum.humanInstructions.at(i).turnPrint=="straight"){         
-                   std::cout <<"continue " << Hum.humanInstructions.at(i).turnPrint
-                    <<" "<<Hum.humanInstructions.at(i).nextStreet << std::endl;
-                } else{   
-                   std::cout <<"turn " << Hum.humanInstructions.at(i).turnPrint
-                   <<" onto "<<Hum.humanInstructions.at(i).nextStreet << std::endl;
-                }
-                
-            }
-            
-            else{
-                std::cout <<"Continue on "<< Hum.humanInstructions.at(i).onStreet << " for " <<
-                Hum.humanInstructions.at(i).distancePrint<<" then go "<<
-                Hum.humanInstructions.at(i).turnPrint << " onto " << 
-                Hum.humanInstructions.at(i).nextStreet << std::endl;
-            }
-        }
 
         
         // highlight the path found

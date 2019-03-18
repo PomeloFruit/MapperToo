@@ -176,9 +176,6 @@ void HumanInfo::fillDistance(std::vector<unsigned> path, std::vector<std::pair<u
             curMarker=static_cast<int> (path[i]);
             double tempDistance=find_street_segment_length(path[i]);
             distance=distance+tempDistance;
-
-            time=time+tempDistance/find_street_segment_travel_time(path[i]);
-            
             if(changedStreetIDSegs.size()>0&&(curMarker==nextMarker)){
                 totalDistance=totalDistance+distance;
                 totalTime=totalTime+time;
@@ -208,7 +205,6 @@ void HumanInfo::fillDistance(std::vector<unsigned> path, std::vector<std::pair<u
     }
     if(changedStreetIDSegs.size()==0){
         totalDistance=distance;
-        totalTime=time;
     }
     int intDistance=static_cast<int> (totalDistance);
     if(numStreetsChanged==0){
@@ -217,6 +213,7 @@ void HumanInfo::fillDistance(std::vector<unsigned> path, std::vector<std::pair<u
     intDistance=static_cast<int> (totalDistance);
     int rem = intDistance % 10;
     intDistance=rem >= 5 ? (intDistance - rem + 10) : (intDistance - rem);
+    totalTime=compute_path_travel_time(path, 0, 0);
     setDistanceTime(intDistance, totalTime);
 }
 
@@ -318,7 +315,7 @@ void HumanInfo::setDistanceTime(int distance, double time){
     else{
         Hum.totDistancePrint=std::to_string(distance)+" m";
     }
-    
+    std::cout<<time<<" sex"<<'\n';
     int intTime=static_cast<int> (time);
     int hours=intTime/3600;
     intTime=intTime-hours*3600;

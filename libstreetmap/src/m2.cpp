@@ -420,6 +420,7 @@ std::vector<std::pair<std::string, int>> processInstructions(){
         }else{
             directionDeterminer=0;
         }
+        std::cout<<pushIn<<'\n';
         finalInstructions.push_back(std::make_pair(pushIn, directionDeterminer));
     }
     return finalInstructions;
