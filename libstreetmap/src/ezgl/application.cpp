@@ -343,16 +343,22 @@ void application::update_travelInfo(std::string time, std::string distance){
     std::string ETA = "ETA: " + time; 
     std::string Distance = "Distance " + distance; 
     
-    GtkWidget *etaText = gtk_label_new(ETA.c_str()); 
-    GtkWidget *distanceText = gtk_label_new(Distance.c_str());
+    GtkWidget *etaText = (GtkWidget *) this->get_object("ETA"); 
+    GtkWidget *distanceText = (GtkWidget *) this->get_object("Distance");
     
-    gtk_grid_remove_row(sGrid, 2);
+    gtk_label_set_text((GtkLabel*)etaText, ETA.c_str()); 
+    gtk_label_set_text((GtkLabel*)distanceText, Distance.c_str()); 
     
-    gtk_grid_attach(sGrid, etaText, 0, 2, 10, 1);
-    gtk_grid_attach(sGrid, distanceText, 10, 2, 10, 1); 
-    
-    gtk_widget_show(etaText);
-    gtk_widget_show(distanceText);
+//    GtkWidget *etaText = gtk_label_new(ETA.c_str()); 
+//    GtkWidget *distanceText = gtk_label_new(Distance.c_str());
+//    
+//    gtk_grid_remove_row(sGrid, 2);
+//    
+//    gtk_grid_attach(sGrid, etaText, 0, 2, 10, 1);
+//    gtk_grid_attach(sGrid, distanceText, 10, 2, 10, 1); 
+//    
+//    gtk_widget_show(etaText);
+//    gtk_widget_show(distanceText);
 }
 
 
