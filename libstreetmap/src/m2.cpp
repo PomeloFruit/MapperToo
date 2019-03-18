@@ -440,7 +440,7 @@ std::vector<std::pair<std::string, int>> processInstructions(){
 void recoverStreetsFromInput(std::string input, std::string &retStreet1, std::string &retStreet2){
     //split the input from the search bars into individual street names if applicable
     int splitEnd, splitStart, tempCombsNum;
-    std::vector<std::string> tempCombs = {" & ", " &", "& ", "&" };
+    std::vector<std::string> tempCombs = {" & ", " &", "& ", "&"};
     tempCombsNum = 0;
     
     retStreet1 = "";
@@ -450,8 +450,8 @@ void recoverStreetsFromInput(std::string input, std::string &retStreet1, std::st
         splitEnd = (int)input.find(tempCombs[tempCombsNum]);
         splitStart = splitEnd + tempCombs[tempCombsNum].size();
         tempCombsNum ++;
-    } while(splitEnd == -1);
-    
+    } while(splitEnd == -1 && tempCombsNum < tempCombs.size());
+        
     // intersection inputted, so need to split it up
     if(splitEnd != -1){
         for(int i = 0; i < splitEnd; i++){
