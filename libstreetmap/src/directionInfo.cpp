@@ -316,6 +316,7 @@ void HumanInfo::setDistanceTime(int distance, double time){
     } else {
         Hum.totDistancePrint=std::to_string(distance)+" m";
     }
+
     
     int hour = time/(SEC_PER_MIN*MIN_PER_HOUR); 
     time = time - hour*(SEC_PER_MIN*MIN_PER_HOUR); 
