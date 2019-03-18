@@ -66,6 +66,7 @@ void zoomLocation(ezgl::application *application, std::vector<unsigned> zoomVec,
 void zoomStreet(ezgl::application *application);
 void zoomFeature(ezgl::application *application);
 void zoomAllPoints(ezgl::application *application);
+std::vector<std::pair<std::string, int>>  processInstructions();
 
 //=========================== Global Variables =========================== 
 
@@ -175,7 +176,7 @@ void initial_setup(ezgl::application *application){
     application->connect_feature(findButton, directionButton, touristButton, fdButton, shopsButton, transitButton, closeButton);
     
     //================================= need to change this later ========================================
-    application->create_direction();
+    //application->create_direction();
 }
 
 
@@ -344,7 +345,7 @@ void findButton(GtkWidget *, ezgl::application *application){
     }
     
     //======================== Map Element Searching ===========================
-    
+    application->destroy_direction(Hum.humanInstructions.size());
     //split up the input if there is '&' 
     if(info.findDirections){
         recoverStreetsFromInput(name2, info.textInput1, info.textInput2);
@@ -371,10 +372,55 @@ void findButton(GtkWidget *, ezgl::application *application){
     zoomAllPoints(application);
 
     // reflect the changes
+    
+    std::vector<std::pair<std::string, int>> processedInstructions=processInstructions();
+    for(int i=0;i<Hum.humanInstructions.size();i++){
+        application->create_direction(processedInstructions[i].first.c_str(), processedInstructions[i].second, i);
+    }
     application->update_message(message);
     application->refresh_drawing();
 }
 
+std::vector<std::pair<std::string, int>> processInstructions(){
+    std::vector<std::pair<std::string, int>>  finalInstructions;
+    for(int i=0;i<Hum.humanInstructions.size();i++){
+        std::string pushIn;
+        int directionDeterminer;
+        if(i==Hum.humanInstructions.size()-1){
+            pushIn="Continue on " + Hum.humanInstructions.at(i).onStreet + " for " +
+            Hum.humanInstructions.at(i).distancePrint+
+            " to arrive at your destination "+'\n';  
+        }
+        else if(i==0){
+            pushIn= "Proceed on " + Hum.humanInstructions.at(i).onStreet + " for " +
+            Hum.humanInstructions.at(i).distancePrint+" then ";
+            if(Hum.humanInstructions.at(i).turnPrint=="straight"){         
+               pushIn=pushIn + "continue " + Hum.humanInstructions.at(i).turnPrint
+                +" "+Hum.humanInstructions.at(i).nextStreet + '\n';
+            } else{   
+               pushIn=pushIn +"turn " + Hum.humanInstructions.at(i).turnPrint
+               +" onto "+Hum.humanInstructions.at(i).nextStreet + '\n';
+            }
+
+        }
+
+        else{
+            pushIn = "Continue on "+ Hum.humanInstructions.at(i).onStreet + " for " +
+            Hum.humanInstructions.at(i).distancePrint+" then go "+
+            Hum.humanInstructions.at(i).turnPrint + " onto " + 
+            Hum.humanInstructions.at(i).nextStreet + '\n';
+        }
+        if(Hum.humanInstructions.at(i).turnPrint=="slightly left"||Hum.humanInstructions.at(i).turnPrint=="left"){
+            directionDeterminer=2;
+        }else if(Hum.humanInstructions.at(i).turnPrint=="slightly right"||Hum.humanInstructions.at(i).turnPrint=="right"){
+            directionDeterminer=1;
+        }else{
+            directionDeterminer=0;
+        }
+        finalInstructions.push_back(std::make_pair(pushIn, directionDeterminer));
+    }
+    return finalInstructions;
+}
 
 /* recoverStreetsFromInput function
  * - looks for & in the input and seperates the 2 streets from the input field

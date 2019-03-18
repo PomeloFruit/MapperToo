@@ -121,7 +121,7 @@ public:
   
   void set_input_text(const char *&street1, const char *&street2, const char *&street3);
 
-  void create_direction();//const char *instruction, int direction, int step, int prevStep);
+  void create_direction(const char *instruction, int direction, int step);
   
   void destroy_direction(int steps);
   
