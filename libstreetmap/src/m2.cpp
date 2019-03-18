@@ -49,6 +49,7 @@ void setCompletionModel(ezgl::application *application);
 void findButton(GtkWidget *, ezgl::application *application);
 void recoverStreetsFromInput(std::string input, std::string &retStreet1, std::string &retStreet2);
 void closeButton(GtkWidget *, ezgl::application *application);
+void flipButton(GtkWidget *, ezgl::application *application);
 void directionButton(GtkWidget *, ezgl::application *application);
 void dialog_box(GtkWidget *, ezgl::application *application, std::string message);
 void on_dialog_response(GtkDialog *dialog);
@@ -173,7 +174,7 @@ void initial_setup(ezgl::application *application){
     setCompletionModel(application);
     application->update_message("Left-click for Points of Interest | Right-click for Intersections | <ctrl> + Left-click for Subways ");
 
-    application->connect_feature(findButton, directionButton, touristButton, fdButton, shopsButton, transitButton, closeButton, findButton);
+    application->connect_feature(findButton, directionButton, touristButton, fdButton, shopsButton, transitButton, closeButton, findButton, flipButton);
     
     //================================= need to change this later ========================================
     //application->create_direction();
@@ -532,6 +533,12 @@ void closeButton(GtkWidget *, ezgl::application *application){
     application->clear_direction_inputs();
     application->destroy_direction(Hum.humanInstructions.size());
     application->update_travelInfo("", "");
+}
+
+
+void flipButton(GtkWidget *, ezgl::application *application){
+    application->flip_direction_inputs();
+    findButton(NULL, application);
 }
 
 

@@ -67,6 +67,11 @@
     <property name="can_focus">False</property>
     <property name="pixbuf">close.png</property>
   </object>
+  <object class="GtkImage" id="flipImage">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="pixbuf">flip.png</property>
+  </object>
   <object class="GtkImage" id="foodDrinkIcon">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -453,28 +458,6 @@
           </packing>
         </child>
         <child type="overlay">
-          <object class="GtkButton" id="FindButton">
-            <property name="width_request">40</property>
-            <property name="height_request">20</property>
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-            <property name="halign">start</property>
-            <property name="valign">start</property>
-            <property name="margin_left">377</property>
-            <property name="margin_top">32</property>
-            <property name="image">FindImage</property>
-            <property name="image_position">bottom</property>
-            <style>
-              <class name="findButton"/>
-            </style>
-          </object>
-          <packing>
-            <property name="pass_through">True</property>
-            <property name="index">3</property>
-          </packing>
-        </child>
-        <child type="overlay">
           <object class="GtkButton" id="DirectionButton">
             <property name="width_request">40</property>
             <property name="height_request">20</property>
@@ -492,6 +475,28 @@
             <signal name="clicked" handler="gtk_widget_hide" object="StatusBar" swapped="no"/>
             <style>
               <class name="searchButton"/>
+            </style>
+          </object>
+          <packing>
+            <property name="pass_through">True</property>
+            <property name="index">3</property>
+          </packing>
+        </child>
+        <child type="overlay">
+          <object class="GtkButton" id="FindButton">
+            <property name="width_request">40</property>
+            <property name="height_request">20</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="halign">start</property>
+            <property name="valign">start</property>
+            <property name="margin_left">377</property>
+            <property name="margin_top">32</property>
+            <property name="image">FindImage</property>
+            <property name="image_position">bottom</property>
+            <style>
+              <class name="findButton"/>
             </style>
           </object>
           <packing>
@@ -518,11 +523,12 @@
                 <property name="left_padding">12</property>
                 <child>
                   <object class="GtkGrid" id="directionSearch">
-                    <property name="width_request">435</property>
+                    <property name="width_request">449</property>
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="halign">start</property>
                     <property name="valign">start</property>
+                    <property name="row_spacing">7</property>
                     <child>
                       <object class="GtkSearchEntry" id="FindStreet2">
                         <property name="width_request">275</property>
@@ -547,27 +553,24 @@
                     </child>
                     <child>
                       <object class="GtkSearchEntry" id="FindStreet3">
-                        <property name="width_request">435</property>
+                        <property name="width_request">388</property>
                         <property name="height_request">46</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="halign">center</property>
                         <property name="valign">end</property>
-                        <property name="margin_top">5</property>
-                        <property name="margin_bottom">10</property>
                         <property name="primary_icon_name">find-location-symbolic.symbolic</property>
                         <property name="primary_icon_activatable">False</property>
                         <property name="primary_icon_sensitive">False</property>
                         <property name="placeholder_text" translatable="yes">Choose Destination</property>
                         <property name="completion">NameCompletion3</property>
                         <style>
-                          <class name="searchInput"/>
+                          <class name="findButton"/>
                         </style>
                       </object>
                       <packing>
                         <property name="left_attach">0</property>
                         <property name="top_attach">1</property>
-                        <property name="width">20</property>
+                        <property name="width">19</property>
                       </packing>
                     </child>
                     <child>
@@ -615,6 +618,21 @@
                         <property name="width">10</property>
                       </packing>
                     </child>
+                    <child>
+                      <object class="GtkButton" id="flipButton">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <property name="image">flipImage</property>
+                        <style>
+                          <class name="findButton"/>
+                        </style>
+                      </object>
+                      <packing>
+                        <property name="left_attach">19</property>
+                        <property name="top_attach">1</property>
+                      </packing>
+                    </child>
                   </object>
                 </child>
               </object>
@@ -660,9 +678,30 @@
                         <property name="halign">start</property>
                         <property name="valign">start</property>
                         <property name="margin_left">16</property>
-                        <property name="row_spacing">5</property>
+                        <property name="row_spacing">20</property>
                         <property name="column_spacing">25</property>
                         <property name="row_homogeneous">True</property>
+                        <child>
+                          <placeholder/>
+                        </child>
+                        <child>
+                          <placeholder/>
+                        </child>
+                        <child>
+                          <placeholder/>
+                        </child>
+                        <child>
+                          <placeholder/>
+                        </child>
+                        <child>
+                          <placeholder/>
+                        </child>
+                        <child>
+                          <placeholder/>
+                        </child>
+                        <child>
+                          <placeholder/>
+                        </child>
                         <child>
                           <placeholder/>
                         </child>
@@ -688,7 +727,7 @@
               </object>
             </child>
             <style>
-              <class name="searchFrame"/>
+              <class name="directionFrame"/>
             </style>
           </object>
           <packing>

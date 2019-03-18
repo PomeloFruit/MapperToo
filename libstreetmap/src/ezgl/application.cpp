@@ -251,7 +251,8 @@ void application::update_message(std::string const &message)
 
 void application::connect_feature(button_callback_fn press_find, button_callback_fn press_direction, 
         button_callback_fn press_tourist, button_callback_fn press_food, button_callback_fn press_shop,
-        button_callback_fn press_transit, button_callback_fn press_close, button_callback_fn press_findDirection){
+        button_callback_fn press_transit, button_callback_fn press_close, button_callback_fn press_findDirection,
+        button_callback_fn press_flip){
     // Connect press_zoom_out function to the Zoom-out button
     GtkWidget *find_button = (GtkWidget *) this->get_object("FindButton");
     g_signal_connect(G_OBJECT(find_button), "clicked", G_CALLBACK(press_find), this);
@@ -276,6 +277,9 @@ void application::connect_feature(button_callback_fn press_find, button_callback
     
     GtkWidget *findDirection_button = (GtkWidget *) this->get_object("directionButton");
     g_signal_connect(G_OBJECT(findDirection_button), "clicked", G_CALLBACK(press_findDirection), this);
+    
+    GtkWidget *flip_button = (GtkWidget *) this->get_object("flipButton");
+    g_signal_connect(G_OBJECT(flip_button), "clicked", G_CALLBACK(press_flip), this);
 }
 
 void application::get_input_text(const char *&street1, const char *&street2,
@@ -325,8 +329,8 @@ void application::clear_direction_inputs(){
 }
 
 void application::flip_direction_inputs(){
-    const char *input2;
-    const char *input3;
+    const char *temp;
+    std::string input2, input3;
     
     GtkEntry *street_entry2 = (GtkEntry *) this->get_object("FindStreet2");
     GtkEntry *street_entry3 = (GtkEntry *) this->get_object("FindStreet3");
@@ -334,23 +338,22 @@ void application::flip_direction_inputs(){
     input2 = gtk_entry_get_text(street_entry2);
     input3 = gtk_entry_get_text(street_entry3);
     
-    gtk_entry_set_text(street_entry3, input2);
-    gtk_entry_set_text(street_entry2, input3);
+    temp = input2.c_str();
+    gtk_entry_set_text(street_entry3, temp);
+    temp = input3.c_str();
+    gtk_entry_set_text(street_entry2, temp);
 }
 
 void application::update_travelInfo(std::string time, std::string distance){
-    GtkGrid* sGrid = (GtkGrid*) get_object("directionSearch");
+    //GtkGrid* sGrid = (GtkGrid*) get_object("directionSearch");
     std::string ETA = "ETA: " + time; 
     std::string Distance = "Distance " + distance; 
     
-    GtkWidget *etaText = (GtkWidget *) this->get_object("ETA"); 
-    GtkWidget *distanceText = (GtkWidget *) this->get_object("Distance");
+    GtkWidget *etaText = (GtkWidget*) get_object("ETA");
+    GtkWidget *distanceText = (GtkWidget*) get_object("Distance");
     
-    gtk_label_set_text((GtkLabel*)etaText, ETA.c_str()); 
-    gtk_label_set_text((GtkLabel*)distanceText, Distance.c_str()); 
-    
-//    GtkWidget *etaText = gtk_label_new(ETA.c_str()); 
-//    GtkWidget *distanceText = gtk_label_new(Distance.c_str());
+    gtk_label_set_text((GtkLabel*)etaText, ETA.c_str());
+    gtk_label_set_text((GtkLabel*)distanceText, Distance.c_str());
 //    
 //    gtk_grid_remove_row(sGrid, 2);
 //    
@@ -386,6 +389,8 @@ void application::create_direction(const char *instruction, int direction, int s
     GtkWidget *directionIcon = gtk_image_new_from_file(path);
     
     gtk_label_set_line_wrap((GtkLabel *) directionText, TRUE);
+    gtk_label_set_width_chars((GtkLabel *)directionText, 50);
+    gtk_label_set_xalign((GtkLabel *)directionText, 0);
     
     gtk_grid_attach(dGrid, directionIcon, 0, step, 1, 1);
     gtk_grid_attach(dGrid, directionText, 1, step, 1, 1);

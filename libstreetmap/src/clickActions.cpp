@@ -354,8 +354,6 @@ void clickActions::searchForDirections(infoStrucs &info){
         path = find_path_between_intersections(resultID[start], resultID2[start], LEFTTURNPENALTY, RIGHTTURNPENALTY); //================================================ need to determine left right turn times
         double travelTime = compute_path_travel_time(path, LEFTTURNPENALTY, RIGHTTURNPENALTY); //================================================ need to determine left right turn times
         
-        std::cout << "hi" << std::endl;
-        
         // determine the directions to display
         Hum.clear();
         Hum.fillInfo(path);

@@ -5,6 +5,13 @@
 	border-color: #cccccc;
 	box-shadow: 1px 1px 3px #808080; 
 }
+.directionFrame{
+	background-color: #f8f0fb;
+	border:2px solid;
+	border-radius: 5px;
+	border-color: #cccccc;
+	box-shadow: 1px 1px 3px #808080; 
+}
 .searchInput{
 	border:0px solid; 
 	box-shadow: 40px 40px 40px #f1f1f1 inset;
@@ -37,7 +44,7 @@
 	border: 0px solid; 
 }
 .directionGrid{
-	background-color: #92aee7;
+	background-color: #c85cf0;
 	border:2px solid;
 	border-radius: 5px;
 	border-color: #6d93df;
