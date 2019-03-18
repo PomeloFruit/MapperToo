@@ -36,16 +36,30 @@ HumanInfo Hum;
  * @return displayName <std::string > - message with information about intersection
  */
 
-std::string clickActions::clickedOnIntersection(double x, double y, mapBoundary &xy, infoStrucs &info){
+std::string clickActions::clickedOnIntersection(double x, double y, mapBoundary &xy, infoStrucs &info, int type){
     LatLon clickPos;
     unsigned clickedID = 0;
-    std::string displayName = "Intersection Clicked: ";
+    std::string displayName;
     
     clickPos = xy.LatLonFromXY(x,y);
     clickedID = find_closest_intersection(clickPos);
-    displayName += info.IntersectionInfo[clickedID].name;
     
-    highlightIntersection(info, clickedID);
+    if(info.findDirections){
+        if(type == 1){ //left click for start
+            info.directionStart = clickedID;
+            info.corInput2 = info.IntersectionInfo[clickedID].name;    
+        } else if(type == 2){
+            info.directionEnd = clickedID;
+            info.corInput3 = info.IntersectionInfo[clickedID].name;
+        }
+        
+        if(info.directionStart != -1 && info.directionEnd != -1){
+            searchForDirections(info);
+        }
+    } else {
+        displayName = "Intersection Clicked: " + info.IntersectionInfo[clickedID].name;
+        highlightIntersection(info, clickedID);
+    }
     
     return displayName;
 }
@@ -332,10 +346,21 @@ void clickActions::searchForDirections(infoStrucs &info){
     resultID.clear();
     
     // get the match type of the search
-    match1 = findMatches(street1ID, info.textInput1, info);
-    match2 = findMatches(street2ID, info.textInput2, info);
-    match3 = findMatches(street3ID, info.textInput3, info);
-    match4 = findMatches(street4ID, info.textInput4, info);
+    if(info.corInput2 != getIntersectionName(info.directionStart)){
+        match1 = findMatches(street1ID, info.textInput1, info);
+        match2 = findMatches(street2ID, info.textInput2, info);
+        resultID = findIntersectionsFromStreets(street1ID, street2ID); 
+    } else {
+        resultID.push_back(info.directionStart);
+    }
+    
+    if(info.corInput3 != getIntersectionName(info.directionEnd)){
+        match3 = findMatches(street3ID, info.textInput3, info);
+        match4 = findMatches(street4ID, info.textInput4, info);
+        resultID2 = findIntersectionsFromStreets(street3ID, street4ID);
+    } else {
+        resultID2.push_back(info.directionEnd);
+    }
     
     // reset correct input output names to blank
     info.corInput2 = "";
@@ -343,14 +368,10 @@ void clickActions::searchForDirections(infoStrucs &info){
         
     std::vector<unsigned> temp;        
         
-    resultID = findIntersectionsFromStreets(street1ID, street2ID); 
-    resultID2 = findIntersectionsFromStreets(street3ID, street4ID);
-        
-        
     if(resultID.size() > 0 && resultID2.size() > 0){ // if intersection found
         info.corInput2 = getIntersectionName(resultID[start]);
         info.corInput3 = getIntersectionName(resultID2[start]);
-
+                    
         // get the fastest path and travel time
         std::vector<unsigned> path;
         path = find_path_between_intersections(resultID[start], resultID2[start], LEFTTURNPENALTY, RIGHTTURNPENALTY);
@@ -367,6 +388,8 @@ void clickActions::searchForDirections(infoStrucs &info){
             info.StreetSegInfo[path[i]].clicked = true;
         }
         info.lastSeg = path;
+        info.directionStart = resultID[start];
+        info.directionEnd = resultID2[start];
         
     } 
 }
@@ -830,7 +853,9 @@ void clickActions::clearPreviousHighlights(infoStrucs &info){
         info.IntersectionInfo[currentIndex].clicked = false;
     }
     info.lastIntersection.clear();
-    
+    info.directionStart = -1;
+    info.directionEnd = -1;
+
     for(unsigned i=0 ; i<info.lastSeg.size() ; i++){
         currentIndex = info.lastSeg[i];
         info.StreetSegInfo[currentIndex].clicked = false;

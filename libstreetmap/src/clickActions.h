@@ -13,7 +13,7 @@ class clickActions {
 public:
     // finds the clicked intersection and highlights it,
     // returns message with information on intersection if any
-    std::string clickedOnIntersection(double x, double y, mapBoundary &xy, infoStrucs &info);
+    std::string clickedOnIntersection(double x, double y, mapBoundary &xy, infoStrucs &info, int type);
     
     // finds the clicked POI and highlights it,
     // returns message with information on POI if any

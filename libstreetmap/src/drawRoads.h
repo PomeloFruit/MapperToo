@@ -23,6 +23,6 @@ public:
     void drawSpecialIntersections(mapBoundary &xy, infoStrucs &info, ezgl::renderer &g);
     //Determines if the intersection should be drawn as normal or loaded in with a png
     //Then draws the intersection as specified
-    void drawOneIntersection(int i, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g);
+    void drawOneIntersection(int i, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g, int startStop);
 };
 

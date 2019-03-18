@@ -77,6 +77,11 @@
     <property name="can_focus">False</property>
     <property name="pixbuf">food.png</property>
   </object>
+  <object class="GtkImage" id="helpImage">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="pixbuf">help.png</property>
+  </object>
   <object class="GtkImage" id="searchDirectionImage">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -86,6 +91,14 @@
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <property name="pixbuf">shop bag.png</property>
+  </object>
+  <object class="GtkImage" id="tScott">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="pixbuf">tscott.png</property>
+    <style>
+      <class name="menuButton"/>
+    </style>
   </object>
   <object class="GtkImage" id="touristIcon">
     <property name="visible">True</property>
@@ -101,8 +114,8 @@
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <property name="title">MapperToo</property>
-    <property name="default_width">1200</property>
-    <property name="default_height">800</property>
+    <property name="default_width">1500</property>
+    <property name="default_height">1000</property>
     <child>
       <object class="GtkOverlay" id="Overlay">
         <property name="visible">True</property>
@@ -165,7 +178,7 @@
               </object>
               <packing>
                 <property name="left_attach">0</property>
-                <property name="top_attach">4</property>
+                <property name="top_attach">5</property>
               </packing>
             </child>
             <child>
@@ -181,7 +194,7 @@
               </object>
               <packing>
                 <property name="left_attach">0</property>
-                <property name="top_attach">5</property>
+                <property name="top_attach">6</property>
               </packing>
             </child>
             <child>
@@ -197,7 +210,7 @@
               </object>
               <packing>
                 <property name="left_attach">0</property>
-                <property name="top_attach">6</property>
+                <property name="top_attach">7</property>
               </packing>
             </child>
             <child>
@@ -213,7 +226,7 @@
               </object>
               <packing>
                 <property name="left_attach">0</property>
-                <property name="top_attach">7</property>
+                <property name="top_attach">8</property>
               </packing>
             </child>
             <child>
@@ -289,6 +302,21 @@
               <packing>
                 <property name="left_attach">0</property>
                 <property name="top_attach">2</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="helpButton">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="image">helpImage</property>
+                <style>
+                  <class name="menuButton"/>
+                </style>
+              </object>
+              <packing>
+                <property name="left_attach">0</property>
+                <property name="top_attach">4</property>
               </packing>
             </child>
           </object>
@@ -458,6 +486,28 @@
           </packing>
         </child>
         <child type="overlay">
+          <object class="GtkButton" id="FindButton">
+            <property name="width_request">40</property>
+            <property name="height_request">20</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="halign">start</property>
+            <property name="valign">start</property>
+            <property name="margin_left">377</property>
+            <property name="margin_top">32</property>
+            <property name="image">FindImage</property>
+            <property name="image_position">bottom</property>
+            <style>
+              <class name="findButton"/>
+            </style>
+          </object>
+          <packing>
+            <property name="pass_through">True</property>
+            <property name="index">3</property>
+          </packing>
+        </child>
+        <child type="overlay">
           <object class="GtkButton" id="DirectionButton">
             <property name="width_request">40</property>
             <property name="height_request">20</property>
@@ -483,25 +533,21 @@
           </packing>
         </child>
         <child type="overlay">
-          <object class="GtkButton" id="FindButton">
-            <property name="width_request">40</property>
-            <property name="height_request">20</property>
-            <property name="visible">True</property>
+          <object class="GtkButton" id="closeOverlay">
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
             <property name="halign">start</property>
             <property name="valign">start</property>
-            <property name="margin_left">377</property>
-            <property name="margin_top">32</property>
-            <property name="image">FindImage</property>
-            <property name="image_position">bottom</property>
+            <property name="margin_left">480</property>
+            <property name="margin_top">15</property>
+            <property name="image">closeImge</property>
             <style>
-              <class name="findButton"/>
+              <class name="closeButton"/>
             </style>
           </object>
           <packing>
             <property name="pass_through">True</property>
-            <property name="index">3</property>
+            <property name="index">7</property>
           </packing>
         </child>
         <child type="overlay">
@@ -672,7 +718,7 @@
                     <property name="can_focus">False</property>
                     <child>
                       <object class="GtkGrid" id="directionGrid">
-                        <property name="width_request">425</property>
+                        <property name="width_request">410</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="halign">start</property>
@@ -735,21 +781,19 @@
           </packing>
         </child>
         <child type="overlay">
-          <object class="GtkButton" id="closeOverlay">
+          <object class="GtkButton" id="sickoButton">
+            <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
-            <property name="halign">start</property>
+            <property name="halign">end</property>
             <property name="valign">start</property>
-            <property name="margin_left">480</property>
-            <property name="margin_top">15</property>
-            <property name="image">closeImge</property>
+            <property name="image">tScott</property>
             <style>
-              <class name="closeButton"/>
+              <class name="menuButton"/>
             </style>
           </object>
           <packing>
-            <property name="pass_through">True</property>
-            <property name="index">7</property>
+            <property name="index">9</property>
           </packing>
         </child>
       </object>

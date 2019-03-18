@@ -174,7 +174,7 @@ void initial_setup(ezgl::application *application){
     setCompletionModel(application);
     application->update_message("Left-click for Points of Interest | Right-click for Intersections | <ctrl> + Left-click for Subways ");
 
-    application->connect_feature(findButton, directionButton, touristButton, fdButton, shopsButton, transitButton, closeButton, findButton, flipButton);
+    application->connect_feature(findButton, directionButton, touristButton, fdButton, shopsButton, transitButton, closeButton, findButton, flipButton, helpButton, initiateTheSicko);
     
     //================================= need to change this later ========================================
     //application->create_direction();
@@ -205,19 +205,24 @@ void setCompletionModel(ezgl::application *application){
     
     // add all intersections
     for(unsigned i=0 ; i< static_cast<unsigned>(getNumIntersections()) ; i++){
-        
-        // convert string to char*
         std::string str = getIntersectionName(i);
-        char * nameChar = new char[str.size() + 1];
-        std::copy(str.begin(), str.end(), nameChar);
-        nameChar[str.size()] = '\0';
-
-        // add new row to list store and store street name
-        gtk_list_store_insert(completeModel, &iter, -1);
-        gtk_list_store_set(completeModel, &iter, 0, nameChar, -1);
         
-        // free char* memory
-        delete[] nameChar;
+        // count the occurences of &, since our program can only handle &
+        int numAmpersand = std::count(str.begin(), str.end(), '&');
+        
+        if(numAmpersand == 1){ // only add intersection to model if only one &
+            // convert string to char*
+            char * nameChar = new char[str.size() + 1];
+            std::copy(str.begin(), str.end(), nameChar);
+            nameChar[str.size()] = '\0';
+
+            // add new row to list store and store street name
+            gtk_list_store_insert(completeModel, &iter, -1);
+            gtk_list_store_set(completeModel, &iter, 0, nameChar, -1);
+
+            // free char* memory
+            delete[] nameChar;
+        }
     }
 }
 
@@ -241,21 +246,40 @@ void setCompletionModel(ezgl::application *application){
 void act_on_mouse_press(ezgl::application *application, GdkEventButton *event, double x, double y){
     std::string message;
 
-    if (event->button == 1) { //left click
-        
-        if ((event->state & GDK_CONTROL_MASK) && info.showRoute>0) { // control key   
-            message = ck.clickedOnSubway(x, y, xy, info);   
-        } else {  //without shift key
-            message = ck.clickedOnPOI(x, y, xy, info);
+    if(info.findDirections){
+        if (event->button == 1) { //left click
+            ck.clickedOnIntersection(x, y, xy, info, 1);
+        } else if (event->button == 3) { // right click
+            ck.clickedOnIntersection(x, y, xy, info, 2);
         }
         
-    } else if (event->button == 3) { // right click
+        const char *name1, *name2, *name3;
+            name1 = info.corInput1.c_str();
+            name2 = info.corInput2.c_str();
+            name3 = info.corInput3.c_str();
         
-        message = ck.clickedOnIntersection(x, y, xy, info);
+        std::cout << info.corInput1 << "...."<< info.corInput2 << "...."<< info.corInput3 << "...."<< info.directionStart << "...."<< info.directionEnd << "...."<<std::endl;
+
+        application->set_input_text(name1, name2, name3);
+    } else {
+        if (event->button == 1) { //left click
+
+            if ((event->state & GDK_CONTROL_MASK) && info.showRoute>0) { // control key   
+                message = ck.clickedOnSubway(x, y, xy, info);   
+            } else {  //without shift key
+                message = ck.clickedOnPOI(x, y, xy, info);
+            }
+
+        } else if (event->button == 3) { // right click
+
+            message = ck.clickedOnIntersection(x, y, xy, info, 0);
+        }
+
+        zoomAllPoints(application);
+
+        
+        
     }
-    
-    zoomAllPoints(application);
-    
     application->update_message(message);
     application->refresh_drawing();
 }
@@ -415,10 +439,14 @@ std::vector<std::pair<std::string, int>> processInstructions(){
             Hum.humanInstructions.at(i).turnPrint + " onto " + 
             Hum.humanInstructions.at(i).nextStreet;
         }
-        if(Hum.humanInstructions.at(i).turnPrint == "slightly left" || Hum.humanInstructions.at(i).turnPrint == "left"){
+        if(Hum.humanInstructions.at(i).turnPrint == "left"){
             directionDeterminer=2;
-        }else if(Hum.humanInstructions.at(i).turnPrint == "slightly right" || Hum.humanInstructions.at(i).turnPrint == "right"){
+        }else if (Hum.humanInstructions.at(i).turnPrint == "slightly left"){
+            directionDeterminer = 4;
+        }else if(Hum.humanInstructions.at(i).turnPrint == "right"){
             directionDeterminer=1;
+        }else if (Hum.humanInstructions.at(i).turnPrint == "slightly right" ){
+            directionDeterminer = 3;
         }else{
             directionDeterminer=0;
         }
@@ -532,8 +560,6 @@ void closeButton(GtkWidget *, ezgl::application *application){
         gtk_widget_show(poiGrid);
     }    
     application->clear_direction_inputs();
-    application->destroy_direction(Hum.humanInstructions.size());
-    application->update_travelInfo("", "");
 }
 
 
@@ -949,8 +975,8 @@ void zoomFeature(ezgl::application *application){
  */
 
 void zoomAllPoints(ezgl::application *application){
-    //zoomLocation(application, info.lastPOI, 0);
-    //zoomLocation(application, info.lastIntersection, 1);
+    zoomLocation(application, info.lastPOI, 0);
+    zoomLocation(application, info.lastIntersection, 1);
     zoomLocation(application, info.lastSubway, 2);
     zoomStreet(application);
     zoomFeature(application);
@@ -972,18 +998,16 @@ void initiateTheSicko(GtkWidget *, ezgl::application *application){
     
     if(info.initiateSicko == 0){
         info.initiateSicko = 1;
-        application->change_button_text("Sicko Mode", "Mo Bamba");
         message = "Warning, you may be in awe by how amazing this mode is.\n"
             "Once you go sicko, you can never go back!\n"
             "If you look closely enough at the CN Tower you can see Drake.";
     }else{
         info.initiateSicko = 0;
-        application->change_button_text("Mo Bamba", "Sicko Mode");
         message = "You have left sicko mode.\n"
             "Your life will never be the same!\n";
     }
     
     dialog_box(NULL, application, message.c_str());
             
-    application->refresh_drawing();
+    application->refresh_drawing(); 
 }

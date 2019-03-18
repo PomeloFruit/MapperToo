@@ -37,6 +37,8 @@ void populateData::initialize(infoStrucs &info, mapBoundary &xy){
     info.lastPOI.clear();
     info.lastSeg.clear();
     info.showRoute = 0;
+    info.directionEnd = -1;
+    info.directionStart = -1;
 }
 
 
@@ -58,6 +60,11 @@ void populateData::clear(infoStrucs &info){
     for(int i = 0; i < 6; i++){
         info.numStreetType[i] = 0;
     }
+    info.directionEnd = -1;
+    info.directionStart = -1;
+    info.corInput1.clear();
+    info.corInput2.clear();
+    info.corInput3.clear();
 }
 
 

@@ -7,6 +7,8 @@ bool disable_event_loop = false;
     const char* straightPath = "libstreetmap/resources/straight.png";
     const char* rightPath = "libstreetmap/resources/right turn.png";
     const char* leftPath = "libstreetmap/resources/left_turn.png";
+    const char* slightRightPath = "libstreetmap/resources/slight_right.png";
+    const char* slightLeftPath = "libstreetmap/resources/slight_left.png"; 
 
 namespace ezgl {
 
@@ -252,7 +254,7 @@ void application::update_message(std::string const &message)
 void application::connect_feature(button_callback_fn press_find, button_callback_fn press_direction, 
         button_callback_fn press_tourist, button_callback_fn press_food, button_callback_fn press_shop,
         button_callback_fn press_transit, button_callback_fn press_close, button_callback_fn press_findDirection,
-        button_callback_fn press_flip){
+        button_callback_fn press_flip, button_callback_fn press_help, button_callback_fn press_sicko){
     // Connect press_zoom_out function to the Zoom-out button
     GtkWidget *find_button = (GtkWidget *) this->get_object("FindButton");
     g_signal_connect(G_OBJECT(find_button), "clicked", G_CALLBACK(press_find), this);
@@ -280,6 +282,12 @@ void application::connect_feature(button_callback_fn press_find, button_callback
     
     GtkWidget *flip_button = (GtkWidget *) this->get_object("flipButton");
     g_signal_connect(G_OBJECT(flip_button), "clicked", G_CALLBACK(press_flip), this);
+    
+    GtkWidget *help_button = (GtkWidget *) this->get_object("helpButton");
+    g_signal_connect(G_OBJECT(help_button), "clicked", G_CALLBACK(press_help), this);
+    
+    GtkWidget *sicko_button = (GtkWidget *) this->get_object("sickoButton");
+    g_signal_connect(G_OBJECT(sicko_button), "clicked", G_CALLBACK(press_sicko), this);
 }
 
 void application::get_input_text(const char *&street1, const char *&street2,
@@ -383,13 +391,17 @@ void application::create_direction(const char *instruction, int direction, int s
         path = rightPath;
     }else if (direction == 2){
         path = leftPath;
+    }else if (direction == 3){
+        path = slightRightPath;
+    }else if (direction == 4){
+        path = slightLeftPath; 
     }
     
     GtkWidget *directionText = gtk_label_new(instruction);
     GtkWidget *directionIcon = gtk_image_new_from_file(path);
     
     gtk_label_set_line_wrap((GtkLabel *) directionText, TRUE);
-    gtk_label_set_width_chars((GtkLabel *)directionText, 50);
+    gtk_label_set_width_chars((GtkLabel *)directionText, 30);
     gtk_label_set_xalign((GtkLabel *)directionText, 0);
     
     gtk_grid_attach(dGrid, directionIcon, 0, step, 1, 1);

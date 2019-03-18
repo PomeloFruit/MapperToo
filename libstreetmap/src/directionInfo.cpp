@@ -11,7 +11,8 @@
 #include <sstream>
 #include <iomanip>
 
-#define SLIGHTTURNANGLE M_PI/4//45 degrees in radians
+
+#define SLIGHTTURNANGLE M_PI/4 //45 degrees in radians
 #define NOTURNANGLE 0.261799
 #define NOINTERSECTION -100
 #define SAMESTREET -99

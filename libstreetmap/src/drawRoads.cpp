@@ -245,7 +245,7 @@ void roadDrawing::drawIntersections(int numInter, mapBoundary &xy, infoStrucs &i
     ezgl::rectangle currentRectangle=g.get_visible_world();
 //    for(int i = 0 ; i < numInter ; i++){
 //        if(inBounds(xy, currentRectangle, info.IntersectionInfo[i].position)){
-//            drawOneIntersection(i, xy, info, g);
+//            drawOneIntersection(i, xy, info, g, 0);
 //        }
 //    }
     drawSpecialIntersections(xy, info, g);
@@ -263,9 +263,17 @@ void roadDrawing::drawIntersections(int numInter, mapBoundary &xy, infoStrucs &i
  */
 
 void roadDrawing::drawSpecialIntersections(mapBoundary &xy, infoStrucs &info, ezgl::renderer &g){
-    for(unsigned i = 0 ; i < info.lastIntersection.size() ; i++){
-        drawOneIntersection(info.lastIntersection[i], xy, info, g);
+    if(info.directionStart != -1){
+        drawOneIntersection(info.directionStart, xy, info, g, 1);
     }
+    if(info.directionEnd != -1){
+        drawOneIntersection(info.directionEnd, xy, info, g, 2);
+    }
+    
+    for(unsigned i = 0 ; i < info.lastIntersection.size() ; i++){
+        drawOneIntersection(info.lastIntersection[i], xy, info, g, 0);
+    }
+    
 }
 
 
@@ -281,8 +289,9 @@ void roadDrawing::drawSpecialIntersections(mapBoundary &xy, infoStrucs &info, ez
  * @return void
  */
 
-void roadDrawing::drawOneIntersection(int id, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g){
+void roadDrawing::drawOneIntersection(int id, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g, int startStop){
     const float RADIUSNORM = 0.00003;
+    const double RADIUS2 = g.get_visible_world().width()*0.009;
     const double RADIUS = g.get_visible_world().width()*0.018;
     float x, y;
        
@@ -295,6 +304,10 @@ void roadDrawing::drawOneIntersection(int id, mapBoundary &xy, infoStrucs &info,
         }else{
             g.draw_surface(g.load_png("intersection.png"), ezgl::point2d(x-RADIUS, y+RADIUS));
         }
+    } else if (startStop == 1){ // draw start
+        g.draw_surface(g.load_png("POI_select.png"), ezgl::point2d(x-RADIUS2, y+RADIUS2));
+    } else if (startStop == 2){ // draw stop
+        g.draw_surface(g.load_png("destination.png"), ezgl::point2d(x-RADIUS2, y+RADIUS2));
     } else {
         if(info.initiateSicko == 1){
             g.set_color(0,0,0,255);
@@ -304,6 +317,7 @@ void roadDrawing::drawOneIntersection(int id, mapBoundary &xy, infoStrucs &info,
         
         g.fill_elliptic_arc(ezgl::point2d(x,y),RADIUSNORM,RADIUSNORM,0,360);
     }
+    
 }
 
 
