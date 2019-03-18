@@ -18,9 +18,9 @@ const int RESULTPOI = -2;
 const int RESULTSUBWAY = -3;
 const int RESULTFEATURE = -4;
 
-#define LEFTTURNPENALTY 25
-#define RIGHTTURNPENALTY 15
-
+#define LEFTTURNPENALTY 9.894933333333333
+#define RIGHTTURNPENALTY 7.032466667
+//^^for right hand driving places
 HumanInfo Hum;
 
 /* clickedOnIntersection function

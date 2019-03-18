@@ -22,7 +22,7 @@
  */
 
 void roadDrawing::setRoadColourSize(infoStrucs &info, int type, bool highlight, ezgl::renderer &g, double startArea, double currentArea){
-    const int HIGHLIGHTFACT = 5;
+    const int HIGHLIGHTFACT = 1;
     int width = SECONDARYWIDTH;
     g.set_color(255,255,255,255); //Default white colour
     double inputAdjust=1/(currentArea/startArea);
@@ -182,6 +182,28 @@ void roadDrawing::setRoadColourSize(infoStrucs &info, int type, bool highlight, 
             
         }
     }
+    for(int i=0;i<info.lastSeg.size();i++){
+        setRoadColourSize(info, HIGHWAY, true, g, startArea, currentArea);//all roads that are highlighted on a path will be drawn at the same width as a highway and shit
+       //^^all roads that are being in lastSeg should be highlighted
+        //this is also the most scuffed way of doing this
+        from = getIntersectionPosition(getInfoStreetSegment(info.lastSeg[i]).from);
+        for(int j=0;j<getInfoStreetSegment(info.lastSeg[i]).curvePointCount;j++){
+            to = getStreetSegmentCurvePoint(j,info.lastSeg[i]);
+            draw=(inBounds(xy, currentRectangle, to))||(inBounds(xy, currentRectangle, from));
+
+            if(draw){
+                drawStraightStreet(from, to, xy, g);
+            }
+            from = to;
+        }
+        to=getIntersectionPosition(getInfoStreetSegment(info.lastSeg[i]).to);
+        //to = info.IntersectionInfo[info.StreetSegInfo[i].toIntersection].position;
+        draw = (inBounds(xy, currentRectangle, to))||(inBounds(xy, currentRectangle, from));
+
+        if(draw){
+                drawStraightStreet(from, to, xy, g);
+        }
+    }
 }
 
  
@@ -221,11 +243,11 @@ void roadDrawing::drawStraightStreet(LatLon &pt1, LatLon &pt2, mapBoundary &xy, 
 
 void roadDrawing::drawIntersections(int numInter, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g){
     ezgl::rectangle currentRectangle=g.get_visible_world();
-    for(int i = 0 ; i < numInter ; i++){
-        if(inBounds(xy, currentRectangle, info.IntersectionInfo[i].position)){
-            drawOneIntersection(i, xy, info, g);
-        }
-    }
+//    for(int i = 0 ; i < numInter ; i++){
+//        if(inBounds(xy, currentRectangle, info.IntersectionInfo[i].position)){
+//            drawOneIntersection(i, xy, info, g);
+//        }
+//    }
     drawSpecialIntersections(xy, info, g);
 }
 

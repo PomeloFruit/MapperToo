@@ -385,7 +385,8 @@ void findButton(GtkWidget *, ezgl::application *application){
     application->update_message(message);
     application->refresh_drawing();
 }
-
+//so for 5 to start and 6 to end
+//make sure to put in the start thingy in first and the endy in the end
 std::vector<std::pair<std::string, int>> processInstructions(){
     std::vector<std::pair<std::string, int>>  finalInstructions;
     for(int i=0;i<Hum.humanInstructions.size();i++){
@@ -697,7 +698,8 @@ void shopsButton(GtkWidget *, ezgl::application *application){
 void newMap(std::string path, ezgl::application *application){
     path = "/cad2/ece297s/public/maps/" + path + ".streets.bin";
     
-    pop.clear(info);  
+    pop.clear(info);
+    Hum.clear();
     close_map(); 
     load_map(path); 
     initializeMap();

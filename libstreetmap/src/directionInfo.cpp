@@ -11,7 +11,7 @@
 #include <sstream>
 #include <iomanip>
 
-#define SLIGHTTURNANGLE M_PI/2 //45 degrees in radians
+#define SLIGHTTURNANGLE M_PI/4//45 degrees in radians
 #define NOTURNANGLE 0.261799
 #define NOINTERSECTION -100
 #define SAMESTREET -99
@@ -165,6 +165,7 @@ void HumanInfo::fillDistance(std::vector<unsigned> path, std::vector<std::pair<u
     double totalDistance=0;
     double totalTime=0;
     double time=0;
+    int intDistance=0;
     int numStreetsChanged=0;
     int curMarker=static_cast<int> (path[0]);
     int nextMarker=-1;
@@ -187,9 +188,7 @@ void HumanInfo::fillDistance(std::vector<unsigned> path, std::vector<std::pair<u
                 distance=0;
                 time=0;
                 numStreetsChanged++;
-                std::cout<<numStreetsChanged<<" "<<changedStreetIDSegs.size()<<'\n';
                 if(numStreetsChanged<=changedStreetIDSegs.size()){
-                    
                     if((numStreetsChanged)!=changedStreetIDSegs.size()){
                         nextMarker=static_cast<int> (changedStreetIDSegs[numStreetsChanged].first);
                     }
@@ -201,13 +200,14 @@ void HumanInfo::fillDistance(std::vector<unsigned> path, std::vector<std::pair<u
         }
     }
     else if(path.size()==1){
-        totalDistance=find_street_segment_travel_time(path[0]);
+        totalDistance=find_street_segment_length(path[0]);
+        totalTime=find_street_segment_travel_time(path[0]);
     }
-    if(changedStreetIDSegs.size()==0){
-        totalDistance=distance;
-    }
-    int intDistance=static_cast<int> (totalDistance);
-    if(numStreetsChanged==0){
+    if(path.size()!=1&&numStreetsChanged==0){
+        for(int i=0;i<path.size();i++){
+            totalDistance=totalDistance+find_street_segment_length(path[i]);
+        }
+        intDistance=static_cast<int> (totalDistance);
         setDistanceTimeStreet(intDistance, numStreetsChanged);
     }
     intDistance=static_cast<int> (totalDistance);
@@ -303,7 +303,7 @@ void HumanInfo::setStartStop(std::string start, std::string stop){
 void HumanInfo::setDistanceTime(int distance, double time){
     const double SEC_PER_MIN = 60.0;
     const double MIN_PER_HOUR = 60.0; 
-    
+    //std::cout<<distance<<'\n';
     if(distance >= 1000){
         double tempDistance=static_cast<double> (distance);
         tempDistance=tempDistance/100;
