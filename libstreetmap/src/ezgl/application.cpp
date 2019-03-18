@@ -251,7 +251,7 @@ void application::update_message(std::string const &message)
 
 void application::connect_feature(button_callback_fn press_find, button_callback_fn press_direction, 
         button_callback_fn press_tourist, button_callback_fn press_food, button_callback_fn press_shop,
-        button_callback_fn press_transit, button_callback_fn press_close){
+        button_callback_fn press_transit, button_callback_fn press_close, button_callback_fn press_findDirection){
     // Connect press_zoom_out function to the Zoom-out button
     GtkWidget *find_button = (GtkWidget *) this->get_object("FindButton");
     g_signal_connect(G_OBJECT(find_button), "clicked", G_CALLBACK(press_find), this);
@@ -273,6 +273,9 @@ void application::connect_feature(button_callback_fn press_find, button_callback
     
     GtkWidget *close_button = (GtkWidget *) this->get_object("closeOverlay");
     g_signal_connect(G_OBJECT(close_button), "clicked", G_CALLBACK(press_close), this);
+    
+    GtkWidget *findDirection_button = (GtkWidget *) this->get_object("directionButton");
+    g_signal_connect(G_OBJECT(findDirection_button), "clicked", G_CALLBACK(press_findDirection), this);
 }
 
 void application::get_input_text(const char *&street1, const char *&street2,
@@ -295,12 +298,24 @@ void application::set_input_text(const char *&street1, const char *&street2,
     gtk_entry_set_text(street_entry3, street3);
 }
 
-//
-//void application::create_direction(const char *time, const char *distance){
-//    GtkWidget *eta = 
-//    
-//    
-//}
+
+void application::update_travelInfo(std::string time, std::string distance){
+    GtkGrid* sGrid = (GtkGrid*) get_object("directionSearch");
+    std::string ETA = "ETA: " + time; 
+    std::string Distance = "Distance " + distance; 
+    
+    GtkWidget *etaText = gtk_label_new(ETA.c_str()); 
+    GtkWidget *distanceText = gtk_label_new(Distance.c_str());
+    
+    gtk_grid_remove_row(sGrid, 2);
+    
+    gtk_grid_attach(sGrid, etaText, 0, 2, 10, 1);
+    gtk_grid_attach(sGrid, distanceText, 10, 2, 10, 1); 
+    
+    gtk_widget_show(etaText);
+    gtk_widget_show(distanceText);
+}
+
 
 void application::destroy_direction(int steps){
     GtkGrid* dGrid = (GtkGrid*) get_object("directionGrid");
@@ -331,6 +346,7 @@ void application::create_direction(const char *instruction, int direction, int s
     gtk_widget_show(directionText);
     gtk_widget_show(directionIcon);
 }
+
 
 void application::create_button(const char *button_text,
     int left,

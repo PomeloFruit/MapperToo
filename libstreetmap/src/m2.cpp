@@ -173,7 +173,7 @@ void initial_setup(ezgl::application *application){
     setCompletionModel(application);
     application->update_message("Left-click for Points of Interest | Right-click for Intersections | <ctrl> + Left-click for Subways ");
 
-    application->connect_feature(findButton, directionButton, touristButton, fdButton, shopsButton, transitButton, closeButton);
+    application->connect_feature(findButton, directionButton, touristButton, fdButton, shopsButton, transitButton, closeButton, findButton);
     
     //================================= need to change this later ========================================
     //application->create_direction();
