@@ -53,7 +53,14 @@ std::string clickActions::clickedOnIntersection(double x, double y, mapBoundary 
             info.corInput3 = info.IntersectionInfo[clickedID].name;
         }
         
-        if(info.directionStart != -1 && info.directionEnd != -1){
+        unsigned tempStart = info.directionStart;
+        unsigned tempEnd = info.directionEnd;
+        clearPreviousHighlights(info);
+        info.directionStart = tempStart;
+        info.directionEnd = tempEnd;
+        
+        
+        if(info.directionStart != -1 && info.directionEnd != -1){     
             searchForDirections(info);
         }
     } else {
@@ -338,7 +345,8 @@ std::string clickActions::searchOnMap(infoStrucs &info){
  * @return void
  */
 
-void clickActions::searchForDirections(infoStrucs &info){
+std::string clickActions::searchForDirections(infoStrucs &info){
+    std::string message = "";
     std::vector<unsigned> street1ID, street2ID, street3ID, street4ID, resultID, resultID2;
     int match1, match2, match3, match4;
     int start = 0;
@@ -346,27 +354,29 @@ void clickActions::searchForDirections(infoStrucs &info){
     resultID.clear();
     
     // get the match type of the search
-    if(info.corInput2 != getIntersectionName(info.directionStart)){
+    if(info.directionStart != -1 && info.corInput2 == getIntersectionName(info.directionStart)){
+        resultID.push_back(info.directionStart);
+        match1 = 0;
+        match2 = 0;
+    } else {// if (info.directionStart == -1){
         match1 = findMatches(street1ID, info.textInput1, info);
         match2 = findMatches(street2ID, info.textInput2, info);
-        resultID = findIntersectionsFromStreets(street1ID, street2ID); 
-    } else {
-        resultID.push_back(info.directionStart);
+        resultID = findIntersectionsFromStreets(street1ID, street2ID);
     }
     
-    if(info.corInput3 != getIntersectionName(info.directionEnd)){
+    if(info.directionEnd != -1  &&  info.corInput3 == getIntersectionName(info.directionEnd)){
+        resultID2.push_back(info.directionEnd);
+        match3 = 0;
+        match4 = 0;
+    } else {
         match3 = findMatches(street3ID, info.textInput3, info);
         match4 = findMatches(street4ID, info.textInput4, info);
         resultID2 = findIntersectionsFromStreets(street3ID, street4ID);
-    } else {
-        resultID2.push_back(info.directionEnd);
     }
     
     // reset correct input output names to blank
     info.corInput2 = "";
     info.corInput3 = "";
-        
-    std::vector<unsigned> temp;        
         
     if(resultID.size() > 0 && resultID2.size() > 0){ // if intersection found
         info.corInput2 = getIntersectionName(resultID[start]);
@@ -391,7 +401,15 @@ void clickActions::searchForDirections(infoStrucs &info){
         info.directionStart = resultID[start];
         info.directionEnd = resultID2[start];
         
-    } 
+    } else if(resultID.size() > 0 && resultID2.size() == 0){
+        message = "Destination Invalid. No match could be found. Please consider trying again.";
+    } else if(resultID.size() == 0 && resultID2.size() > 0){
+        message = "Start Invalid. No match could be found. Please try again.";
+    } else {
+        message = "Start Invalid and Destination Invalid. No match could be found. Try again.";
+    }
+    
+    return message;
 }
 
 
@@ -853,6 +871,7 @@ void clickActions::clearPreviousHighlights(infoStrucs &info){
         info.IntersectionInfo[currentIndex].clicked = false;
     }
     info.lastIntersection.clear();
+    
     info.directionStart = -1;
     info.directionEnd = -1;
 

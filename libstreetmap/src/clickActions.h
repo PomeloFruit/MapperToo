@@ -31,7 +31,7 @@ public:
     std::string searchOnMap(infoStrucs &info);
     
     // finds a path between two intersections and returns it on the screen
-    void searchForDirections(infoStrucs &info);
+    std::string searchForDirections(infoStrucs &info);
     
     // find the nearest subway station to pt
     unsigned findNearestSubway(infoStrucs &info, LatLon pt);

@@ -275,10 +275,7 @@ void act_on_mouse_press(ezgl::application *application, GdkEventButton *event, d
             message = ck.clickedOnIntersection(x, y, xy, info, 0);
         }
 
-        zoomAllPoints(application);
-
-        
-        
+        //zoomAllPoints(application);
     }
     application->update_message(message);
     application->refresh_drawing();
@@ -376,8 +373,7 @@ void findButton(GtkWidget *, ezgl::application *application){
     if(info.findDirections){
         recoverStreetsFromInput(name2, info.textInput1, info.textInput2);
         recoverStreetsFromInput(name3, info.textInput3, info.textInput4);
-        ck.searchForDirections(info);
-        message = "";
+        message = ck.searchForDirections(info);
     } else {
         recoverStreetsFromInput(name1, info.textInput1, info.textInput2);
         message = ck.searchOnMap(info);
@@ -565,6 +561,12 @@ void closeButton(GtkWidget *, ezgl::application *application){
 
 void flipButton(GtkWidget *, ezgl::application *application){
     application->flip_direction_inputs();
+    
+    unsigned temp1 = info.directionStart;
+    unsigned temp2 = info.directionEnd;
+    info.directionEnd = temp1;
+    info.directionStart = temp2;
+    
     findButton(NULL, application);
 }
 
@@ -729,7 +731,8 @@ void newMap(std::string path, ezgl::application *application){
     close_map(); 
     load_map(path); 
     initializeMap();
-   
+    application->clear_direction_inputs();
+    
     std::string canvasID = application->get_main_canvas_id(); 
     ezgl::rectangle new_world({xy.xMin,xy.yMin},{xy.xMax,xy.yMax});
     ezgl::canvas* myCanvas = application->get_canvas(canvasID);
