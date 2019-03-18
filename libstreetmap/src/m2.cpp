@@ -245,7 +245,7 @@ void setCompletionModel(ezgl::application *application){
 
 void act_on_mouse_press(ezgl::application *application, GdkEventButton *event, double x, double y){
     std::string message;
-
+    application->destroy_direction(Hum.humanInstructions.size());
     if(info.findDirections){
         if (event->button == 1) { //left click
             ck.clickedOnIntersection(x, y, xy, info, 1);
@@ -276,6 +276,14 @@ void act_on_mouse_press(ezgl::application *application, GdkEventButton *event, d
         }
 
         //zoomAllPoints(application);
+    }
+
+
+    std::vector<std::pair<std::string, int>> processedInstructions = processInstructions();
+    
+    for(int i=0;i<Hum.humanInstructions.size();i++){
+        application->create_direction(processedInstructions[i].first.c_str(), processedInstructions[i].second, i);
+        application->update_travelInfo(Hum.totTimePrint, Hum.totDistancePrint);
     }
     application->update_message(message);
     application->refresh_drawing();
@@ -409,42 +417,50 @@ void findButton(GtkWidget *, ezgl::application *application){
 //make sure to put in the start thingy in first and the endy in the end
 std::vector<std::pair<std::string, int>> processInstructions(){
     std::vector<std::pair<std::string, int>>  finalInstructions;
-    for(int i=0;i<Hum.humanInstructions.size();i++){
+    for(int i=-1;i<Hum.humanInstructions.size()+1;i++){
         std::string pushIn;
         int directionDeterminer;
-        if(i==Hum.humanInstructions.size()-1){
-            pushIn="Continue on " + Hum.humanInstructions.at(i).onStreet + " for " +
-            Hum.humanInstructions.at(i).distancePrint + " to arrive at your destination ";  
-        }
-        else if(i==0){
-            pushIn= "Proceed on " + Hum.humanInstructions.at(i).onStreet + " for " +
-            Hum.humanInstructions.at(i).distancePrint+" then ";
-            if(Hum.humanInstructions.at(i).turnPrint=="straight"){         
-               pushIn=pushIn + " continue " + Hum.humanInstructions.at(i).turnPrint
-                +" "+Hum.humanInstructions.at(i).nextStreet;
-            } else{   
-               pushIn=pushIn +" turn " + Hum.humanInstructions.at(i).turnPrint
-               +" onto "+Hum.humanInstructions.at(i).nextStreet;
+        if((i!=Hum.humanInstructions.size())&&(i!=-1)){
+            if(i==Hum.humanInstructions.size()-1){
+                pushIn="Continue on " + Hum.humanInstructions.at(i).onStreet + " for " +
+                Hum.humanInstructions.at(i).distancePrint + " to arrive at your destination ";  
+            }
+            else if(i==0){
+                pushIn= "Proceed on " + Hum.humanInstructions.at(i).onStreet + " for " +
+                Hum.humanInstructions.at(i).distancePrint+" then ";
+                if(Hum.humanInstructions.at(i).turnPrint=="straight"){         
+                   pushIn=pushIn + " continue " + Hum.humanInstructions.at(i).turnPrint
+                    +" "+Hum.humanInstructions.at(i).nextStreet;
+                } else{   
+                   pushIn=pushIn +" turn " + Hum.humanInstructions.at(i).turnPrint
+                   +" onto "+Hum.humanInstructions.at(i).nextStreet;
+                }
+
             }
 
-        }
-
-        else{
-            pushIn = "Continue on "+ Hum.humanInstructions.at(i).onStreet + " for " +
-            Hum.humanInstructions.at(i).distancePrint+" then go "+
-            Hum.humanInstructions.at(i).turnPrint + " onto " + 
-            Hum.humanInstructions.at(i).nextStreet;
-        }
-        if(Hum.humanInstructions.at(i).turnPrint == "left"){
-            directionDeterminer=2;
-        }else if (Hum.humanInstructions.at(i).turnPrint == "slightly left"){
-            directionDeterminer = 4;
-        }else if(Hum.humanInstructions.at(i).turnPrint == "right"){
-            directionDeterminer=1;
-        }else if (Hum.humanInstructions.at(i).turnPrint == "slightly right" ){
-            directionDeterminer = 3;
-        }else{
-            directionDeterminer=0;
+            else{
+                pushIn = "Continue on "+ Hum.humanInstructions.at(i).onStreet + " for " +
+                Hum.humanInstructions.at(i).distancePrint+" then go "+
+                Hum.humanInstructions.at(i).turnPrint + " onto " + 
+                Hum.humanInstructions.at(i).nextStreet;
+            }
+            if(Hum.humanInstructions.at(i).turnPrint == "left"){
+                directionDeterminer=2;
+            }else if (Hum.humanInstructions.at(i).turnPrint == "slightly left"){
+                directionDeterminer = 4;
+            }else if(Hum.humanInstructions.at(i).turnPrint == "right"){
+                directionDeterminer=1;
+            }else if (Hum.humanInstructions.at(i).turnPrint == "slightly right" ){
+                directionDeterminer = 3;
+            }else{
+                directionDeterminer=0;
+            }
+        } else if(i==-1){
+            pushIn="You are starting at" + Hum.startIntersection;
+            directionDeterminer=5;
+        } else{
+            pushIn="You have arrived at your destination, "+ Hum.endIntersection;
+            directionDeterminer=6;
         }
         std::cout<<pushIn<<'\n';
         finalInstructions.push_back(std::make_pair(pushIn, directionDeterminer));

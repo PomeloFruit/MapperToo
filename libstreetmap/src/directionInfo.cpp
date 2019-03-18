@@ -146,9 +146,6 @@ void HumanInfo::fillInfo(std::vector<unsigned> path){
             }
             prevID=path[i];
         }
-//        if(numStreetsOnPath>2){
-//            numStreetsOnPath--;
-//        }
         
         clear();
         for(int i=0;i<numStreetsOnPath;i++){
