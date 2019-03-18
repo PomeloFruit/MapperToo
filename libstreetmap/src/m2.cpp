@@ -387,13 +387,12 @@ std::vector<std::pair<std::string, int>> processInstructions(){
         std::string pushIn;
         int directionDeterminer;
         if(i==Hum.humanInstructions.size()-1){
-            pushIn="Continue on " + Hum.humanInstructions.at(i).onStreet + " for " +
-            Hum.humanInstructions.at(i).distancePrint+
-            " to arrive at your destination "+'\n';  
+            pushIn="\nContinue on " + Hum.humanInstructions.at(i).onStreet + " for " +
+            Hum.humanInstructions.at(i).distancePrint + "\nto arrive at your destination "+'\n';  
         }
         else if(i==0){
-            pushIn= "Proceed on " + Hum.humanInstructions.at(i).onStreet + " for " +
-            Hum.humanInstructions.at(i).distancePrint+" then ";
+            pushIn= "\nProceed on " + Hum.humanInstructions.at(i).onStreet + " for " +
+            Hum.humanInstructions.at(i).distancePrint+"\nthen ";
             if(Hum.humanInstructions.at(i).turnPrint=="straight"){         
                pushIn=pushIn + "continue " + Hum.humanInstructions.at(i).turnPrint
                 +" "+Hum.humanInstructions.at(i).nextStreet + '\n';
@@ -405,8 +404,8 @@ std::vector<std::pair<std::string, int>> processInstructions(){
         }
 
         else{
-            pushIn = "Continue on "+ Hum.humanInstructions.at(i).onStreet + " for " +
-            Hum.humanInstructions.at(i).distancePrint+" then go "+
+            pushIn = "\nContinue on "+ Hum.humanInstructions.at(i).onStreet + " for " +
+            Hum.humanInstructions.at(i).distancePrint+"\nthen go "+
             Hum.humanInstructions.at(i).turnPrint + " onto " + 
             Hum.humanInstructions.at(i).nextStreet + '\n';
         }
