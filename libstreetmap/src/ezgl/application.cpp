@@ -298,6 +298,45 @@ void application::set_input_text(const char *&street1, const char *&street2,
     gtk_entry_set_text(street_entry3, street3);
 }
 
+void application::set_text_in_directions(){
+    const char *input;
+    std::string blankStr = "";
+    const char *blank = blankStr.c_str();
+    
+    GtkEntry *street_entry1 = (GtkEntry *) this->get_object("FindStreet1");
+    input = gtk_entry_get_text(street_entry1);
+    //gtk_entry_set_text(street_entry1, blank);
+    GtkEntry *street_entry2 = (GtkEntry *) this->get_object("FindStreet2");
+    gtk_entry_set_text(street_entry2, input);
+    GtkEntry *street_entry3 = (GtkEntry *) this->get_object("FindStreet3");
+    gtk_entry_set_text(street_entry3, blank);
+}
+
+void application::clear_direction_inputs(){
+    std::string blankStr = "";
+    const char *blank = blankStr.c_str();
+    
+    GtkEntry *street_entry1 = (GtkEntry *) this->get_object("FindStreet1");
+    gtk_entry_set_text(street_entry1, blank);
+    GtkEntry *street_entry2 = (GtkEntry *) this->get_object("FindStreet2");
+    gtk_entry_set_text(street_entry2, blank);
+    GtkEntry *street_entry3 = (GtkEntry *) this->get_object("FindStreet3");
+    gtk_entry_set_text(street_entry3, blank);
+}
+
+void application::flip_direction_inputs(){
+    const char *input2;
+    const char *input3;
+    
+    GtkEntry *street_entry2 = (GtkEntry *) this->get_object("FindStreet2");
+    GtkEntry *street_entry3 = (GtkEntry *) this->get_object("FindStreet3");
+    
+    input2 = gtk_entry_get_text(street_entry2);
+    input3 = gtk_entry_get_text(street_entry3);
+    
+    gtk_entry_set_text(street_entry3, input2);
+    gtk_entry_set_text(street_entry2, input3);
+}
 
 void application::update_travelInfo(std::string time, std::string distance){
     GtkGrid* sGrid = (GtkGrid*) get_object("directionSearch");
@@ -339,6 +378,8 @@ void application::create_direction(const char *instruction, int direction, int s
     
     GtkWidget *directionText = gtk_label_new(instruction);
     GtkWidget *directionIcon = gtk_image_new_from_file(path);
+    
+    gtk_label_set_line_wrap((GtkLabel *) directionText, TRUE);
     
     gtk_grid_attach(dGrid, directionIcon, 0, step, 1, 1);
     gtk_grid_attach(dGrid, directionText, 1, step, 1, 1);

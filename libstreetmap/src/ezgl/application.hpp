@@ -120,6 +120,12 @@ public:
   void get_input_text(const char *&street1, const char *&street2, const char *&street3);
   
   void set_input_text(const char *&street1, const char *&street2, const char *&street3);
+  
+  void set_text_in_directions();
+  
+  void clear_direction_inputs();
+  
+  void flip_direction_inputs();
 
   void update_travelInfo(std::string time, std::string distance);
   

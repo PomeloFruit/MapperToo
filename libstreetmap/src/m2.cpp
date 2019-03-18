@@ -346,6 +346,7 @@ void findButton(GtkWidget *, ezgl::application *application){
     
     //======================== Map Element Searching ===========================
     application->destroy_direction(Hum.humanInstructions.size());
+    
     //split up the input if there is '&' 
     if(info.findDirections){
         recoverStreetsFromInput(name2, info.textInput1, info.textInput2);
@@ -373,10 +374,13 @@ void findButton(GtkWidget *, ezgl::application *application){
 
     // reflect the changes
     
-    std::vector<std::pair<std::string, int>> processedInstructions=processInstructions();
+    std::vector<std::pair<std::string, int>> processedInstructions = processInstructions();
+    
     for(int i=0;i<Hum.humanInstructions.size();i++){
         application->create_direction(processedInstructions[i].first.c_str(), processedInstructions[i].second, i);
+        application->update_travelInfo(Hum.totTimePrint, Hum.totDistancePrint);
     }
+    
     application->update_message(message);
     application->refresh_drawing();
 }
@@ -387,31 +391,31 @@ std::vector<std::pair<std::string, int>> processInstructions(){
         std::string pushIn;
         int directionDeterminer;
         if(i==Hum.humanInstructions.size()-1){
-            pushIn="\nContinue on " + Hum.humanInstructions.at(i).onStreet + " for " +
-            Hum.humanInstructions.at(i).distancePrint + "\nto arrive at your destination "+'\n';  
+            pushIn="Continue on " + Hum.humanInstructions.at(i).onStreet + " for " +
+            Hum.humanInstructions.at(i).distancePrint + " to arrive at your destination ";  
         }
         else if(i==0){
-            pushIn= "\nProceed on " + Hum.humanInstructions.at(i).onStreet + " for " +
-            Hum.humanInstructions.at(i).distancePrint+"\nthen ";
+            pushIn= "Proceed on " + Hum.humanInstructions.at(i).onStreet + " for " +
+            Hum.humanInstructions.at(i).distancePrint+" then ";
             if(Hum.humanInstructions.at(i).turnPrint=="straight"){         
-               pushIn=pushIn + "continue " + Hum.humanInstructions.at(i).turnPrint
-                +" "+Hum.humanInstructions.at(i).nextStreet + '\n';
+               pushIn=pushIn + " continue " + Hum.humanInstructions.at(i).turnPrint
+                +" "+Hum.humanInstructions.at(i).nextStreet;
             } else{   
-               pushIn=pushIn +"turn " + Hum.humanInstructions.at(i).turnPrint
-               +" onto "+Hum.humanInstructions.at(i).nextStreet + '\n';
+               pushIn=pushIn +" turn " + Hum.humanInstructions.at(i).turnPrint
+               +" onto "+Hum.humanInstructions.at(i).nextStreet;
             }
 
         }
 
         else{
-            pushIn = "\nContinue on "+ Hum.humanInstructions.at(i).onStreet + " for " +
-            Hum.humanInstructions.at(i).distancePrint+"\nthen go "+
+            pushIn = "Continue on "+ Hum.humanInstructions.at(i).onStreet + " for " +
+            Hum.humanInstructions.at(i).distancePrint+" then go "+
             Hum.humanInstructions.at(i).turnPrint + " onto " + 
-            Hum.humanInstructions.at(i).nextStreet + '\n';
+            Hum.humanInstructions.at(i).nextStreet;
         }
-        if(Hum.humanInstructions.at(i).turnPrint=="slightly left"||Hum.humanInstructions.at(i).turnPrint=="left"){
+        if(Hum.humanInstructions.at(i).turnPrint == "slightly left" || Hum.humanInstructions.at(i).turnPrint == "left"){
             directionDeterminer=2;
-        }else if(Hum.humanInstructions.at(i).turnPrint=="slightly right"||Hum.humanInstructions.at(i).turnPrint=="right"){
+        }else if(Hum.humanInstructions.at(i).turnPrint == "slightly right" || Hum.humanInstructions.at(i).turnPrint == "right"){
             directionDeterminer=1;
         }else{
             directionDeterminer=0;
@@ -494,8 +498,9 @@ void directionButton(GtkWidget *, ezgl::application *application){
         gtk_widget_hide(directionButton);
         gtk_widget_hide(findButton);
         gtk_widget_hide(poiGrid);
-        
     }
+    
+    application->set_text_in_directions();
 }
 
 
@@ -522,7 +527,10 @@ void closeButton(GtkWidget *, ezgl::application *application){
         gtk_widget_show(directionButton);
         gtk_widget_show(findButton);
         gtk_widget_show(poiGrid);
-    }
+    }    
+    application->clear_direction_inputs();
+    application->destroy_direction(Hum.humanInstructions.size());
+    application->update_travelInfo("", "");
 }
 
 
