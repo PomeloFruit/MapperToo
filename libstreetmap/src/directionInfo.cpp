@@ -287,8 +287,8 @@ void HumanInfo::fillTurn(std::vector<unsigned> path, std::vector<std::pair<unsig
 
         }
     }
+    
     //the last turn
-    std::cout<<"I'm straight c:"<<'\n';
     Hum.humanInstructions[changedStreetIDSegs.size()].turnType=HumanTurnType::STRAIGHT;
     std::string insert="straight";
     Hum.humanInstructions[changedStreetIDSegs.size()].turnPrint=insert;
@@ -301,8 +301,10 @@ void HumanInfo::setStartStop(std::string start, std::string stop){
 
 
 void HumanInfo::setDistanceTime(int distance, double time){
-    time=ceil(time);
-    if(distance>=1000){
+    const double SEC_PER_MIN = 60.0;
+    const double MIN_PER_HOUR = 60.0; 
+    
+    if(distance >= 1000){
         double tempDistance=static_cast<double> (distance);
         tempDistance=tempDistance/100;
         tempDistance=round(tempDistance);
@@ -311,26 +313,24 @@ void HumanInfo::setDistanceTime(int distance, double time){
         editor<<std::fixed<<std::setprecision(1)<<tempDistance;
         std::string insert=editor.str();
         Hum.totDistancePrint=insert+" km";
-    }
-    else{
+    } else {
         Hum.totDistancePrint=std::to_string(distance)+" m";
     }
-    std::cout<<time<<" sex"<<'\n';
-    int intTime=static_cast<int> (time);
-    int hours=intTime/3600;
-    intTime=intTime-hours*3600;
-    int minutes=intTime/60;
-    intTime=intTime-minutes*60;
-    int seconds=intTime/60;
     
-    if(hours==0&&minutes!=0){
-        Hum.totTimePrint=std::to_string(minutes)+" min";
+    int hour = time/(SEC_PER_MIN*MIN_PER_HOUR); 
+    time = time - hour*(SEC_PER_MIN*MIN_PER_HOUR); 
+    
+    int min = time/(SEC_PER_MIN); 
+
+    if(hour == 0 && min != 0){
+        min = ceil(time/(SEC_PER_MIN));
+        Hum.totTimePrint=std::to_string(min)+" min";
     }
-    else if(hours==0&&minutes==0){
-        Hum.totTimePrint=std::to_string(seconds)+" sec";
+    else if(hour == 0 && min == 0){
+        Hum.totTimePrint = "< 1 min";
     }
     else{
-        Hum.totTimePrint=std::to_string(hours)+" h "+std::to_string(minutes)+" min";
+        Hum.totTimePrint=std::to_string(hour)+" h "+std::to_string(min)+" min";
     }
     
 }

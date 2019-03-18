@@ -17,8 +17,10 @@ const int RESULTEMPTY = -1;
 const int RESULTPOI = -2;
 const int RESULTSUBWAY = -3;
 const int RESULTFEATURE = -4;
-#define LEFTTURNPENALTY 0
-#define RIGHTTURNPENALTY 0
+
+#define LEFTTURNPENALTY 25
+#define RIGHTTURNPENALTY 15
+
 HumanInfo Hum;
 
 /* clickedOnIntersection function
@@ -351,8 +353,7 @@ void clickActions::searchForDirections(infoStrucs &info){
 
         // get the fastest path and travel time
         std::vector<unsigned> path;
-        path = find_path_between_intersections(resultID[start], resultID2[start], LEFTTURNPENALTY, RIGHTTURNPENALTY); //================================================ need to determine left right turn times
-        double travelTime = compute_path_travel_time(path, LEFTTURNPENALTY, RIGHTTURNPENALTY); //================================================ need to determine left right turn times
+        path = find_path_between_intersections(resultID[start], resultID2[start], LEFTTURNPENALTY, RIGHTTURNPENALTY);
         
         // determine the directions to display
         Hum.clear();

@@ -820,7 +820,7 @@ void zoomStreet(ezgl::application *application){
     
     double deltaX = x2 - x1;
     double deltaY = y2 - y1;
-    const double BUFFER = 1.2; 
+    const double BUFFER = 2.0; 
     
     double currentH = cnv->get_camera().get_world().height();
     double currentW = cnv->get_camera().get_world().width();
@@ -839,14 +839,24 @@ void zoomStreet(ezgl::application *application){
     
     
     //change the viewing area
-    double startX = (x1 + x2 - recX)/2;
+    double startX = (-1*(cnv->get_camera().get_world().width()/30) + x1 + x2 - recX)/2;
     double startY = (y1 + y2 - recY)/2;
+    double endX = startX + recX;
+    double endY = startY + recY;
     
     ezgl::point2d focusPt(startX, startY); 
     ezgl::rectangle zoomArea (focusPt, recX,  recY); 
     
-    cnv->get_camera().set_world(zoomArea);
-    cnv->redraw();
+    bool pointInside = (cnv->get_camera().get_initial_world().contains(startX, startY)) &&
+                       (cnv->get_camera().get_initial_world().contains(endX, endY));
+    
+    if(pointInside){
+        cnv->get_camera().set_world(zoomArea);
+        cnv->redraw();
+    } else {
+        cnv->get_camera().set_world(cnv->get_camera().get_initial_world());
+        cnv->redraw();
+    }
 }
 
 
@@ -937,8 +947,8 @@ void zoomFeature(ezgl::application *application){
  */
 
 void zoomAllPoints(ezgl::application *application){
-    zoomLocation(application, info.lastPOI, 0);
-    zoomLocation(application, info.lastIntersection, 1);
+    //zoomLocation(application, info.lastPOI, 0);
+    //zoomLocation(application, info.lastIntersection, 1);
     zoomLocation(application, info.lastSubway, 2);
     zoomStreet(application);
     zoomFeature(application);
