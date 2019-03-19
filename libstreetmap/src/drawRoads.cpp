@@ -182,7 +182,7 @@ void roadDrawing::setRoadColourSize(infoStrucs &info, int type, bool highlight, 
             
         }
     }
-    for(int i=0;i<info.lastSeg.size();i++){
+    for(int i=0;i<static_cast<int> (info.lastSeg.size());i++){
         setRoadColourSize(info, HIGHWAY, true, g, startArea, currentArea);//all roads that are highlighted on a path will be drawn at the same width as a highway and shit
        //^^all roads that are being in lastSeg should be highlighted
         //this is also the most scuffed way of doing this
@@ -242,14 +242,14 @@ void roadDrawing::drawStraightStreet(LatLon &pt1, LatLon &pt2, mapBoundary &xy, 
  */
 
 void roadDrawing::drawIntersections(int numInter, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g){
-    ezgl::rectangle currentRectangle=g.get_visible_world();
-    
     // can be added to draw all intersections if wanted
-//    for(int i = 0 ; i < numInter ; i++){
-//        if(inBounds(xy, currentRectangle, info.IntersectionInfo[i].position)){
-//            drawOneIntersection(i, xy, info, g, 0);
-//        }
-//    }
+    ezgl::rectangle currentRectangle=g.get_visible_world();
+    //this for loop will not run
+    for(int i = numInter ; i < numInter ; i++){
+        if(inBounds(xy, currentRectangle, info.IntersectionInfo[i].position)){
+            drawOneIntersection(i, xy, info, g, 0);
+        }
+    }
     
     drawSpecialIntersections(xy, info, g);
 }

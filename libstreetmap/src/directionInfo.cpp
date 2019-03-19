@@ -127,6 +127,14 @@ void DirectionInfo::findFastestStreet(){
     secPerMeter = (3600 / fastestKmH) * 0.001;
 }
 
+/* fillInfo function
+ * - If there is a path to take info from to populate Hum with, it will do this
+ * - Determines how many streets were crossed on the path as well
+ * 
+ * @param std::vector<unsigned> path - The path returned by a*
+ * 
+ * @return void
+ */
 
 void HumanInfo::fillInfo(std::vector<unsigned> path){
     if(path.size()>0){
@@ -153,12 +161,21 @@ void HumanInfo::fillInfo(std::vector<unsigned> path){
         }
         fillDistance(path, changedStreetIDSegs);
         fillStreets(path, changedStreetIDSegs);
-        fillTurn(path, changedStreetIDSegs);
+        fillTurn(changedStreetIDSegs);
     }else{
         clear();
     }
     
 }
+
+/* fillDistance function
+ * - Processes information required to fill all distance fields in the Hum object
+ * 
+ * @param std::vector<unsigned> path - The path returned by a*
+ * @param std::vector<std::pair<unsigned, unsigned>> changedStreetIDSegs - A vector of pairs of street segments where a change in street happened
+ * 
+ * @return void
+ */
 
 void HumanInfo::fillDistance(std::vector<unsigned> path, std::vector<std::pair<unsigned, unsigned>> changedStreetIDSegs){
     double distance=0;
@@ -188,8 +205,8 @@ void HumanInfo::fillDistance(std::vector<unsigned> path, std::vector<std::pair<u
                 distance=0;
                 time=0;
                 numStreetsChanged++;
-                if(numStreetsChanged<=changedStreetIDSegs.size()){
-                    if((numStreetsChanged)!=changedStreetIDSegs.size()){
+                if(numStreetsChanged<=static_cast<int> (changedStreetIDSegs.size())){
+                    if((numStreetsChanged)!=static_cast<int> (changedStreetIDSegs.size())){
                         nextMarker=static_cast<int> (changedStreetIDSegs[numStreetsChanged].first);
                     }
                     else{
@@ -204,7 +221,7 @@ void HumanInfo::fillDistance(std::vector<unsigned> path, std::vector<std::pair<u
         totalTime=find_street_segment_travel_time(path[0]);
     }
     if(path.size()!=1&&numStreetsChanged==0){
-        for(int i=0;i<path.size();i++){
+        for(int i=0;i<static_cast<int> (path.size());i++){
             totalDistance=totalDistance+find_street_segment_length(path[i]);
         }
         intDistance=static_cast<int> (totalDistance);
@@ -217,9 +234,19 @@ void HumanInfo::fillDistance(std::vector<unsigned> path, std::vector<std::pair<u
     setDistanceTime(intDistance, totalTime);
 }
 
+/* fillStreets function
+ * - Processes information required to fill all street fields in the Hum object
+ * - Fills the street fields
+ * 
+ * @param std::vector<unsigned> path - The path returned by a*
+ * @param std::vector<std::pair<unsigned, unsigned>> changedStreetIDSegs - A vector of pairs of street segments where a change in street happened
+ * 
+ * @return void
+ */
+
 void HumanInfo::fillStreets(std::vector<unsigned> path, std::vector<std::pair<unsigned, unsigned>> changedStreetIDSegs){
     
-    for(int i=0;i<changedStreetIDSegs.size();i++){
+    for(int i=0;i<static_cast<int> (changedStreetIDSegs.size());i++){
         InfoStreetSegment prevInfo=getInfoStreetSegment(changedStreetIDSegs[i].first);
         InfoStreetSegment curInfo=getInfoStreetSegment(changedStreetIDSegs[i].second);
         std::string prevName=getStreetName(prevInfo.streetID);
@@ -227,7 +254,7 @@ void HumanInfo::fillStreets(std::vector<unsigned> path, std::vector<std::pair<un
         Hum.humanInstructions[i].onStreet=prevName;
         Hum.humanInstructions[i].nextStreet=curName;
     }
-    if(changedStreetIDSegs.size()==0){
+    if(changedStreetIDSegs.empty()){
         InfoStreetSegment curInfo=getInfoStreetSegment(path[0]);
         std::string curName=getStreetName(curInfo.streetID);
         Hum.humanInstructions[0].onStreet=curName;
@@ -240,10 +267,17 @@ void HumanInfo::fillStreets(std::vector<unsigned> path, std::vector<std::pair<un
     }
 }
 
+/* fillTurn function
+ * - Processes information required to fill all turn fields in the Hum object
+ * 
+ * @param std::vector<std::pair<unsigned, unsigned>> changedStreetIDSegs - A vector of pairs of street segments where a change in street happened
+ * 
+ * @return void
+ */
 
-void HumanInfo::fillTurn(std::vector<unsigned> path, std::vector<std::pair<unsigned, unsigned>> changedStreetIDSegs){
+void HumanInfo::fillTurn(std::vector<std::pair<unsigned, unsigned>> changedStreetIDSegs){
     if(changedStreetIDSegs.size()>0){
-        for(int i=0;i<changedStreetIDSegs.size();i++){
+        for(int i=0;i<static_cast<int> (changedStreetIDSegs.size());i++){
             double angle=findAngleBetweenSegs(changedStreetIDSegs[i].first, changedStreetIDSegs[i].second);
             double angleSeverity=abs(angle);
             int turnSeverity;
@@ -265,7 +299,7 @@ void HumanInfo::fillTurn(std::vector<unsigned> path, std::vector<std::pair<unsig
                 Hum.humanInstructions[i].turnType=HumanTurnType::STRAIGHT;
                 Hum.humanInstructions[i].turnPrint=insert;
             } else if(angle == NOINTERSECTION){ // segments dont intersect
-                std::string insert="AHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH";
+                std::string insert="AHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH ERROR";
                 Hum.humanInstructions[i].turnType=HumanTurnType::NONE;
                 Hum.humanInstructions[i].turnPrint=insert;
             } else if(((angle < 0 && angle > -M_PI)|| angle > M_PI)&&(turnSeverity==REGULARTURN)){ //negative angle
@@ -288,26 +322,45 @@ void HumanInfo::fillTurn(std::vector<unsigned> path, std::vector<std::pair<unsig
         }
     }
     
-    //the last turn
+    //the last stretch
     Hum.humanInstructions[changedStreetIDSegs.size()].turnType=HumanTurnType::STRAIGHT;
     std::string insert="straight";
     Hum.humanInstructions[changedStreetIDSegs.size()].turnPrint=insert;
 }
+
+/* setStartStop function
+ * - Sets the intersection fields in the Hum object
+ * 
+ * @param void
+ * 
+ * @return void
+ */
 
 void HumanInfo::setStartStop(std::string start, std::string stop){
     Hum.startIntersection = start;
     Hum.endIntersection = stop;
 }
 
+/* setDistanceTime function
+ * - Takes processed information and further processes it into a readable string
+ * 
+ * @param int distance - Distance of the entire street (in meters) rounded up to the nearest whole number
+ * @param double time - The total distance in seconds of the entire path
+ * 
+ * @return void
+ */
 
 void HumanInfo::setDistanceTime(int distance, double time){
     const double SEC_PER_MIN = 60.0;
     const double MIN_PER_HOUR = 60.0; 
     if(distance >= 1000){
+        //cast to double so rounding off will work
         double tempDistance=static_cast<double> (distance);
+        //the next 3 lines are to round the number to one decimal place
         tempDistance=tempDistance/100;
         tempDistance=round(tempDistance);
         tempDistance=tempDistance/10;
+        //and the 3 lines after this are to ensure that the string only shows the numbers that matter
         std::stringstream editor;
         editor<<std::fixed<<std::setprecision(1)<<tempDistance;
         std::string insert=editor.str();
@@ -335,6 +388,15 @@ void HumanInfo::setDistanceTime(int distance, double time){
     
 }
 
+/* setDistanceTimeStreet function
+ * - Takes processed information and further processes it into a readable string
+ * 
+ * @param int distance - Total distance that will be traveled on a given street (in meters) rounded up to the nearest whole number
+ * @param int index - Determines where the distance should be put in Hum
+ * 
+ * @return void
+ */
+
 void HumanInfo::setDistanceTimeStreet(int distance, int index){
     if(distance>=1000){
         double tempDistance=static_cast<double> (distance);
@@ -351,6 +413,13 @@ void HumanInfo::setDistanceTimeStreet(int distance, int index){
     }
 }
 
+/* clear function
+ * - clears every field of the Hum object
+ * 
+ * @param void
+ * 
+ * @return void
+ */
 
 void HumanInfo::clear(){
     Hum.endIntersection.clear();

@@ -39,18 +39,18 @@ enum class HumanTurnType {
     STRAIGHT, // going straight
     RIGHT, // turning right
     LEFT, // turning left
-    SLIGHTRIGHT,
-    SLIGHTLEFT,
+    SLIGHTRIGHT, //turning slightly right
+    SLIGHTLEFT, //turning slightly left
     NONE // no turn detected
 };
 
 struct navInstruction{
-    int distance;
-    HumanTurnType turnType;
-    std::string distancePrint;
-    std::string nextStreet;
-    std::string onStreet;
-    std::string turnPrint;
+    int distance;//The total distance spent on the street
+    HumanTurnType turnType;//The turn that has to be made at the end of the time on the street
+    std::string distancePrint;//The distance spent on street but processed into a string
+    std::string nextStreet;//The street that will be turned onto
+    std::string onStreet;//The street that the distance is covered on
+    std::string turnPrint;//The turn type but processed
 };
 
 //============================== Class ===================================
@@ -79,21 +79,35 @@ public:
 
 class HumanInfo {
 public:
-    std::vector< navInstruction > humanInstructions;
-    std::string startIntersection;
-    std::string endIntersection;
-    std::string totDistancePrint;
-    std::string totTimePrint;
     
-    void fillInfo(std::vector<unsigned> path);//calls me other shit yarr harr
+    std::vector< navInstruction > humanInstructions;//A vector containing navInstructions, each index is an instruction to be printed
+    std::string startIntersection;//The intersection the user starts at
+    std::string endIntersection;//The intersection the user ends at
+    std::string totDistancePrint;//The total distance of the path but processed
+    std::string totTimePrint;//The total time of the path but processed
+    
+    //creates changedStreetIDSegs and calls other functions
+    void fillInfo(std::vector<unsigned> path);
+    
+    //Processes information required to fill all distance fields in the Hum object
     void fillDistance(std::vector<unsigned> path, std::vector<std::pair<unsigned, unsigned>> changedStreetIDSegs);
+    
+    //Processes information required to fill all street fields in the Hum object
     void fillStreets(std::vector<unsigned> path, std::vector<std::pair<unsigned, unsigned>> changedStreetIDSegs);
-    void fillTurn(std::vector<unsigned> path, std::vector<std::pair<unsigned, unsigned>> changedStreetIDSegs);
+    
+    //Processes information required to fill all turn fields in the Hum object
+    void fillTurn(std::vector<std::pair<unsigned, unsigned>> changedStreetIDSegs);
+    
+    //Takes processed information and further processes it into a readable string
     void setDistanceTimeStreet(int distance, int index);
     
+    //Sets the intersection fields in the Hum object
     void setStartStop(std::string start, std::string stop);
+    
+    //Takes processed information and further processes it into a readable string
     void setDistanceTime(int distance, double time);
     
+    //clears every field of the Hum object
     void clear();
 };
 

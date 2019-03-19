@@ -283,7 +283,7 @@ void act_on_mouse_press(ezgl::application *application, GdkEventButton *event, d
     if(Hum.humanInstructions.size()>0) {
         std::vector<std::pair<std::string, int>> processedInstructions = processInstructions();
 
-        for(int i=0;i<processedInstructions.size();i++){
+        for(int i=0;i<static_cast<int> (processedInstructions.size());i++){
             application->create_direction(processedInstructions[i].first.c_str(), processedInstructions[i].second, i);
             application->update_travelInfo(Hum.totTimePrint, Hum.totDistancePrint);
         }
@@ -425,10 +425,11 @@ void findButton(GtkWidget *, ezgl::application *application){
     zoomAllPoints(application);
 
     // add the navigational instructions    
-    if(Hum.humanInstructions.size()>0){
+    // reflect the changes  
+    if(static_cast<int> (Hum.humanInstructions.size())>0){
         std::vector<std::pair<std::string, int>> processedInstructions = processInstructions();
 
-        for(int i=0;i<processedInstructions.size();i++){
+        for(int i=0;i<static_cast<int> (processedInstructions.size());i++){
             application->create_direction(processedInstructions[i].first.c_str(), processedInstructions[i].second, i);
             application->update_travelInfo(Hum.totTimePrint, Hum.totDistancePrint);
         }
@@ -440,16 +441,27 @@ void findButton(GtkWidget *, ezgl::application *application){
     application->refresh_drawing();
 }
 
+/* processInstructions function
+ * - Takes all the information in the Hum object and forms it into a multiple strings
+ * - Strings are stored in a pair with an encoded number to determine the icon to place
+ * - After the strings are made it prints them out into console
+ * 
+ * @param int distance - Distance of the entire street (in meters) rounded up to the nearest whole number
+ * @param double time - The total distance in seconds of the entire path
+ * 
+ * @return void
+ */
 
-
-//============================================ COMMENT THIS IAN >:( =============================================
 std::vector<std::pair<std::string, int>> processInstructions(){
     std::vector<std::pair<std::string, int>>  finalInstructions;
+    //Since Hum does not have specific instructions set for start and stop intersections
+    //the loop is going to start at -1 to fill start intersection information
+    //and end at one past the length of the vector in Hum to fill end intersection information
     for(int i=-1;i<static_cast<int>(Hum.humanInstructions.size()+1);i++){
         std::string pushIn;
         int directionDeterminer;
-        if((i!=static_cast<int>(Hum.humanInstructions.size()))&&(i!=-1)){
-            if(i==Hum.humanInstructions.size()-1){
+        if((i!=static_cast<int>(Hum.humanInstructions.size())) && (i!=-1)){
+            if(i==static_cast<int> (Hum.humanInstructions.size()-1)){
                 pushIn="Continue on " + Hum.humanInstructions.at(i).onStreet + " for " +
                 Hum.humanInstructions.at(i).distancePrint + " to arrive at your destination ";  
             }
@@ -485,16 +497,15 @@ std::vector<std::pair<std::string, int>> processInstructions(){
             }
         } else if(i==-1){
             pushIn="Start at " + Hum.startIntersection;
+            std::cout << "=============================================\n";
+            std::cout << "Navigation Instructions: \n";
+            std::cout << "=============================================\n";
             directionDeterminer=5;
-        } else if(Hum.humanInstructions.size()==i){
+        } else if(static_cast<int> (Hum.humanInstructions.size())==i){
             pushIn="Arrive at destination "+ Hum.endIntersection;
-            std::cout<<"============================================="<<'\n';
             directionDeterminer=6;
         }
         std::cout<<pushIn<<'\n';
-        if(i==Hum.humanInstructions.size()){
-            std::cout<<"============================================="<<'\n';
-        }
         finalInstructions.push_back(std::make_pair(pushIn, directionDeterminer));
     }
     return finalInstructions;
@@ -524,7 +535,7 @@ void recoverStreetsFromInput(std::string input, std::string &retStreet1, std::st
         splitEnd = (int)input.find(tempCombs[tempCombsNum]);
         splitStart = splitEnd + tempCombs[tempCombsNum].size();
         tempCombsNum ++;
-    } while(splitEnd == -1 && tempCombsNum < tempCombs.size());
+    } while(splitEnd == -1 && tempCombsNum < static_cast<int> (tempCombs.size()));
         
     // intersection inputted, so need to split it up
     if(splitEnd != -1){
