@@ -83,7 +83,6 @@ std::vector<std::pair<std::string, std::string>> city {std::make_pair("beijing",
         std::make_pair("tokyo","japan"), std::make_pair("toronto","canada")
 };
 
-bool showTime [10];
 //std::vector<std::string> leftHandDrives {std::string "egypt", std::string "england",
 //        std::string "india", std::string "japan", std::string "australia",
 //        std::string "singapore", std::string "saint-helena", std::string "hong-kong"};
@@ -256,6 +255,7 @@ void act_on_mouse_press(ezgl::application *application, GdkEventButton *event, d
             ck.clickedOnIntersection(x, y, xy, info, 2);
         }
         
+        // write clicked intersections to search bar
         const char *name1, *name2, *name3;
         name1 = info.corInput1.c_str();
         name2 = info.corInput2.c_str();
@@ -436,8 +436,10 @@ void findButton(GtkWidget *, ezgl::application *application){
     application->update_message(message);
     application->refresh_drawing();
 }
-//so for 5 to start and 6 to end
-//make sure to put in the start thingy in first and the endy in the end
+
+
+
+//============================================ COMMENT THIS IAN >:( =============================================
 std::vector<std::pair<std::string, int>> processInstructions(){
     std::vector<std::pair<std::string, int>>  finalInstructions;
     for(int i=-1;i<static_cast<int>(Hum.humanInstructions.size()+1);i++){
@@ -536,7 +538,7 @@ void recoverStreetsFromInput(std::string input, std::string &retStreet1, std::st
 
 
 /* directionButton function
- * - calls to show/hide the directions panel
+ * - calls to show the directions panel
  * 
  * @param widget <GtkWidget> -event object to determine mouse action
  * @param application <ezgl::application> - application object to access window elements
@@ -556,9 +558,8 @@ void directionButton(GtkWidget *, ezgl::application *application){
     GtkWidget *findButton = (GtkWidget*)application->get_object("FindButton");
     
     
-    if(showTime[0] == false){
+    if(info.findDirections == false){
         info.findDirections = true;
-        showTime[0] = true; 
         
         gtk_widget_show(directionBackground);
         gtk_widget_show(closeOverlay);
@@ -573,6 +574,14 @@ void directionButton(GtkWidget *, ezgl::application *application){
     application->set_text_in_directions();
 }
 
+/* closeButton function
+ * - calls to hide the directions panel
+ * 
+ * @param widget <GtkWidget> -event object to determine mouse action
+ * @param application <ezgl::application> - application object to access window elements
+ * 
+ * @return void
+ */
 
 void closeButton(GtkWidget *, ezgl::application *application){
     
@@ -585,9 +594,8 @@ void closeButton(GtkWidget *, ezgl::application *application){
     GtkWidget *poiGrid = (GtkWidget*)application->get_object("PoiGrid");
     GtkWidget *findButton = (GtkWidget*)application->get_object("FindButton");
     
-    if(showTime[0] == true){
+    if(info.findDirections == true){
         info.findDirections = false;
-        showTime[0] = false; 
         
         gtk_widget_hide(directionBackground);
         gtk_widget_hide(closeOverlay);
@@ -601,6 +609,15 @@ void closeButton(GtkWidget *, ezgl::application *application){
     application->clear_direction_inputs();
 }
 
+
+/* flipButton function
+ * - calls to flip inputs from search bars in directions panel
+ * 
+ * @param widget <GtkWidget> -event object to determine mouse action
+ * @param application <ezgl::application> - application object to access window elements
+ * 
+ * @return void
+ */
 
 void flipButton(GtkWidget *, ezgl::application *application){
     application->flip_direction_inputs();
@@ -902,6 +919,10 @@ void zoomStreet(ezgl::application *application){
     double deltaX = x2 - x1;
     double deltaY = y2 - y1;
     const double BUFFER = 2.0; 
+//    const double MIN_AREA = 8.7474e-04;
+//    const double MIN_RATIO = cnv->get_camera().get_initial_world().area()/MIN_AREA; 
+//    const double MIN_X = cnv->get_camera().get_initial_world().width()/MIN_RATIO;
+//    const double MIN_Y = cnv->get_camera().get_initial_world().height()/MIN_RATIO;
     
     double currentH = cnv->get_camera().get_world().height();
     double currentW = cnv->get_camera().get_world().width();
@@ -932,7 +953,7 @@ void zoomStreet(ezgl::application *application){
     double endY = startY + recY;
     
     ezgl::point2d focusPt(startX, startY); 
-    ezgl::rectangle zoomArea (focusPt, recX,  recY); 
+    ezgl::rectangle zoomArea (focusPt, recX,  recY);  
     
     bool pointInside = (cnv->get_camera().get_initial_world().contains(startX, startY)) &&
                        (cnv->get_camera().get_initial_world().contains(endX, endY));
@@ -989,7 +1010,7 @@ void zoomFeature(ezgl::application *application){
         //find the dimensions of the new rectangle/viewing area
         double deltaX = x2 - x1;
         double deltaY = y2 - y1;
-        const double BUFFER = 5; 
+        const double BUFFER = 5;  
 
         double currentH = cnv->get_camera().get_world().height();
         double currentW = cnv->get_camera().get_world().width();
@@ -1013,7 +1034,6 @@ void zoomFeature(ezgl::application *application){
 
         ezgl::point2d focusPt(startX, startY); 
         ezgl::rectangle zoomArea (focusPt, recX,  recY); 
-        
         if(zoomArea.area() < cnv->get_camera().get_initial_world().area()){
             cnv->get_camera().set_world(zoomArea);
             cnv->redraw();

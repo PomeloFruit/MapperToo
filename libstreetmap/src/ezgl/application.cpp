@@ -316,7 +316,7 @@ void application::set_input_text(const char *&street1, const char *&street2,
     gtk_entry_set_text(street_entry3, street3);
 }
 
-
+// Set the text in the Searchbars when the direction panel is open
 void application::set_text_in_directions(){
     const char *input;
     std::string blankStr = "";
@@ -331,6 +331,7 @@ void application::set_text_in_directions(){
     gtk_entry_set_text(street_entry3, blank);
 }
 
+// Clear the text in the Searchbars when the direction panel is open
 void application::clear_direction_inputs(){
     std::string blankStr = "";
     const char *blank = blankStr.c_str();
@@ -343,6 +344,7 @@ void application::clear_direction_inputs(){
     gtk_entry_set_text(street_entry3, blank);
 }
 
+// Flip the inputs from the two Searchbars in the direction panel
 void application::flip_direction_inputs(){
     const char *temp;
     std::string input2, input3;
@@ -359,8 +361,8 @@ void application::flip_direction_inputs(){
     gtk_entry_set_text(street_entry2, temp);
 }
 
+// Update the ETA and distance labels 
 void application::update_travelInfo(std::string time, std::string distance){
-    //GtkGrid* sGrid = (GtkGrid*) get_object("directionSearch");
     std::string ETA = "ETA: " + time; 
     std::string Distance = "Distance " + distance; 
     
@@ -371,7 +373,7 @@ void application::update_travelInfo(std::string time, std::string distance){
     gtk_label_set_text((GtkLabel*)distanceText, Distance.c_str());
 }
 
-
+// Delete the current directions in the direction panels
 void application::destroy_direction(int steps){
     GtkGrid* dGrid = (GtkGrid*) get_object("directionGrid");
     for(int i = 0; i < steps; i++){
@@ -379,7 +381,8 @@ void application::destroy_direction(int steps){
     }
 }
 
-
+// Create new direction instructions in the direction panel 
+// Based on the direction type, a different icon will be displayed for the step 
 void application::create_direction(const char *instruction, int direction, int step){
     GtkGrid* dGrid = (GtkGrid*) get_object("directionGrid");
     const char* path = ""; 

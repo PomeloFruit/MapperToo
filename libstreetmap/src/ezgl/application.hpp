@@ -119,19 +119,38 @@ public:
   
   //retrieve input text from text fields
   void get_input_text(const char *&street1, const char *&street2, const char *&street3);
-  
+  // Set the text in the Searchbars
   void set_input_text(const char *&street1, const char *&street2, const char *&street3);
-  
+  // Set the text in the Searchbars when the direction panel is open
   void set_text_in_directions();
-  
+  // Clear the text in the Searchbars when the direction panel is open
   void clear_direction_inputs();
-  
+  // Flip the inputs from the two Searchbars in the direction panel
   void flip_direction_inputs();
-
+  
+  /*
+   *Updates the ETA and Distance labels in the display 
+   * 
+   * @param time the ETA time 
+   * @param distance the total distance traveled to reach destination
+   *    
+   */
   void update_travelInfo(std::string time, std::string distance);
   
+  /*
+   * Creates a new direction instruction on the display 
+   * 
+   * @param instruction the text to be displayed in the direction 
+   * @param direction  the direction that the path is going 
+   * @param step    the current step of the path 
+   */
   void create_direction(const char *instruction, int direction, int step);
   
+  /*
+   * Deletes all direction instructions in the grid 
+   * 
+   * @param step  the total number of steps in the path
+   */
   void destroy_direction(int steps);
   
   /**

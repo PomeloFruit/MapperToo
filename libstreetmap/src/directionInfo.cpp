@@ -135,7 +135,7 @@ void HumanInfo::fillInfo(std::vector<unsigned> path){
         unsigned prevID=path[0];
         int numStreetsOnPath=1;
         std::vector<std::pair<unsigned, unsigned>> changedStreetIDSegs;
-        for(int i=1;i<path.size();i++){
+        for(unsigned i=1;i<path.size();i++){
             curInfo=getInfoStreetSegment(path[i]);
             if(prevInfo.streetID!=curInfo.streetID){
                 if(getStreetName(getInfoStreetSegment(prevID).streetID)!=getStreetName(curInfo.streetID)){
@@ -173,7 +173,7 @@ void HumanInfo::fillDistance(std::vector<unsigned> path, std::vector<std::pair<u
         nextMarker=changedStreetIDSegs[0].first;
     }
     if(path.size()>1){
-        for(int i=0 ; i<path.size() ; i++){
+        for(unsigned i=0 ; i<path.size() ; i++){
             curMarker=static_cast<int> (path[i]);
             double tempDistance=find_street_segment_length(path[i]);
             distance=distance+tempDistance;
