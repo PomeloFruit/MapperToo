@@ -12,6 +12,8 @@
 #include <string>
 #include <iostream>
 
+// from research in papers, took average of results
+// time penalties in seconds
 #define LEFTTURNPENALTY 9.894933333333333
 #define RIGHTTURNPENALTY 7.032466667
 
@@ -21,12 +23,13 @@ const int RESULTPOI = -2;
 const int RESULTSUBWAY = -3;
 const int RESULTFEATURE = -4;
 
-//^^for right hand driving places
+// create the object holding path directions for humans
 HumanInfo Hum;
 
 /* clickedOnIntersection function
  * - determines which intersection was clicked
  * - calls for said intersection to be highlighted
+ * - also sets start/end locations in directions mode
  * - returns message about it
  * 
  * @param x <double> - x coordinate of click in screen coordinates
@@ -56,12 +59,14 @@ std::string clickActions::clickedOnIntersection(double x, double y, mapBoundary 
             info.clickedEnd = true;
         }
         
+        // clear old path but keep clicked intersection IDs
         unsigned tempStart = info.directionStart;
         unsigned tempEnd = info.directionEnd;
         clearPreviousHighlights(info);
         info.directionStart = tempStart;
         info.directionEnd = tempEnd;
         
+        // update path based on location
         searchForDirections(info);
         
     } else {
@@ -105,7 +110,10 @@ std::string clickActions::clickedOnPOI(double x, double y, mapBoundary &xy, info
     return displayName;
 }
 
-
+//    const double MIN_AREA = 8.7474e-04;
+//    const double MIN_RATIO = cnv->get_camera().get_initial_world().area()/MIN_AREA; 
+//    const double MIN_X = cnv->get_camera().get_initial_world().width()/MIN_RATIO;
+//    const double MIN_Y = cnv->get_camera().get_initial_world().height()/MIN_RATIO;
 /* clickedOnSubway function
  * - determines which subway was clicked
  * - calls for said subway to be highlighted
@@ -353,39 +361,40 @@ std::string clickActions::searchForDirections(infoStrucs &info){
     resultID.clear();
     resultID2.clear();   
     
+    // if start location was clicked, use ID generated from click
     if(info.clickedStart){
         resultID.push_back(info.directionStart);
-    } else {// if (info.directionStart == -1){
+    } else { // if start location was typed in
         findMatches(street1ID, info.textInput1, info);
         findMatches(street2ID, info.textInput2, info);
         resultID = findIntersectionsFromStreets(street1ID, street2ID);
     }
     
+    // if input was previously generated from clicks, and has not been changed
     if(resultID.size() == 0 && !info.changedInput2 && info.directionStart != -1){
         resultID.push_back(info.directionStart);
-    } else if(resultID.size() > 0) {
+    } else if(resultID.size() > 0) { // reset flags if input values find intersection
         info.changedInput2 = false;
         info.clickedStart = false; 
     }        
     
+    // if start location was clicked, use ID generated from click
     if(info.clickedEnd){
         resultID2.push_back(info.directionEnd);
-    } else {
+    } else { // use input from input field
         findMatches(street3ID, info.textInput3, info);
         findMatches(street4ID, info.textInput4, info);
         resultID2 = findIntersectionsFromStreets(street3ID, street4ID);
     }
     
+    // if input was previously generated from clicks, and has not been changed
     if(resultID2.size() == 0 && !info.changedInput3 && info.directionEnd != -1){
         resultID2.push_back(info.directionEnd);
-    } else if(resultID2.size() > 0) {
+    } else if(resultID2.size() > 0) { // reset flags if input values find intersection
         info.changedInput3 = false;
         info.clickedEnd = false; 
     }
     
-    // reset correct input output names to blank
-
-        
     if(resultID.size() > 0 && resultID2.size() > 0){ // if intersection found
         info.corInput2 = getIntersectionName(resultID[start]);
         info.corInput3 = getIntersectionName(resultID2[start]);
@@ -411,7 +420,7 @@ std::string clickActions::searchForDirections(infoStrucs &info){
         info.directionStart = resultID[start];
         info.directionEnd = resultID2[start];
         
-    } else {
+    } else { // no path found since start/end intersections not found
         if(resultID.size() > 0 && resultID2.size() == 0){
             info.directionEnd = -1;
             message = "Destination Invalid. No match could be found. Please consider trying again.";
@@ -423,6 +432,8 @@ std::string clickActions::searchForDirections(infoStrucs &info){
             info.directionEnd = -1;
             message = "Start Invalid and Destination Invalid. No match could be found. Try again.";
         }
+        
+        // clear previous path
         info.lastSeg.clear();
         Hum.clear();
     }
@@ -628,7 +639,7 @@ std::string clickActions::getMessagesFromMatches(int match1, int match2){
     
     if(match1 == RESULTEMPTY){ //no input in field 1
         
-        displayMessage = "Please try again <input 1 - no names detected>!";
+        displayMessage = "Please try again <no names detected>!";
         
     } else if(match1 == RESULTNONE){ //no match found for field 1
         
@@ -641,7 +652,7 @@ std::string clickActions::getMessagesFromMatches(int match1, int match2){
         } else if((match2 == 1) || (match2 == RESULTEMPTY)) { // unique in field 2, but field 1 is no good
             
             displayMessage = "Please try again | ";
-            displayMessage += std::to_string(match1) + " matches found for name 1.";
+            displayMessage += std::to_string(match1) + " matches found for input.";
             
         }
         
@@ -894,6 +905,7 @@ void clickActions::clearPreviousHighlights(infoStrucs &info){
     }
     info.lastIntersection.clear();
     
+    // remove the start/end indicators on the map
     info.directionStart = -1;
     info.directionEnd = -1;
 

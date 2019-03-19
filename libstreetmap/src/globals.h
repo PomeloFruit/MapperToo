@@ -141,15 +141,19 @@ public:
     // contains the output to the text fields/ corrected names
     std::string corInput1, corInput2, corInput3;
     
+    // stores the previous input into the start/end search fields
     std::string prevName2, prevName3;
     
+    // true if input for start/dest have been changed
     bool changedInput2,changedInput3; 
     
+    // saves the id of the clicked intersections for start/dest
     int directionStart, directionEnd;
     
     // contains whether or not to show 0-none/1-subways/2-trains/3-both
     int showRoute;
     
+    // true if directions panel is open, false if closed
     bool findDirections;
    
     // Holds the number of each street type in each map 

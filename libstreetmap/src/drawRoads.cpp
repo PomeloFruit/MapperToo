@@ -243,17 +243,21 @@ void roadDrawing::drawStraightStreet(LatLon &pt1, LatLon &pt2, mapBoundary &xy, 
 
 void roadDrawing::drawIntersections(int numInter, mapBoundary &xy, infoStrucs &info, ezgl::renderer &g){
     ezgl::rectangle currentRectangle=g.get_visible_world();
+    
+    // can be added to draw all intersections if wanted
 //    for(int i = 0 ; i < numInter ; i++){
 //        if(inBounds(xy, currentRectangle, info.IntersectionInfo[i].position)){
 //            drawOneIntersection(i, xy, info, g, 0);
 //        }
 //    }
+    
     drawSpecialIntersections(xy, info, g);
 }
 
 
 /* drawSpecialIntersections
  *  - Draws special intersections
+ *  - draws the start and stop icons for the directions
  * 
  * @param xy <mapBoundary> - An object that contains the bounds of the original map and functions to convert to and from LatLon/XY
  * @param info <infoStrucs> - An object that contains various data structures filled with info relevant to the map

@@ -184,7 +184,8 @@ void initial_setup(ezgl::application *application){
 
 
 /* setCompletionModel function
- * - fills the list store containing all the street names for entry completion
+ * - fills the list store containing all the intersection names for entry completion
+ * - only adds intersections if and only if they contain 1 &
  * 
  * @param application <ezgl::application> - application object to access window elements
  * 
@@ -209,7 +210,7 @@ void setCompletionModel(ezgl::application *application){
     for(unsigned i=0 ; i< static_cast<unsigned>(getNumIntersections()) ; i++){
         std::string str = getIntersectionName(i);
         
-        // count the occurences of &, since our program can only handle &
+        // count the number of &, since our program can only handle one &
         int numAmpersand = std::count(str.begin(), str.end(), '&');
         
         if(numAmpersand == 1){ // only add intersection to model if only one &
@@ -243,11 +244,13 @@ void setCompletionModel(ezgl::application *application){
  * @param y <double> - y coordinate of the mouse click (in screen co-ords)
  * 
  * @return void
- */
+ */        //zoomAllPoints(application);
 
 void act_on_mouse_press(ezgl::application *application, GdkEventButton *event, double x, double y){
     std::string message;
+    
     application->destroy_direction(Hum.humanInstructions.size()+2);
+    
     if(info.findDirections){
         if (event->button == 1) { //left click
             ck.clickedOnIntersection(x, y, xy, info, 1);
@@ -274,18 +277,17 @@ void act_on_mouse_press(ezgl::application *application, GdkEventButton *event, d
 
             message = ck.clickedOnIntersection(x, y, xy, info, 0);
         }
-
-        //zoomAllPoints(application);
     }
 
-    if(Hum.humanInstructions.size()>0){
+    // if click generated a valid path, update navigation information
+    if(Hum.humanInstructions.size()>0) {
         std::vector<std::pair<std::string, int>> processedInstructions = processInstructions();
 
         for(int i=0;i<processedInstructions.size();i++){
             application->create_direction(processedInstructions[i].first.c_str(), processedInstructions[i].second, i);
             application->update_travelInfo(Hum.totTimePrint, Hum.totDistancePrint);
         }
-    } else{
+    } else {
         application->update_travelInfo("", "");
     }
     
@@ -407,6 +409,7 @@ void findButton(GtkWidget *, ezgl::application *application){
         message = ck.searchOnMap(info);
     }
 
+    // update the search fields with the correct names
     if(info.corInput1 != ""){
         name1 = info.corInput1.c_str();
     }
@@ -421,8 +424,7 @@ void findButton(GtkWidget *, ezgl::application *application){
     
     zoomAllPoints(application);
 
-    // reflect the changes
-    
+    // add the navigational instructions    
     if(Hum.humanInstructions.size()>0){
         std::vector<std::pair<std::string, int>> processedInstructions = processInstructions();
 
@@ -430,9 +432,10 @@ void findButton(GtkWidget *, ezgl::application *application){
             application->create_direction(processedInstructions[i].first.c_str(), processedInstructions[i].second, i);
             application->update_travelInfo(Hum.totTimePrint, Hum.totDistancePrint);
         }
-    } else{
+    } else { // clear all information if no path exists
         application->update_travelInfo("", "");
     }
+    
     application->update_message(message);
     application->refresh_drawing();
 }
