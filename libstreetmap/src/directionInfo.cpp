@@ -139,7 +139,6 @@ void HumanInfo::fillInfo(std::vector<unsigned> path){
             curInfo=getInfoStreetSegment(path[i]);
             if(prevInfo.streetID!=curInfo.streetID){
                 if(getStreetName(getInfoStreetSegment(prevID).streetID)!=getStreetName(curInfo.streetID)){
-                    std::cout<< getStreetName(getInfoStreetSegment(prevID).streetID)<<" "<< getStreetName(curInfo.streetID)<<" "<<prevID<<" "<<path[i]<<'\n';
                     changedStreetIDSegs.push_back(std::make_pair(prevID, path[i]));
                     numStreetsOnPath++;
                 }
@@ -304,7 +303,6 @@ void HumanInfo::setStartStop(std::string start, std::string stop){
 void HumanInfo::setDistanceTime(int distance, double time){
     const double SEC_PER_MIN = 60.0;
     const double MIN_PER_HOUR = 60.0; 
-    //std::cout<<distance<<'\n';
     if(distance >= 1000){
         double tempDistance=static_cast<double> (distance);
         tempDistance=tempDistance/100;

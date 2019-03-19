@@ -82,6 +82,70 @@
     <property name="can_focus">False</property>
     <property name="pixbuf">help.png</property>
   </object>
+  <object class="GtkPopoverMenu" id="rightClick">
+    <property name="can_focus">False</property>
+    <property name="halign">end</property>
+    <property name="valign">start</property>
+    <child>
+      <object class="GtkBox">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="orientation">vertical</property>
+        <child>
+          <object class="GtkButton" id="sickoButton">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="halign">end</property>
+            <property name="valign">start</property>
+            <property name="image">tScott</property>
+            <style>
+              <class name="menuButton"/>
+            </style>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLinkButton" id="sickoMode">
+            <property name="label" translatable="yes">button</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="action_name">Initiate The Sicko</property>
+            <property name="relief">none</property>
+            <property name="uri">https://www.youtube.com/watch?v=6ONRf7h3Mdk</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLinkButton" id="ece297">
+            <property name="label" translatable="yes">button</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="relief">none</property>
+            <property name="uri">http://www.eecg.toronto.edu/~vaughn/ece297/</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">2</property>
+          </packing>
+        </child>
+      </object>
+      <packing>
+        <property name="submenu">main</property>
+      </packing>
+    </child>
+  </object>
   <object class="GtkImage" id="searchDirectionImage">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -116,6 +180,7 @@
     <property name="title">MapperToo</property>
     <property name="default_width">1500</property>
     <property name="default_height">1000</property>
+    <property name="icon">tscott.png</property>
     <child>
       <object class="GtkOverlay" id="Overlay">
         <property name="visible">True</property>
@@ -585,7 +650,7 @@
                         <property name="primary_icon_name">user-home-symbolic.symbolic</property>
                         <property name="primary_icon_activatable">False</property>
                         <property name="primary_icon_sensitive">False</property>
-                        <property name="placeholder_text" translatable="yes">Choose Starting Location</property>
+                        <property name="placeholder_text" translatable="yes">Enter Starting Location (or Left Click on Map)</property>
                         <property name="completion">NameCompletion2</property>
                         <style>
                           <class name="findButton"/>
@@ -607,7 +672,7 @@
                         <property name="primary_icon_name">find-location-symbolic.symbolic</property>
                         <property name="primary_icon_activatable">False</property>
                         <property name="primary_icon_sensitive">False</property>
-                        <property name="placeholder_text" translatable="yes">Choose Destination</property>
+                        <property name="placeholder_text" translatable="yes">Enter Destination (or Right Click on Map)</property>
                         <property name="completion">NameCompletion3</property>
                         <style>
                           <class name="findButton"/>
@@ -781,19 +846,23 @@
           </packing>
         </child>
         <child type="overlay">
-          <object class="GtkButton" id="sickoButton">
+          <object class="GtkMenuButton" id="menu">
+            <property name="width_request">50</property>
+            <property name="height_request">50</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
             <property name="halign">end</property>
             <property name="valign">start</property>
-            <property name="image">tScott</property>
-            <style>
-              <class name="menuButton"/>
-            </style>
+            <property name="margin_right">15</property>
+            <property name="margin_top">15</property>
+            <property name="popover">rightClick</property>
+            <child>
+              <placeholder/>
+            </child>
           </object>
           <packing>
-            <property name="index">9</property>
+            <property name="index">10</property>
           </packing>
         </child>
       </object>

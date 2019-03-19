@@ -9,6 +9,8 @@ bool disable_event_loop = false;
     const char* leftPath = "libstreetmap/resources/left_turn.png";
     const char* slightRightPath = "libstreetmap/resources/slight_right.png";
     const char* slightLeftPath = "libstreetmap/resources/slight_left.png"; 
+    const char* start = "libstreetmap/resources/current.png"; 
+    const char* end = "libstreetmap/resources/destination.png"; 
 
 namespace ezgl {
 
@@ -251,10 +253,12 @@ void application::update_message(std::string const &message)
   gtk_statusbar_push(status_bar, 0, message.c_str());
 }
 
+// Connect buttons from Glade to callback functions in M2
 void application::connect_feature(button_callback_fn press_find, button_callback_fn press_direction, 
         button_callback_fn press_tourist, button_callback_fn press_food, button_callback_fn press_shop,
         button_callback_fn press_transit, button_callback_fn press_close, button_callback_fn press_findDirection,
         button_callback_fn press_flip, button_callback_fn press_help, button_callback_fn press_sicko){
+    
     // Connect press_zoom_out function to the Zoom-out button
     GtkWidget *find_button = (GtkWidget *) this->get_object("FindButton");
     g_signal_connect(G_OBJECT(find_button), "clicked", G_CALLBACK(press_find), this);
@@ -290,6 +294,7 @@ void application::connect_feature(button_callback_fn press_find, button_callback
     g_signal_connect(G_OBJECT(sicko_button), "clicked", G_CALLBACK(press_sicko), this);
 }
 
+// Get input text from the Searchbars
 void application::get_input_text(const char *&street1, const char *&street2,
                                  const char *&street3){
     GtkEntry *street_entry1 = (GtkEntry *) this->get_object("FindStreet1");
@@ -300,6 +305,7 @@ void application::get_input_text(const char *&street1, const char *&street2,
     street3 = gtk_entry_get_text(street_entry3);
 }
 
+// Set the text in the Searchbars
 void application::set_input_text(const char *&street1, const char *&street2,
                                  const char *&street3){
     GtkEntry *street_entry1 = (GtkEntry *) this->get_object("FindStreet1");
@@ -309,6 +315,7 @@ void application::set_input_text(const char *&street1, const char *&street2,
     GtkEntry *street_entry3 = (GtkEntry *) this->get_object("FindStreet3");
     gtk_entry_set_text(street_entry3, street3);
 }
+
 
 void application::set_text_in_directions(){
     const char *input;
@@ -362,14 +369,6 @@ void application::update_travelInfo(std::string time, std::string distance){
     
     gtk_label_set_text((GtkLabel*)etaText, ETA.c_str());
     gtk_label_set_text((GtkLabel*)distanceText, Distance.c_str());
-//    
-//    gtk_grid_remove_row(sGrid, 2);
-//    
-//    gtk_grid_attach(sGrid, etaText, 0, 2, 10, 1);
-//    gtk_grid_attach(sGrid, distanceText, 10, 2, 10, 1); 
-//    
-//    gtk_widget_show(etaText);
-//    gtk_widget_show(distanceText);
 }
 
 
@@ -394,6 +393,10 @@ void application::create_direction(const char *instruction, int direction, int s
         path = slightRightPath;
     }else if (direction == 4){
         path = slightLeftPath; 
+    }else if (direction == 5){
+        path = start;
+    }else if (direction == 6){
+        path = end; 
     }
     
     GtkWidget *directionText = gtk_label_new(instruction);

@@ -585,7 +585,7 @@
                         <property name="primary_icon_name">user-home-symbolic.symbolic</property>
                         <property name="primary_icon_activatable">False</property>
                         <property name="primary_icon_sensitive">False</property>
-                        <property name="placeholder_text" translatable="yes">Choose Starting Location</property>
+                        <property name="placeholder_text" translatable="yes">Enter Starting Location (or Left Click on Map)</property>
                         <property name="completion">NameCompletion2</property>
                         <style>
                           <class name="findButton"/>
@@ -607,7 +607,7 @@
                         <property name="primary_icon_name">find-location-symbolic.symbolic</property>
                         <property name="primary_icon_activatable">False</property>
                         <property name="primary_icon_sensitive">False</property>
-                        <property name="placeholder_text" translatable="yes">Choose Destination</property>
+                        <property name="placeholder_text" translatable="yes">Enter Destination (or Right Click on Map)</property>
                         <property name="completion">NameCompletion3</property>
                         <style>
                           <class name="findButton"/>
@@ -718,7 +718,7 @@
                     <property name="can_focus">False</property>
                     <child>
                       <object class="GtkGrid" id="directionGrid">
-                        <property name="width_request">425</property>
+                        <property name="width_request">410</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="halign">start</property>

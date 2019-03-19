@@ -257,12 +257,9 @@ void act_on_mouse_press(ezgl::application *application, GdkEventButton *event, d
         }
         
         const char *name1, *name2, *name3;
-            name1 = info.corInput1.c_str();
-            name2 = info.corInput2.c_str();
-            name3 = info.corInput3.c_str();
-        
-        std::cout << info.corInput1 << "...."<< info.corInput2 << "...."<< info.corInput3 << "...."<< info.directionStart << "...."<< info.directionEnd << "...."<<std::endl;
-
+        name1 = info.corInput1.c_str();
+        name2 = info.corInput2.c_str();
+        name3 = info.corInput3.c_str();
         application->set_input_text(name1, name2, name3);
     } else {
         if (event->button == 1) { //left click
@@ -490,7 +487,7 @@ std::vector<std::pair<std::string, int>> processInstructions(){
             directionDeterminer=6;
         }
         std::cout<<pushIn<<'\n';
-        if(i==-1){
+        if(i==Hum.humanInstructions.size()){
             std::cout<<"============================================="<<'\n';
         }
         finalInstructions.push_back(std::make_pair(pushIn, directionDeterminer));
@@ -637,14 +634,14 @@ void dialog_box(GtkWidget *, ezgl::application *application, std::string message
     window = application->get_object(application->get_main_window_id().c_str());
     
     // Create the dialog window. Modal windows prevent interaction with other windows in the same application
-    dialog = gtk_dialog_new_with_buttons("MapperToo",(GtkWindow*) window, GTK_DIALOG_MODAL, ("OK"), 
+    dialog = gtk_dialog_new_with_buttons("MapperToo Help",(GtkWindow*) window, GTK_DIALOG_MODAL, ("Close Help"), 
                                     GTK_RESPONSE_ACCEPT, NULL);
     
     // Create a label and attach it to the content area of the dialog
     content_area = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
     label = gtk_label_new(message.c_str());
     gtk_container_add(GTK_CONTAINER(content_area), label);
-       
+    
     // The main purpose of this is to show dialog’s child widget, label
     gtk_widget_show_all(dialog);
     
@@ -811,19 +808,26 @@ void helpButton(GtkWidget *widget, ezgl::application *application){
             "The search bar at the top can be used to find intersections, streets, POI, Features, and Subways.\n"
             "To search for:\n"
             " - intersections,\n"
-            "\t - enter the name of street 1 on the left search box and\n"
-            "\t - name of street 2 in the right search box\n"
+            "\t - enter the name of the first street followed by ' & ' and then the second street. \n"
             " - streets, POI, Features,\n"
-            "\t - enter name in the left search box\n"
+            "\t - enter name in the search box\n"
             " - subway stations, \n"
             "\t  - ensure 'show subways' or 'show trains' button has been clicked\n"
-            "\t  - enter the station name in the left search box, ensuring the name ends with 'station'\n"
+            "\t  - enter the station name in the search box, ensuring the name ends with 'station'\n"
             "\n"
-            "***** Make sure to hit the 'Find' button after entering the names! *****\n"
+            "***** Press the Enter key or the Magnifying Glass/Find button to search *****\n"
+            "\n"
+            "To search for directions from Point A to Point B: \n"
+            "\t - Press the Directions Button beside the Find button\n"
+            "\t - Left Click to set the Starting Point - marked by a Red Pointer.\n"
+            "\t - Right Click to set the Ending Destination - marked by a Purple Flag.\n"
+            "\t - You can press the Swap key to switch the start and end points.\n"
+            "\t - You can press the 'X' icon on the side of the search bar to close the Direction Panel and return to the regular map.\n"
             "\n"
             " As well, you can access more information by: \n"
-            " - left-clicking on POI, where a red marker will be placed\n"
-            " - right-clicking on intersections, where a green figure will be placed\n"
+            " - Clicking on the POI icons on the top left bar will show/hide POIs of that type on the map.\n"
+            " - left-clicking while the direction panel is closed will show the nearest POI - marked by a Red Pointer.\n"
+            " - right-clicking while the direction panel is closed will show the nearest intersections - marked by a Green Human.\n"
             " - left-click while holding the <ctrl> key, to inquire subway stations\n"
             "\n"
             "To change maps, simply enter the city name, and hit find.\n";
@@ -914,9 +918,15 @@ void zoomStreet(ezgl::application *application){
         recY = abs(deltaX)*ratioHW*BUFFER;
     }
     
+    double adjustmentFactor = cnv->get_camera().get_world().width()/27;
     
     //change the viewing area
-    double startX = (-1*(cnv->get_camera().get_world().width()/30) + x1 + x2 - recX)/2;
+    double startX; 
+    if(info.findDirections){
+        startX = (x1 + x2 - recX - adjustmentFactor)/2;
+    }else{
+        startX = (x1 + x2 - recX)/2;
+    }
     double startY = (y1 + y2 - recY)/2;
     double endX = startX + recX;
     double endY = startY + recY;

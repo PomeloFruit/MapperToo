@@ -261,7 +261,7 @@ std::string clickActions::searchOnMap(infoStrucs &info){
 
         // if multiple results, tell user which option they are seeing
 
-        std::cout << "Street search rcorInput3esult(s):" << std::endl;
+        std::cout << "Street search result(s):" << std::endl;
 
         for(unsigned i=0 ; i<resultID.size() ; i++){
             std::cout << "(" << (i+1) << " of " << std::to_string(resultID.size()) << " found) "; 
@@ -298,7 +298,6 @@ std::string clickActions::searchOnMap(infoStrucs &info){
         displayMessage = "Subway Found: ";
         displayMessage += info.SubwayInfo[resultID[start]].name;
         info.corInput1 = info.SubwayInfo[resultID[start]].name;
-        std::cout<<"Updated corInput1"<<std::endl;
 
         if((resultID.size()-start)>1){
             displayMessage += " (Displaying 1 of " + std::to_string(resultID.size()-start) + " found)"; 
@@ -349,21 +348,16 @@ std::string clickActions::searchOnMap(infoStrucs &info){
 std::string clickActions::searchForDirections(infoStrucs &info){
     std::string message = "";
     std::vector<unsigned> street1ID, street2ID, street3ID, street4ID, resultID, resultID2;
-    int match1, match2, match3, match4;
     int start = 0;
     
     resultID.clear();
     resultID2.clear();   
     
-   
-    
     if(info.clickedStart){
         resultID.push_back(info.directionStart);
-        match1 = 0;
-        match2 = 0;
     } else {// if (info.directionStart == -1){
-        match1 = findMatches(street1ID, info.textInput1, info);
-        match2 = findMatches(street2ID, info.textInput2, info);
+        findMatches(street1ID, info.textInput1, info);
+        findMatches(street2ID, info.textInput2, info);
         resultID = findIntersectionsFromStreets(street1ID, street2ID);
     }
     
@@ -376,11 +370,9 @@ std::string clickActions::searchForDirections(infoStrucs &info){
     
     if(info.clickedEnd){
         resultID2.push_back(info.directionEnd);
-        match3 = 0;
-        match4 = 0;
     } else {
-        match3 = findMatches(street3ID, info.textInput3, info);
-        match4 = findMatches(street4ID, info.textInput4, info);
+        findMatches(street3ID, info.textInput3, info);
+        findMatches(street4ID, info.textInput4, info);
         resultID2 = findIntersectionsFromStreets(street3ID, street4ID);
     }
     
@@ -402,7 +394,7 @@ std::string clickActions::searchForDirections(infoStrucs &info){
         std::vector<unsigned> path;
         
         path = find_path_between_intersections(resultID[start], resultID2[start], LEFTTURNPENALTY, RIGHTTURNPENALTY);
-        std::cout<<resultID[start]<<" "<<resultID2[start]<<" "<<path.size()<<"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"<<'\n';
+        
         // determine the directions to display
         Hum.clear();
         Hum.fillInfo(path);
@@ -586,7 +578,6 @@ void clickActions::findSubwaysByName(std::vector<unsigned> &streetID, std::strin
         std::transform(temp.begin(), temp.end(), temp.begin(), ::tolower);
         
         if(temp.size() != 0 && temp == userInput){
-            std::cout << i << std::endl;
             streetID.push_back(i);
         }
     }
