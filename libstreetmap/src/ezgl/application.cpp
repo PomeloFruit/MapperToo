@@ -384,7 +384,6 @@ void application::destroy_direction(int steps){
 void application::create_direction(const char *instruction, int direction, int step){
     GtkGrid* dGrid = (GtkGrid*) get_object("directionGrid");
     const char* path = ""; 
-
     if(direction == 0){
         path = straightPath;
     }else if (direction == 1){
