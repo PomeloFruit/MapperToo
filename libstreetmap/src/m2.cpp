@@ -83,9 +83,6 @@ std::vector<std::pair<std::string, std::string>> city {std::make_pair("beijing",
         std::make_pair("tokyo","japan"), std::make_pair("toronto","canada")
 };
 
-//std::vector<std::string> leftHandDrives {std::string "egypt", std::string "england",
-//        std::string "india", std::string "japan", std::string "australia",
-//        std::string "singapore", std::string "saint-helena", std::string "hong-kong"};
 //=========================== Function Definitions ===========================
 
 
