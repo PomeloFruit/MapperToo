@@ -174,9 +174,6 @@ void initial_setup(ezgl::application *application){
     application->update_message("Left-click for Points of Interest | Right-click for Intersections | <ctrl> + Left-click for Subways ");
 
     application->connect_feature(findButton, directionButton, touristButton, fdButton, shopsButton, transitButton, closeButton, findButton, flipButton, helpButton, initiateTheSicko);
-    
-    //================================= need to change this later ========================================
-    //application->create_direction();
 }
 
 
@@ -360,12 +357,20 @@ void findButton(GtkWidget *, ezgl::application *application){
             changeMap = true; 
             path_name = it->first;
             
+            // clear old directions
+            application->destroy_direction(Hum.humanInstructions.size()+2);
+            application->update_travelInfo("", "");
+            
             application->update_message("New map loaded");
             newMap(path_name, application);
             break;
         } else if (it->first == potentialCityName && !(it->second.empty())){
             changeMap = true;
             path_name = it->first + "_" + it->second; 
+            
+            // clear old directions
+            application->destroy_direction(Hum.humanInstructions.size()+2);
+            application->update_travelInfo("", "");
             
             application->update_message("New map loaded");
             newMap(path_name, application);
@@ -431,6 +436,7 @@ void findButton(GtkWidget *, ezgl::application *application){
             application->update_travelInfo(Hum.totTimePrint, Hum.totDistancePrint);
         }
     } else { // clear all information if no path exists
+        
         application->update_travelInfo("", "");
     }
     
@@ -637,6 +643,11 @@ void flipButton(GtkWidget *, ezgl::application *application){
     unsigned temp2 = info.directionEnd;
     info.directionEnd = temp1;
     info.directionStart = temp2;
+    
+    std::string temp;
+    temp = info.prevName2;
+    info.prevName2 = info.prevName3;
+    info.prevName3 = temp;
     
     findButton(NULL, application);
 }
@@ -927,55 +938,72 @@ void zoomStreet(ezgl::application *application){
     double x2 = xy.xFromLon(botPt.lon());
     double y2 = xy.yFromLat(botPt.lat());
     
-    double deltaX = x2 - x1;
-    double deltaY = y2 - y1;
-    const double BUFFER = 2.0; 
-//    const double MIN_AREA = 8.7474e-04;
-//    const double MIN_RATIO = cnv->get_camera().get_initial_world().area()/MIN_AREA; 
-//    const double MIN_X = cnv->get_camera().get_initial_world().width()/MIN_RATIO;
-//    const double MIN_Y = cnv->get_camera().get_initial_world().height()/MIN_RATIO;
+    double deltaX = abs(x2 - x1);
+    double deltaY = abs(y2 - y1);
+    const double BUFFER = 2.0;
     
     double currentH = cnv->get_camera().get_world().height();
     double currentW = cnv->get_camera().get_world().width();
     double ratioHW = currentH/currentW;
     
+    const double MIN_AREA = 8e-04;
+    const double MIN_X = sqrt(MIN_AREA/ratioHW);
+    const double MIN_Y = MIN_AREA/MIN_X;
+    const double MINDIVIDER = 4.0;
+    const double MAXMULTIPLIER = 0.7;
+    const double MAX_X = cnv->get_camera().get_initial_world().width();
+    const double MAX_Y = cnv->get_camera().get_initial_world().height();
+    
     double recX, recY;
     
     //scale the rectangle to the appropriate ratio of the screen 
-    if(abs(deltaX) <= abs(deltaY)) {
-        recX = abs(deltaY)/ratioHW*BUFFER;
-        recY = abs(deltaY)*BUFFER;
+    if(deltaX <= deltaY) {
+        recX = deltaY/ratioHW*BUFFER;
+        recY = deltaY*BUFFER;
     } else {
-        recX = abs(deltaX)*BUFFER;
-        recY = abs(deltaX)*ratioHW*BUFFER;
+        recX = deltaX*BUFFER;
+        recY = deltaX*ratioHW*BUFFER;
     }
     
-    double adjustmentFactor = cnv->get_camera().get_world().width()/27;
+    double adjustmentFactor = recX/2;
     
     //change the viewing area
-    double startX; 
+    double startX = (x1 + x2 - recX)/2; 
+    double startY = (y1 + y2 - recY)/2;
+    
+    // for directions, adjust the position to the right since search bar
+    // also, set minimum zoom distance
     if(info.findDirections){
         startX = (x1 + x2 - recX - adjustmentFactor)/2;
-    }else{
-        startX = (x1 + x2 - recX)/2;
-    }
-    double startY = (y1 + y2 - recY)/2;
-    double endX = startX + recX;
-    double endY = startY + recY;
-    
-    ezgl::point2d focusPt(startX, startY); 
-    ezgl::rectangle zoomArea (focusPt, recX,  recY);  
-    
-    bool pointInside = (cnv->get_camera().get_initial_world().contains(startX, startY)) &&
-                       (cnv->get_camera().get_initial_world().contains(endX, endY));
-    
-    if(pointInside){
-        cnv->get_camera().set_world(zoomArea);
-        cnv->redraw();
+        if(deltaX < MIN_X/MINDIVIDER && deltaY < MIN_Y/MINDIVIDER){
+            startX = (x1 + x2 - MIN_X - MIN_X/2)/2;
+            startY = (y1 + y2 - MIN_Y)/2;
+        } else if(deltaX > MAX_X*MAXMULTIPLIER || deltaY > MAX_Y*MAXMULTIPLIER){
+            startX = 0;
+            startY = 0;
+        }
     } else {
-        cnv->get_camera().set_world(cnv->get_camera().get_initial_world());
-        cnv->redraw();
+        if(deltaX < MIN_X/MINDIVIDER && deltaY < MIN_Y/MINDIVIDER){
+            startX = (x1 + x2 - MIN_X - MIN_X/2)/2;
+            startY = (y1 + y2 - MIN_Y)/2;
+        } else if(deltaX > MAX_X*MAXMULTIPLIER || deltaY > MAX_Y*MAXMULTIPLIER){
+            startX = 0;
+            startY = 0;
+        }
     }
+        
+    ezgl::point2d focusPt(startX, startY);
+    ezgl::rectangle zoomArea (focusPt, MIN_X,  MIN_Y);
+    
+    if(startX == 0 && startY == 0){
+        zoomArea = cnv->get_camera().get_initial_world();
+    } else if(recX > MIN_X){
+        ezgl::rectangle temp (focusPt, recX, recY);
+        zoomArea = temp;
+    }
+    
+    cnv->get_camera().set_world(zoomArea);
+    cnv->redraw();
 }
 
 

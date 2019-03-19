@@ -53,10 +53,12 @@ std::string clickActions::clickedOnIntersection(double x, double y, mapBoundary 
             info.directionStart = clickedID;
             info.corInput2 = info.IntersectionInfo[clickedID].name;    
             info.clickedStart = true;
+            info.prevName2 = info.IntersectionInfo[clickedID].name;
         } else if(type == 2){
             info.directionEnd = clickedID;
             info.corInput3 = info.IntersectionInfo[clickedID].name;
             info.clickedEnd = true;
+            info.prevName3 = info.IntersectionInfo[clickedID].name;
         }
         
         // clear old path but keep clicked intersection IDs
@@ -370,13 +372,19 @@ std::string clickActions::searchForDirections(infoStrucs &info){
         resultID = findIntersectionsFromStreets(street1ID, street2ID);
     }
     
+    if(info.changedInput2){
+        info.clickedStart = false; 
+    }
+    
     // if input was previously generated from clicks, and has not been changed
-    if(resultID.size() == 0 && !info.changedInput2 && info.directionStart != -1){
+    if(resultID.empty() && !info.changedInput2 && info.directionStart != -1){
         resultID.push_back(info.directionStart);
     } else if(resultID.size() > 0) { // reset flags if input values find intersection
         info.changedInput2 = false;
         info.clickedStart = false; 
-    }        
+    }
+    
+
     
     // if start location was clicked, use ID generated from click
     if(info.clickedEnd){
@@ -387,8 +395,12 @@ std::string clickActions::searchForDirections(infoStrucs &info){
         resultID2 = findIntersectionsFromStreets(street3ID, street4ID);
     }
     
+    if(info.changedInput3){
+        info.clickedEnd = false;
+    }
+    
     // if input was previously generated from clicks, and has not been changed
-    if(resultID2.size() == 0 && !info.changedInput3 && info.directionEnd != -1){
+    if(resultID2.empty() && !info.changedInput3 && info.directionEnd != -1){
         resultID2.push_back(info.directionEnd);
     } else if(resultID2.size() > 0) { // reset flags if input values find intersection
         info.changedInput3 = false;
@@ -396,6 +408,8 @@ std::string clickActions::searchForDirections(infoStrucs &info){
     }
     
     if(resultID.size() > 0 && resultID2.size() > 0){ // if intersection found
+        clearPreviousHighlights(info);
+        
         info.corInput2 = getIntersectionName(resultID[start]);
         info.corInput3 = getIntersectionName(resultID2[start]);
 
@@ -412,7 +426,6 @@ std::string clickActions::searchForDirections(infoStrucs &info){
         }
         
         // highlight the path found
-        clearPreviousHighlights(info);
         for(unsigned i=0 ; i<path.size() ; i++){
             info.StreetSegInfo[path[i]].clicked = true;
         }
@@ -892,6 +905,7 @@ void clickActions::highlightFeature(infoStrucs &info, std::vector<unsigned> &hig
 
 void clickActions::clearPreviousHighlights(infoStrucs &info){
     unsigned currentIndex;
+    Hum.clear();
     
     for(unsigned i=0 ; i<info.lastPOI.size() ; i++){
         currentIndex = info.lastPOI[i];
