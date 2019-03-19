@@ -84,6 +84,9 @@ std::vector<std::pair<std::string, std::string>> city {std::make_pair("beijing",
 };
 
 bool showTime [10];
+//std::vector<std::string> leftHandDrives {std::string "egypt", std::string "england",
+//        std::string "india", std::string "japan", std::string "australia",
+//        std::string "singapore", std::string "saint-helena", std::string "hong-kong"};
 //=========================== Function Definitions ===========================
 
 
@@ -285,7 +288,10 @@ void act_on_mouse_press(ezgl::application *application, GdkEventButton *event, d
             application->create_direction(processedInstructions[i].first.c_str(), processedInstructions[i].second, i);
             application->update_travelInfo(Hum.totTimePrint, Hum.totDistancePrint);
         }
+    } else{
+        application->update_travelInfo("", "");
     }
+    
     application->update_message(message);
     application->refresh_drawing();
 }
@@ -378,10 +384,26 @@ void findButton(GtkWidget *, ezgl::application *application){
     //======================== Map Element Searching ===========================
     application->destroy_direction(Hum.humanInstructions.size()+2);
     
+    std::string temp;
+    
     //split up the input if there is '&' 
     if(info.findDirections){
         recoverStreetsFromInput(name2, info.textInput1, info.textInput2);
+        info.corInput2.clear();
+        temp = name2;
+        if(temp != info.prevName2){
+            info.changedInput2 = true;
+        }
+        info.prevName2 = temp;
+        
         recoverStreetsFromInput(name3, info.textInput3, info.textInput4);
+        info.corInput3.clear();
+        temp = name3;
+        if(temp != info.prevName3){
+            info.changedInput3 = true;
+        }
+        info.prevName3 = temp;
+        
         message = ck.searchForDirections(info);
     } else {
         recoverStreetsFromInput(name1, info.textInput1, info.textInput2);
@@ -411,6 +433,8 @@ void findButton(GtkWidget *, ezgl::application *application){
             application->create_direction(processedInstructions[i].first.c_str(), processedInstructions[i].second, i);
             application->update_travelInfo(Hum.totTimePrint, Hum.totDistancePrint);
         }
+    } else{
+        application->update_travelInfo("", "");
     }
     application->update_message(message);
     application->refresh_drawing();
@@ -419,7 +443,6 @@ void findButton(GtkWidget *, ezgl::application *application){
 //make sure to put in the start thingy in first and the endy in the end
 std::vector<std::pair<std::string, int>> processInstructions(){
     std::vector<std::pair<std::string, int>>  finalInstructions;
-    std::cout<<Hum.humanInstructions.size()<<"The size of hum"<<'\n';
     for(int i=-1;i<static_cast<int>(Hum.humanInstructions.size()+1);i++){
         std::string pushIn;
         int directionDeterminer;
@@ -459,13 +482,17 @@ std::vector<std::pair<std::string, int>> processInstructions(){
                 directionDeterminer=0;
             }
         } else if(i==-1){
-            pushIn="You are starting at " + Hum.startIntersection;
+            pushIn="Start at " + Hum.startIntersection;
             directionDeterminer=5;
         } else if(Hum.humanInstructions.size()==i){
-            pushIn="You have arrived at your destination, "+ Hum.endIntersection;
+            pushIn="Arrive at destination "+ Hum.endIntersection;
+            std::cout<<"============================================="<<'\n';
             directionDeterminer=6;
         }
         std::cout<<pushIn<<'\n';
+        if(i==-1){
+            std::cout<<"============================================="<<'\n';
+        }
         finalInstructions.push_back(std::make_pair(pushIn, directionDeterminer));
     }
     return finalInstructions;

@@ -131,7 +131,7 @@ void roadDrawing::setRoadColourSize(infoStrucs &info, int type, bool highlight, 
     
     for(int i=0 ; i<numSegs ; i++){
         
-        setRoadColourSize(info, info.StreetSegInfo[i].type, info.StreetSegInfo[i].clicked, g, startArea, currentArea);
+        setRoadColourSize(info, info.StreetSegInfo[i].type, false, g, startArea, currentArea);
         
         from = info.IntersectionInfo[info.StreetSegInfo[i].fromIntersection].position;
         //============================== DEFINE THE NUMBERS ===================================================

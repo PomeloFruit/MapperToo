@@ -36,8 +36,10 @@ std::vector<unsigned> find_path_between_intersections(const unsigned intersect_i
         const unsigned intersect_id_end, const double right_turn_penalty, const double left_turn_penalty){
     
     std::vector<unsigned> path;
-    Node start = Dir.Nodes[intersect_id_start];
-    path = getPath(&start, intersect_id_end, right_turn_penalty, left_turn_penalty);
+    if(intersect_id_start != intersect_id_end){
+        Node start = Dir.Nodes[intersect_id_start];
+        path = getPath(&start, intersect_id_end, right_turn_penalty, left_turn_penalty);
+    }
     return path;
 }
 

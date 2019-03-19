@@ -39,6 +39,12 @@ void populateData::initialize(infoStrucs &info, mapBoundary &xy){
     info.showRoute = 0;
     info.directionEnd = -1;
     info.directionStart = -1;
+    info.clickedStart = false;
+    info.clickedEnd = false;
+    info.changedInput2 = false;
+    info.changedInput3 = false;
+    info.prevName2 = "";
+    info.prevName3 = "";
 }
 
 

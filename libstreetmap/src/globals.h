@@ -141,7 +141,11 @@ public:
     // contains the output to the text fields/ corrected names
     std::string corInput1, corInput2, corInput3;
     
-    unsigned directionStart, directionEnd;
+    std::string prevName2, prevName3;
+    
+    bool changedInput2,changedInput3; 
+    
+    int directionStart, directionEnd;
     
     // contains whether or not to show 0-none/1-subways/2-trains/3-both
     int showRoute;
@@ -160,5 +164,7 @@ public:
     
     // initiates sicko mode
     int initiateSicko;
+    
+    bool clickedStart, clickedEnd;
 };
 

@@ -12,14 +12,15 @@
 #include <string>
 #include <iostream>
 
+#define LEFTTURNPENALTY 9.894933333333333
+#define RIGHTTURNPENALTY 7.032466667
+
 const int RESULTNONE = 0; 
 const int RESULTEMPTY = -1;
 const int RESULTPOI = -2;
 const int RESULTSUBWAY = -3;
 const int RESULTFEATURE = -4;
 
-#define LEFTTURNPENALTY 9.894933333333333
-#define RIGHTTURNPENALTY 7.032466667
 //^^for right hand driving places
 HumanInfo Hum;
 
@@ -48,9 +49,11 @@ std::string clickActions::clickedOnIntersection(double x, double y, mapBoundary 
         if(type == 1){ //left click for start
             info.directionStart = clickedID;
             info.corInput2 = info.IntersectionInfo[clickedID].name;    
+            info.clickedStart = true;
         } else if(type == 2){
             info.directionEnd = clickedID;
             info.corInput3 = info.IntersectionInfo[clickedID].name;
+            info.clickedEnd = true;
         }
         
         unsigned tempStart = info.directionStart;
@@ -59,10 +62,8 @@ std::string clickActions::clickedOnIntersection(double x, double y, mapBoundary 
         info.directionStart = tempStart;
         info.directionEnd = tempEnd;
         
+        searchForDirections(info);
         
-        if(info.directionStart != -1 && info.directionEnd != -1){     
-            searchForDirections(info);
-        }
     } else {
         displayName = "Intersection Clicked: " + info.IntersectionInfo[clickedID].name;
         highlightIntersection(info, clickedID);
@@ -260,7 +261,7 @@ std::string clickActions::searchOnMap(infoStrucs &info){
 
         // if multiple results, tell user which option they are seeing
 
-        std::cout << "Street search result(s):" << std::endl;
+        std::cout << "Street search rcorInput3esult(s):" << std::endl;
 
         for(unsigned i=0 ; i<resultID.size() ; i++){
             std::cout << "(" << (i+1) << " of " << std::to_string(resultID.size()) << " found) "; 
@@ -352,9 +353,11 @@ std::string clickActions::searchForDirections(infoStrucs &info){
     int start = 0;
     
     resultID.clear();
+    resultID2.clear();   
     
-    // get the match type of the search
-    if(info.directionStart != -1 && info.corInput2 == getIntersectionName(info.directionStart)){
+   
+    
+    if(info.clickedStart){
         resultID.push_back(info.directionStart);
         match1 = 0;
         match2 = 0;
@@ -364,7 +367,14 @@ std::string clickActions::searchForDirections(infoStrucs &info){
         resultID = findIntersectionsFromStreets(street1ID, street2ID);
     }
     
-    if(info.directionEnd != -1  &&  info.corInput3 == getIntersectionName(info.directionEnd)){
+    if(resultID.size() == 0 && !info.changedInput2 && info.directionStart != -1){
+        resultID.push_back(info.directionStart);
+    } else if(resultID.size() > 0) {
+        info.changedInput2 = false;
+        info.clickedStart = false; 
+    }        
+    
+    if(info.clickedEnd){
         resultID2.push_back(info.directionEnd);
         match3 = 0;
         match4 = 0;
@@ -374,23 +384,31 @@ std::string clickActions::searchForDirections(infoStrucs &info){
         resultID2 = findIntersectionsFromStreets(street3ID, street4ID);
     }
     
+    if(resultID2.size() == 0 && !info.changedInput3 && info.directionEnd != -1){
+        resultID2.push_back(info.directionEnd);
+    } else if(resultID2.size() > 0) {
+        info.changedInput3 = false;
+        info.clickedEnd = false; 
+    }
+    
     // reset correct input output names to blank
-    info.corInput2 = "";
-    info.corInput3 = "";
+
         
     if(resultID.size() > 0 && resultID2.size() > 0){ // if intersection found
         info.corInput2 = getIntersectionName(resultID[start]);
         info.corInput3 = getIntersectionName(resultID2[start]);
-                    
+
         // get the fastest path and travel time
         std::vector<unsigned> path;
-        path = find_path_between_intersections(resultID[start], resultID2[start], LEFTTURNPENALTY, RIGHTTURNPENALTY);
         
+        path = find_path_between_intersections(resultID[start], resultID2[start], LEFTTURNPENALTY, RIGHTTURNPENALTY);
+        std::cout<<resultID[start]<<" "<<resultID2[start]<<" "<<path.size()<<"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"<<'\n';
         // determine the directions to display
         Hum.clear();
         Hum.fillInfo(path);
-        Hum.setStartStop(info.corInput2, info.corInput3);
-
+        if(path.size()>0){
+            Hum.setStartStop(info.corInput2, info.corInput3);
+        }
         
         // highlight the path found
         clearPreviousHighlights(info);
@@ -401,13 +419,26 @@ std::string clickActions::searchForDirections(infoStrucs &info){
         info.directionStart = resultID[start];
         info.directionEnd = resultID2[start];
         
-    } else if(resultID.size() > 0 && resultID2.size() == 0){
-        message = "Destination Invalid. No match could be found. Please consider trying again.";
-    } else if(resultID.size() == 0 && resultID2.size() > 0){
-        message = "Start Invalid. No match could be found. Please try again.";
     } else {
-        message = "Start Invalid and Destination Invalid. No match could be found. Try again.";
+        if(resultID.size() > 0 && resultID2.size() == 0){
+            info.directionEnd = -1;
+            message = "Destination Invalid. No match could be found. Please consider trying again.";
+        } else if(resultID.size() == 0 && resultID2.size() > 0){
+            info.directionStart = -1;
+            message = "Start Invalid. No match could be found. Please try again.";
+        } else {
+            info.directionStart = -1;
+            info.directionEnd = -1;
+            message = "Start Invalid and Destination Invalid. No match could be found. Try again.";
+        }
+        info.lastSeg.clear();
+        Hum.clear();
     }
+    
+    info.textInput1.clear();
+    info.textInput2.clear();
+    info.textInput3.clear();
+    info.textInput4.clear();
     
     return message;
 }

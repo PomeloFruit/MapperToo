@@ -155,7 +155,10 @@ void HumanInfo::fillInfo(std::vector<unsigned> path){
         fillDistance(path, changedStreetIDSegs);
         fillStreets(path, changedStreetIDSegs);
         fillTurn(path, changedStreetIDSegs);
+    }else{
+        clear();
     }
+    
 }
 
 void HumanInfo::fillDistance(std::vector<unsigned> path, std::vector<std::pair<unsigned, unsigned>> changedStreetIDSegs){
@@ -179,7 +182,7 @@ void HumanInfo::fillDistance(std::vector<unsigned> path, std::vector<std::pair<u
                 totalDistance=totalDistance+distance;
                 totalTime=totalTime+time;
                 Hum.humanInstructions[numStreetsChanged].distance=distance;
-                int intDistance=static_cast<int> (distance);
+                intDistance=static_cast<int> (distance);
                 int rem = intDistance % 10;
                 intDistance=rem >= 5 ? (intDistance - rem + 10) : (intDistance - rem);
                 setDistanceTimeStreet(intDistance, numStreetsChanged);
