@@ -3,14 +3,14 @@
 // A flag to disable event loop (default is false)
 bool disable_event_loop = false;
 
-    // File paths for direction image icons
-    const char* straightPath = "libstreetmap/resources/straight.png";
-    const char* rightPath = "libstreetmap/resources/right turn.png";
-    const char* leftPath = "libstreetmap/resources/left_turn.png";
-    const char* slightRightPath = "libstreetmap/resources/slight_right.png";
-    const char* slightLeftPath = "libstreetmap/resources/slight_left.png"; 
-    const char* start = "libstreetmap/resources/current.png"; 
-    const char* end = "libstreetmap/resources/destination.png"; 
+// File paths for direction image icons
+const char* straightPath = "libstreetmap/resources/straight.png";
+const char* rightPath = "libstreetmap/resources/right turn.png";
+const char* leftPath = "libstreetmap/resources/left_turn.png";
+const char* slightRightPath = "libstreetmap/resources/slight_right.png";
+const char* slightLeftPath = "libstreetmap/resources/slight_left.png"; 
+const char* start = "libstreetmap/resources/current.png"; 
+const char* end = "libstreetmap/resources/destination.png"; 
 
 namespace ezgl {
 
@@ -262,34 +262,34 @@ void application::connect_feature(button_callback_fn press_find, button_callback
     // Connect press_zoom_out function to the Zoom-out button
     GtkWidget *find_button = (GtkWidget *) this->get_object("FindButton");
     g_signal_connect(G_OBJECT(find_button), "clicked", G_CALLBACK(press_find), this);
-    
+    // Show/Hide the direction panel button
     GtkWidget *direction_button = (GtkWidget *) this->get_object("DirectionButton");
     g_signal_connect(G_OBJECT(direction_button), "clicked", G_CALLBACK(press_direction), this);
-    
+    // Show the tourist POI toggle button
     GtkWidget *tourist_button = (GtkWidget *) this->get_object("Tourist");
     g_signal_connect(G_OBJECT(tourist_button), "toggled", G_CALLBACK(press_tourist), this);
-    
+    // Show the food/Drink POI toggle button
     GtkWidget *food_button = (GtkWidget *) this->get_object("FoodDrink");
     g_signal_connect(G_OBJECT(food_button), "toggled", G_CALLBACK(press_food), this);
-    
+    // Show the shops POI toggle button
     GtkWidget *shop_button = (GtkWidget *) this->get_object("Shop");
     g_signal_connect(G_OBJECT(shop_button), "toggled", G_CALLBACK(press_shop), this);
-    
+    /// Show the subway/train POI toggle button
     GtkWidget *transit_button = (GtkWidget *) this->get_object("Subway");
     g_signal_connect(G_OBJECT(transit_button), "toggled", G_CALLBACK(press_transit), this);
-    
+    // Hide the direction panel button
     GtkWidget *close_button = (GtkWidget *) this->get_object("closeOverlay");
     g_signal_connect(G_OBJECT(close_button), "clicked", G_CALLBACK(press_close), this);
-    
+    // Search for directions button
     GtkWidget *findDirection_button = (GtkWidget *) this->get_object("directionButton");
     g_signal_connect(G_OBJECT(findDirection_button), "clicked", G_CALLBACK(press_findDirection), this);
-    
+    // Flip the inputs from search bar 2 and 3 button
     GtkWidget *flip_button = (GtkWidget *) this->get_object("flipButton");
     g_signal_connect(G_OBJECT(flip_button), "clicked", G_CALLBACK(press_flip), this);
-    
+    // Open up help dialog box button
     GtkWidget *help_button = (GtkWidget *) this->get_object("helpButton");
     g_signal_connect(G_OBJECT(help_button), "clicked", G_CALLBACK(press_help), this);
-    
+    // Initiate the sicko button
     GtkWidget *sicko_button = (GtkWidget *) this->get_object("sickoButton");
     g_signal_connect(G_OBJECT(sicko_button), "clicked", G_CALLBACK(press_sicko), this);
 }

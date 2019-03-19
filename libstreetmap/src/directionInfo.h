@@ -10,6 +10,13 @@
 #define NOEDGE -1
 #define NOTIME 9999999999
 #define NOSCORE 9999999999
+#define SLIGHTTURNANGLE M_PI/4 //45 degrees in radians
+#define NOTURNANGLE 0.261799
+#define NOINTERSECTION -100
+#define SAMESTREET -99
+#define NOTURN 0
+#define SLIGHTTURN 1
+#define REGULARTURN 2
 
 //============================== Structures ===================================
 

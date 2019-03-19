@@ -46,6 +46,7 @@ void initial_setup(ezgl::application *application);
 void act_on_mouse_press(ezgl::application *application, GdkEventButton *event, double x, double y);
 void act_on_key_press(ezgl::application *application, GdkEventKey *event, char *key_name);
 void setCompletionModel(ezgl::application *application);
+
 void findButton(GtkWidget *, ezgl::application *application);
 void recoverStreetsFromInput(std::string input, std::string &retStreet1, std::string &retStreet2);
 void closeButton(GtkWidget *, ezgl::application *application);
@@ -53,6 +54,7 @@ void flipButton(GtkWidget *, ezgl::application *application);
 void directionButton(GtkWidget *, ezgl::application *application);
 void dialog_box(GtkWidget *, ezgl::application *application, std::string message);
 void on_dialog_response(GtkDialog *dialog);
+std::vector<std::pair<std::string, int>>  processInstructions();
 
 void transitButton(GtkWidget *, ezgl::application *application);
 void touristButton(GtkWidget *, ezgl::application *application);
@@ -67,7 +69,7 @@ void zoomLocation(ezgl::application *application, std::vector<unsigned> zoomVec,
 void zoomStreet(ezgl::application *application);
 void zoomFeature(ezgl::application *application);
 void zoomAllPoints(ezgl::application *application);
-std::vector<std::pair<std::string, int>>  processInstructions();
+
 
 //=========================== Global Variables =========================== 
 
@@ -173,7 +175,10 @@ void initial_setup(ezgl::application *application){
     setCompletionModel(application);
     application->update_message("Left-click for Points of Interest | Right-click for Intersections | <ctrl> + Left-click for Subways ");
 
-    application->connect_feature(findButton, directionButton, touristButton, fdButton, shopsButton, transitButton, closeButton, findButton, flipButton, helpButton, initiateTheSicko);
+    // Connecting the buttons in Glade with their respective call back functions
+    application->connect_feature(findButton, directionButton, touristButton, fdButton, 
+            shopsButton, transitButton, closeButton, findButton, flipButton, helpButton, 
+            initiateTheSicko);
 }
 
 
@@ -342,7 +347,7 @@ void findButton(GtkWidget *, ezgl::application *application){
     // get the user input(s))
     application->get_input_text(name1, name2, name3);
     
-    //======================= change map ======================================
+    //========================= change map ======================================
     /* takes in the city name from name1 and then matches it with the country name 
      * from the city vector. If a match is found, the city/country is sent to newMap()
      */
@@ -469,6 +474,7 @@ std::vector<std::pair<std::string, int>> processInstructions(){
                 Hum.humanInstructions.at(i).distancePrint + " to arrive at your destination ";  
             }
             else if(i==0){
+                // Determine if the current direction instruction is to travel straight 
                 pushIn= "Proceed on " + Hum.humanInstructions.at(i).onStreet + " for " +
                 Hum.humanInstructions.at(i).distancePrint+" then ";
                 if(Hum.humanInstructions.at(i).turnPrint=="straight"){         
@@ -480,13 +486,14 @@ std::vector<std::pair<std::string, int>> processInstructions(){
                 }
 
             }
-
             else{
                 pushIn = "Continue on "+ Hum.humanInstructions.at(i).onStreet + " for " +
                 Hum.humanInstructions.at(i).distancePrint+" then go "+
                 Hum.humanInstructions.at(i).turnPrint + " onto " + 
                 Hum.humanInstructions.at(i).nextStreet;
             }
+            
+            // Determine if the current direction instruction is a left, right, or slightly left/right turn
             if(Hum.humanInstructions.at(i).turnPrint == "left"){
                 directionDeterminer=2;
             }else if (Hum.humanInstructions.at(i).turnPrint == "slightly left"){
@@ -498,6 +505,7 @@ std::vector<std::pair<std::string, int>> processInstructions(){
             }else{
                 directionDeterminer=0;
             }
+            // Determine if the current direction instruction is the starting or ending point 
         } else if(i==-1){
             pushIn="Start at " + Hum.startIntersection;
             std::cout << "=============================================\n";
@@ -555,7 +563,7 @@ void recoverStreetsFromInput(std::string input, std::string &retStreet1, std::st
 
 
 /* directionButton function
- * - calls to show the directions panel
+ * - calls to show the directions panel and hide the POI/Search panel
  * 
  * @param widget <GtkWidget> -event object to determine mouse action
  * @param application <ezgl::application> - application object to access window elements
@@ -592,7 +600,7 @@ void directionButton(GtkWidget *, ezgl::application *application){
 }
 
 /* closeButton function
- * - calls to hide the directions panel
+ * - calls to hide the directions panel and show the POI/Search panel
  * 
  * @param widget <GtkWidget> -event object to determine mouse action
  * @param application <ezgl::application> - application object to access window elements

@@ -12,15 +12,6 @@
 #include <iomanip>
 
 
-#define SLIGHTTURNANGLE M_PI/4 //45 degrees in radians
-#define NOTURNANGLE 0.261799
-#define NOINTERSECTION -100
-#define SAMESTREET -99
-#define NOTURN 0
-#define SLIGHTTURN 1
-#define REGULARTURN 2
-
-
 /* waveElem constructor
  * - fills waveElem variables with parameters
  * 
@@ -194,6 +185,9 @@ void HumanInfo::fillDistance(std::vector<unsigned> path, std::vector<std::pair<u
             curMarker=static_cast<int> (path[i]);
             double tempDistance=find_street_segment_length(path[i]);
             distance=distance+tempDistance;
+            
+            // if next marker reached and there are markers 
+            // clear all temporary distances and add to running totals
             if(changedStreetIDSegs.size()>0&&(curMarker==nextMarker)){
                 totalDistance=totalDistance+distance;
                 totalTime=totalTime+time;
@@ -205,6 +199,8 @@ void HumanInfo::fillDistance(std::vector<unsigned> path, std::vector<std::pair<u
                 distance=0;
                 time=0;
                 numStreetsChanged++;
+                
+                // set next marker
                 if(numStreetsChanged<=static_cast<int> (changedStreetIDSegs.size())){
                     if((numStreetsChanged)!=static_cast<int> (changedStreetIDSegs.size())){
                         nextMarker=static_cast<int> (changedStreetIDSegs[numStreetsChanged].first);
@@ -216,10 +212,12 @@ void HumanInfo::fillDistance(std::vector<unsigned> path, std::vector<std::pair<u
             }
         }
     }
+    // if path is 1 long, add up the only segment and setDistanceTime
     else if(path.size()==1){
         totalDistance=find_street_segment_length(path[0]);
         totalTime=find_street_segment_travel_time(path[0]);
     }
+    // if path is on one street but not one segment, add up all segment distances and setDistanceTime
     if(path.size()!=1&&numStreetsChanged==0){
         for(int i=0;i<static_cast<int> (path.size());i++){
             totalDistance=totalDistance+find_street_segment_length(path[i]);
@@ -227,6 +225,8 @@ void HumanInfo::fillDistance(std::vector<unsigned> path, std::vector<std::pair<u
         intDistance=static_cast<int> (totalDistance);
         setDistanceTimeStreet(intDistance, numStreetsChanged);
     }
+    // Rounds the distance to the nearest 10
+    // Computes the total time and sets the Hum object by calling setDistanceTime
     intDistance=static_cast<int> (totalDistance);
     int rem = intDistance % 10;
     intDistance=rem >= 5 ? (intDistance - rem + 10) : (intDistance - rem);
@@ -299,7 +299,7 @@ void HumanInfo::fillTurn(std::vector<std::pair<unsigned, unsigned>> changedStree
                 Hum.humanInstructions[i].turnType=HumanTurnType::STRAIGHT;
                 Hum.humanInstructions[i].turnPrint=insert;
             } else if(angle == NOINTERSECTION){ // segments dont intersect
-                std::string insert="AHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH ERROR";
+                std::string insert="ERROR: Segments Do Not Intersect";
                 Hum.humanInstructions[i].turnType=HumanTurnType::NONE;
                 Hum.humanInstructions[i].turnPrint=insert;
             } else if(((angle < 0 && angle > -M_PI)|| angle > M_PI)&&(turnSeverity==REGULARTURN)){ //negative angle
@@ -322,7 +322,6 @@ void HumanInfo::fillTurn(std::vector<std::pair<unsigned, unsigned>> changedStree
         }
     }
     
-    //the last stretch
     Hum.humanInstructions[changedStreetIDSegs.size()].turnType=HumanTurnType::STRAIGHT;
     std::string insert="straight";
     Hum.humanInstructions[changedStreetIDSegs.size()].turnPrint=insert;

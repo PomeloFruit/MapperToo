@@ -112,10 +112,7 @@ std::string clickActions::clickedOnPOI(double x, double y, mapBoundary &xy, info
     return displayName;
 }
 
-//    const double MIN_AREA = 8.7474e-04;
-//    const double MIN_RATIO = cnv->get_camera().get_initial_world().area()/MIN_AREA; 
-//    const double MIN_X = cnv->get_camera().get_initial_world().width()/MIN_RATIO;
-//    const double MIN_Y = cnv->get_camera().get_initial_world().height()/MIN_RATIO;
+
 /* clickedOnSubway function
  * - determines which subway was clicked
  * - calls for said subway to be highlighted
@@ -158,6 +155,15 @@ std::string clickActions::clickedOnSubway(double x, double y, mapBoundary &xy, i
     return displayName;
 }
 
+
+/* findIntersectionFromStreets function
+ * - finds all the intersections from a list of streets
+ * 
+ * @param street1ID <std::vector<unsigned> > - a vector list of streets
+ * @param street2ID <std::vector<unsigned> > - a vector list of streets
+ * 
+ * @return resultID <std::vector<unsigned> > - a vector list of intersections IDs
+ */
 
 std::vector<unsigned> clickActions::findIntersectionsFromStreets(std::vector<unsigned> street1ID,
                                                                  std::vector<unsigned> street2ID){
@@ -907,12 +913,14 @@ void clickActions::clearPreviousHighlights(infoStrucs &info){
     unsigned currentIndex;
     Hum.clear();
     
+    // remove highlighted POIs from the map
     for(unsigned i=0 ; i<info.lastPOI.size() ; i++){
         currentIndex = info.lastPOI[i];
         info.POIInfo[currentIndex].clicked = false;
     }
     info.lastPOI.clear();
     
+    // remove highlighted Intersections from the map
     for(unsigned i=0 ; i<info.lastIntersection.size() ; i++){
         currentIndex = info.lastIntersection[i];
         info.IntersectionInfo[currentIndex].clicked = false;
@@ -929,6 +937,7 @@ void clickActions::clearPreviousHighlights(infoStrucs &info){
     }
     info.lastSeg.clear();
     
+    // remove highlighted subways from the map
     for(unsigned i=0 ; i<info.lastSubway.size() ; i++){
         currentIndex = info.lastSubway[i];
         info.SubwayInfo[currentIndex].clicked = false;
@@ -939,6 +948,7 @@ void clickActions::clearPreviousHighlights(infoStrucs &info){
     }
     info.lastSubway.clear();
     
+    // remove highlighted features from the map
     for(unsigned i=0 ; i<info.lastFeature.size() ; i++){
         currentIndex = info.lastFeature[i];
         info.FeatureInfo[currentIndex].clicked = false;

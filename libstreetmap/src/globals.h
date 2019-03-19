@@ -169,6 +169,7 @@ public:
     // initiates sicko mode
     int initiateSicko;
     
+    // indicates when the left and right mouse have been clicked in the direction mode
     bool clickedStart, clickedEnd;
 };
 
