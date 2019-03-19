@@ -958,7 +958,7 @@ void zoomStreet(ezgl::application *application){
     const double MIN_X = sqrt(MIN_AREA/ratioHW);
     const double MIN_Y = MIN_AREA/MIN_X;
     const double MINDIVIDER = 4.0;
-    const double MAXMULTIPLIER = 0.7;
+    const double MAXMULTIPLIER = 0.57;
     const double MAX_X = cnv->get_camera().get_initial_world().width();
     const double MAX_Y = cnv->get_camera().get_initial_world().height();
     
