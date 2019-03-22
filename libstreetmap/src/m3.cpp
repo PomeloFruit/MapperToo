@@ -97,6 +97,6 @@ double compute_path_travel_time(const std::vector<unsigned>& path, const double 
     for(unsigned i = 1; i<path.size(); i++){
         time = time + travelTimeAdd(path[i-1], path[i], right_turn_penalty, left_turn_penalty);
     }
-    
+        
     return time;
 }
