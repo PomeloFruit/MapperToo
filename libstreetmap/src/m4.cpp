@@ -17,11 +17,21 @@
 #include <string>
 #include <limits>
 #include <iostream>
+#include <chrono>
 
 struct pathTime {
     std::vector<unsigned> path;
     double time;
 };
+
+struct multiStruct {
+    double courierTime;
+    std::vector<unsigned> bestInts;
+    std::vector<unsigned> intTypes; //0 for pickup, 1 for dropoff, 2 for depot
+};
+
+#define TIME_LIMIT 45
+#define CHICKEN 0.99
 
 #define PICKUP 0
 #define DROPOFF 1
@@ -35,8 +45,18 @@ void fillAllPathTimes(std::vector<std::vector<pathTime>>& pathTimes,
                       const double right_turn_penalty,
                       const double left_turn_penalty);
 
-void multiDestPath(Node *sourceNode, const std::vector<unsigned>& allDest, 
-        std::vector<pathTime>& pathTimes, const double rtPen, const double ltPen);
+void multiDestPath(Node *sourceNode, 
+                   const std::vector<unsigned>& allDest, 
+                   std::vector<pathTime>& pathTimes,
+                   const double rtPen,
+                   const double ltPen);
+
+multiStruct multiStart(const unsigned numDeliveries, 
+                       const unsigned startDepot,
+                       const std::vector<std::vector<pathTime>>& pathTimes, 
+                       const std::vector<std::vector<pathTime>>& depotTimes,
+                       const std::vector<DeliveryInfo>& deliveries,
+                       const double truckCap);
 
 // ==================================================================================
 
@@ -47,31 +67,17 @@ std::vector<CourierSubpath> traveling_courier(
 		const float left_turn_penalty, 
 		const float truck_capacity){
     
+//    auto startTime = std::chrono::high_resolution_clock::now();
+//    bool timeOut = false;
+    
     std::vector<CourierSubpath> courierPath;
 
-    unsigned bestInter1;
-    unsigned bestInter2;
-    std::vector<unsigned> bestInts;
-    std::vector<unsigned> intTypes; //0 for pickup, 1 for dropoff, 2 for depot
-    bestInts.clear();
-    intTypes.clear();
-    
-    double remainingWeight = truck_capacity;
-    double minTime;
-    
     unsigned numDeliveries = deliveries.size();
     unsigned numDepots = depots.size();
     unsigned totDest = 2*numDeliveries + numDepots;
-    
-    std::vector<bool> picked;
-    std::vector<bool> dropped;
-    picked.resize(numDeliveries);
-    dropped.resize(numDeliveries);
-    unsigned numPicked = 0;
-    unsigned numDropped = 0;
-    
-    std::vector<std::vector<pathTime>> pathTimes;
-    std::vector<std::vector<pathTime>> depotTimes;
+        
+    std::vector<std::vector<pathTime>> pathTimes; // from pickup/dropoff to pickup/dropoff/depot
+    std::vector<std::vector<pathTime>> depotTimes; // from all depots to all pickups
     pathTimes.resize(2*numDeliveries);
     depotTimes.resize(numDepots);
        
@@ -86,154 +92,70 @@ std::vector<CourierSubpath> traveling_courier(
     }
     
     fillAllPathTimes(pathTimes, depotTimes, deliveries, depots, right_turn_penalty, left_turn_penalty);
+    
+    // do multistart and save the best one ========================================================
 
-    // get best depot to delivery pickup ===========================================================
+    double bestCourier = 99999999999999999;
+    multiStruct bestCI;
     
-    minTime = 99999999999999999;
-    
-    for(unsigned i=0 ; i<depotTimes.size(); i++){
-        for(unsigned j=0 ; j<depotTimes[i].size(); j++){
-            if(depotTimes[i][j].time < minTime && depotTimes[i][j].time != 0){
-                minTime = depotTimes[i][j].time;
-                bestInter1 = i; //depot
-                bestInter2 = j; //delivery pickup
-            }
-        }
-        
-    }
-    
-    // account for pickup dropoff 2x
-    bestInter2 = bestInter2 * 2;
-    bestInts.push_back(bestInter1);
-    intTypes.push_back(DEPOT);
-    bestInts.push_back(bestInter2);
-    intTypes.push_back(PICKUP);
-    picked[bestInter2/2] = true;
-    remainingWeight =  remainingWeight - deliveries[bestInter2/2].itemWeight;
-    numPicked++;
-   // std::cout << bestInter2 << " at " << minTime << std::endl;
-        
-    // do all the deliveries ===========================================================
-    while(numPicked < numDeliveries || numDropped < numDeliveries){
-        bool isCurrentPickUp;
-        minTime = 99999999999999999;
-        bestInter1 = bestInter2;
-        
-        // get best pickup/dropoff anything combination
-        for(unsigned j=0 ; j<pathTimes.size(); j++){
-            
-            if(pathTimes[bestInter1][j].time < minTime){
-                if(j%2 == 0){ //pickup
-                    if(!picked[j/2] && (remainingWeight-deliveries[j/2].itemWeight > 0)){
-                        isCurrentPickUp = true;
-                    } else {
-                        continue;
-                    }
-                } else { //dropoff = 1
-                    if(!dropped[j/2] && picked[j/2]){
-                        isCurrentPickUp = false;
-                    } else {
-                        continue;
-                    }
-                }
-                
-                minTime = pathTimes[bestInter1][j].time;
-                bestInter2 = j; //nextStop
-            }
-        }
-
-        bestInts.push_back(bestInter2);
-     //   std::cout << bestInter2 << " at " << minTime << std::endl;
-        
-        if(isCurrentPickUp){
-            remainingWeight = remainingWeight - deliveries[bestInter2/2].itemWeight;
-            intTypes.push_back(PICKUP);
-            picked[bestInter2/2] = true;
-            numPicked++;
-        } else {
-            remainingWeight = remainingWeight + deliveries[bestInter2/2].itemWeight;
-            intTypes.push_back(DROPOFF);
-            dropped[bestInter2/2] = true;
-            numDropped++;
+    for(unsigned i=0; i<numDepots; i++){
+        multiStruct temp = multiStart(numDeliveries, i, pathTimes, depotTimes, deliveries, truck_capacity);
+        if(temp.courierTime < bestCourier){
+            bestCI = temp;
+            bestCourier = temp.courierTime;
         }
     }
 
-    // find the closest end depot ===========================================================
+    // put some 2 opt stuff here ===========================================================
     
-    bestInter1 = bestInter2;
-    minTime = 99999999999999999;
+//    while(!timeOut){
+//        auto currentTime = std::chrono::high_resolution_clock::now();
+//        auto wallClock = std::chrono::duration_cast<std::chrono::duration<double>> (currentTime-startTime);
+//        
+//        if(wallClock.count() > CHICKEN*TIME_LIMIT){
+//            timeOut = true;
+//        }
+//    }
     
-    for(unsigned j=pathTimes.size() ; j<pathTimes[bestInter1].size(); j++){
-        if(pathTimes[bestInter1][j].time < minTime && pathTimes[bestInter1][j].time != 0){
-            minTime = pathTimes[bestInter1][j].time;
-            bestInter2 = j; //depot
-        }
-    }
+    std::cout << bestCourier << std::endl;
+       
+    // get the courier path now ===========================================================
     
-    bestInts.push_back(bestInter2);
-    intTypes.push_back(DEPOT);
-
-    // get the courier path now
-    
-   // std::cout << "---------------------------------------------------\n";
-    //std::cout << numDeliveries << " deliveries and depots: " << numDepots << std::endl;
-    
-    for(unsigned i=0; i<bestInts.size()-1; i++){
+    for(unsigned i=0; i<bestCI.bestInts.size()-1; i++){
         CourierSubpath tempSubpath;
         tempSubpath.pickUp_indices.clear();
          
-        if(intTypes[i] == DEPOT){
-         //   std::cout << "1depot #" << bestInts[i] << std::endl;
-            tempSubpath.start_intersection = depots[bestInts[i]];
-            tempSubpath.subpath = depotTimes[bestInts[i]][bestInts[i+1]/2].path;
+        if(bestCI.intTypes[i] == DEPOT){
+            tempSubpath.start_intersection = depots[bestCI.bestInts[i]];
+            tempSubpath.subpath = depotTimes[bestCI.bestInts[i]][bestCI.bestInts[i+1]/2].path;
             
-        } else if(intTypes[i] == PICKUP){
-           // std::cout << "1pickup #" << bestInts[i] << std::endl;
-            tempSubpath.start_intersection = deliveries[bestInts[i]/2].pickUp;
-            
-            tempSubpath.pickUp_indices.push_back(bestInts[i]/2);
-//            unsigned next = i+1;
-//            unsigned jumpBy = 0;
-//            while(bestInts[i] == bestInts[next]){
-//                tempSubpath.pickUp_indices.push_back(bestInts[next]/2);
-//                jumpBy++;
-//                next += jumpBy;
-//            }
-//            i = i+jumpBy;
-            
-            tempSubpath.subpath = pathTimes[bestInts[i]][bestInts[i+1]].path;
+        } else if(bestCI.intTypes[i] == PICKUP){
+            tempSubpath.start_intersection = deliveries[bestCI.bestInts[i]/2].pickUp;       
+            tempSubpath.pickUp_indices.push_back(bestCI.bestInts[i]/2);
+            tempSubpath.subpath = pathTimes[bestCI.bestInts[i]][bestCI.bestInts[i+1]].path;
             
         } else { //dropoff
-         //   std::cout << "1dropoff #" << bestInts[i] << std::endl;
-            tempSubpath.start_intersection = deliveries[bestInts[i]/2].dropOff;
-            tempSubpath.subpath = pathTimes[bestInts[i]][bestInts[i+1]].path;
-
+            tempSubpath.start_intersection = deliveries[bestCI.bestInts[i]/2].dropOff;
+            tempSubpath.subpath = pathTimes[bestCI.bestInts[i]][bestCI.bestInts[i+1]].path;
         }
         
         // set the end intersection locations 
         
-        if(intTypes[i+1] == DEPOT){
-         //   std::cout << "2depot #" << bestInts[i+1] << std::endl;
-            tempSubpath.end_intersection = depots[bestInts[i+1]-2*numDeliveries];
-        } else if(intTypes[i+1] == PICKUP){
-         //   std::cout << "2pickup #" << bestInts[i+1] << std::endl;
-            tempSubpath.end_intersection = deliveries[bestInts[i+1]/2].pickUp;
+        if(bestCI.intTypes[i+1] == DEPOT){
+            tempSubpath.end_intersection = depots[bestCI.bestInts[i+1]-2*numDeliveries];
+        } else if(bestCI.intTypes[i+1] == PICKUP){
+            tempSubpath.end_intersection = deliveries[bestCI.bestInts[i+1]/2].pickUp;
         } else {
-          //  std::cout << "2dropoff #" << bestInts[i+1] << std::endl;
-            tempSubpath.end_intersection = deliveries[bestInts[i+1]/2].dropOff;
+            tempSubpath.end_intersection = deliveries[bestCI.bestInts[i+1]/2].dropOff;
         }
-        
-      //  std::cout << tempSubpath.start_intersection << " to " << tempSubpath.end_intersection << "with size " << tempSubpath.subpath.size() << std::endl;
-        
+                
         courierPath.push_back(tempSubpath);
     }
     
-    bestInts.clear();
-    intTypes.clear();
+    bestCI.bestInts.clear();
+    bestCI.intTypes.clear();
     pathTimes.clear();
     depotTimes.clear();
-    picked.clear();
-    dropped.clear();
     
     return courierPath;
 }
@@ -276,6 +198,134 @@ void fillAllPathTimes(std::vector<std::vector<pathTime>>& pathTimes,
     }
 }
 
+
+
+multiStruct multiStart(const unsigned numDeliveries, 
+                       const unsigned startDepot,
+                       const std::vector<std::vector<pathTime>>& pathTimes, 
+                       const std::vector<std::vector<pathTime>>& depotTimes,
+                       const std::vector<DeliveryInfo>& deliveries,
+                       const double truckCap){
+    
+    multiStruct route;
+    
+    unsigned bestInter1;
+    unsigned bestInter2;
+    
+    route.bestInts.clear();
+    route.intTypes.clear();
+    route.courierTime = 0;
+    
+    double remainingWeight = truckCap;
+    double minTime;
+    
+    std::vector<bool> picked;
+    std::vector<bool> dropped;
+    
+    picked.resize(numDeliveries);
+    dropped.resize(numDeliveries);
+    
+    unsigned numPicked = 0;
+    unsigned numDropped = 0;
+    
+    // get best depot to delivery pickup ===========================================================
+    
+    minTime = 99999999999999999;
+    
+    bestInter1 = startDepot;
+    
+    for(unsigned j=0 ; j<depotTimes[startDepot].size(); j++){
+        if(depotTimes[startDepot][j].time < minTime){// && depotTimes[startDepot][j].time != 0){
+            minTime = depotTimes[startDepot][j].time;
+            bestInter2 = j; //delivery pickup
+        }
+    }
+    
+    // no path from depot to any pickup
+    if(minTime == NOTIME){
+        route.courierTime = NOTIME;
+        return route;
+    }
+    
+    // account for pickup dropoff 2x
+    bestInter2 = bestInter2 * 2;
+    route.bestInts.push_back(bestInter1);
+    route.intTypes.push_back(DEPOT);
+    route.bestInts.push_back(bestInter2);
+    route.intTypes.push_back(PICKUP);
+    picked[bestInter2/2] = true;
+    remainingWeight =  remainingWeight - deliveries[bestInter2/2].itemWeight;
+    route.courierTime = route.courierTime + minTime;
+    numPicked++;
+        
+    // do all the deliveries ===========================================================
+    
+    while(numPicked < numDeliveries || numDropped < numDeliveries){
+        bool isCurrentPickUp = false;
+        minTime = 99999999999999999;
+        bestInter1 = bestInter2;
+        
+        // get best pickup/dropoff anything combination
+        for(unsigned j=0 ; j<pathTimes.size(); j++){
+            
+            if(pathTimes[bestInter1][j].time < minTime){
+                if(j%2 == 0){ //pickup
+                    if(!picked[j/2] && (remainingWeight-deliveries[j/2].itemWeight > 0)){
+                        isCurrentPickUp = true;
+                    } else {
+                        continue;
+                    }
+                } else { //dropoff = 1
+                    if(!dropped[j/2] && picked[j/2]){
+                        isCurrentPickUp = false;
+                    } else {
+                        continue;
+                    }
+                }
+                
+                minTime = pathTimes[bestInter1][j].time;
+                bestInter2 = j; //nextStop
+            }
+        }
+
+        route.bestInts.push_back(bestInter2);
+        route.courierTime = route.courierTime + minTime;
+        
+        if(isCurrentPickUp){
+            remainingWeight = remainingWeight - deliveries[bestInter2/2].itemWeight;
+            route.intTypes.push_back(PICKUP);
+            picked[bestInter2/2] = true;
+            numPicked++;
+        } else {
+            remainingWeight = remainingWeight + deliveries[bestInter2/2].itemWeight;
+            route.intTypes.push_back(DROPOFF);
+            dropped[bestInter2/2] = true;
+            numDropped++;
+        }
+    }
+
+    // find the closest end depot ===========================================================
+    
+    bestInter1 = bestInter2;
+    minTime = 99999999999999999;
+    
+    for(unsigned j=pathTimes.size() ; j<pathTimes[bestInter1].size(); j++){
+        if(pathTimes[bestInter1][j].time < minTime && pathTimes[bestInter1][j].time != 0){
+            minTime = pathTimes[bestInter1][j].time;
+            bestInter2 = j; //depot
+        }
+    }
+    
+    route.courierTime = route.courierTime + minTime;
+    route.bestInts.push_back(bestInter2);
+    route.intTypes.push_back(DEPOT);
+    
+    picked.clear();
+    dropped.clear();
+    
+    return route;
+}
+
 // structure contains compare operator for sorting priority queue
 // sorts queue using scores in waveElem such that lowest score is placed at front of queue
 struct compareTime {
@@ -298,13 +348,16 @@ struct compareTime {
  *                                        up the fastest path between start and end (if exists)
  */
 
-void multiDestPath(Node *sourceNode, const std::vector<unsigned>& allDest, 
-        std::vector<pathTime>& pathTimes, const double rtPen, const double ltPen) {
+void multiDestPath(Node *sourceNode, 
+                   const std::vector<unsigned>& allDest, 
+                   std::vector<pathTime>& pathTimes,
+                   const double rtPen,
+                   const double ltPen){
     
     std::priority_queue< waveElem4 , std::vector<waveElem4 >, compareTime> wavefront;
     wavefront.push(waveElem4(NONODE, sourceNode, NOEDGE, 0));
      
-    int numMatched = 0;
+    unsigned numMatched = 0;
     std::vector<unsigned> reachingEdge;
     std::vector<double> bestTime;
     std::vector<Node *> reachingNode;
@@ -314,8 +367,10 @@ void multiDestPath(Node *sourceNode, const std::vector<unsigned>& allDest,
     bestTime.resize(Dir.Nodes.size());
     std::fill(bestTime.begin(), bestTime.end(), NOTIME);
     
-   // std::cout << "dest size  " << allDest.size() << std::endl;
-      
+    for(unsigned i=0 ; i<pathTimes.size(); i++){
+        pathTimes[i].time = NOTIME;
+    }
+          
     // repeat until all possible paths are checked or path is found
     while(!wavefront.empty()){
         // get next intersection node
@@ -337,6 +392,7 @@ void multiDestPath(Node *sourceNode, const std::vector<unsigned>& allDest,
             }
             
             // if at destination, get the path and exit loop
+            #pragma omp parallel for
             for(unsigned i=0; i<allDest.size(); i++){
                 if(currNode->id == allDest[i]){
                     //extract the path from the nodes
@@ -351,6 +407,7 @@ void multiDestPath(Node *sourceNode, const std::vector<unsigned>& allDest,
             }
         
             // add all nodes that can be reached to wavefront
+            #pragma omp parallel for
             for(unsigned i=0 ; i < currNode->outEdges.size(); i++){
                 Node* toNode = currNode->toNodes[i];
                 unsigned toEdge = currNode->outEdges[i];
