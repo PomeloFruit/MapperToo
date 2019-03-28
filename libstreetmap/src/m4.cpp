@@ -130,7 +130,7 @@ std::vector<CourierSubpath> traveling_courier(
         }        
 
         multiStruct betterPath = tempStarts[a];
-        double kOpt = 5;//betterPath.bestInts.size();
+        double kOpt = 7;//betterPath.bestInts.size();
         double numIterations = 14;
 
         bool timeOut = false;
@@ -139,14 +139,12 @@ std::vector<CourierSubpath> traveling_courier(
         
         for(unsigned z = 0; z < numIterations && !timeOut && somethingChanged; z++){
             somethingChanged = false;
-            for(unsigned k = 2; k < kOpt && !timeOut; k++){
-                for(unsigned i=2; i<temp.bestInts.size()-k-1 && !timeOut; i++){ //0 = depot, 1 = first pickup, 2= ? , size-1 = depot, size-2 = last drop, size-3 = ?
+            for(unsigned k = 0; k < kOpt && !timeOut; k++){
+                for(unsigned i=0; i<temp.bestInts.size()-k-3 && !timeOut; i++){ //0 = depot, 1 = first pickup, 2= ? , size-1 = depot, size-2 = last drop, size-3 = ?
                     temp = betterPath;
-                    opt_k_Swap(temp, i, k, pathTimes, deliveries);
+                    opt_k_Swap(temp, i+2, k+2, pathTimes, deliveries);
 
                     if(temp.courierTime < betterPath.courierTime){
-//                        std::cout << "try 1-" << z << " try 2-" << k << " try 3-" << i << std::endl;
-//                        std::cout << temp.courierTime << std::endl;
                         somethingChanged = true;
                         betterPath = temp;
                     }
