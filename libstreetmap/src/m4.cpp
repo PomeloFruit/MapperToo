@@ -35,7 +35,7 @@ struct multiStruct {
 };
 
 #define TIME_LIMIT 45
-#define CHICKEN 0.8
+#define CHICKEN 0.9
 
 #define PICKUP 0
 #define DROPOFF 1
@@ -134,10 +134,11 @@ std::vector<CourierSubpath> traveling_courier(
         double numIterations = 14;
 
         bool timeOut = false;
+        bool somethingChanged = true;
         multiStruct temp = betterPath;
         
-        for(unsigned z = 0; z < numIterations && !timeOut; z++){
-            //std::cout << "try 1-" << z << std::endl;
+        for(unsigned z = 0; z < numIterations && !timeOut && somethingChanged; z++){
+            somethingChanged = false;
             for(unsigned k = 2; k < kOpt && !timeOut; k++){
                 for(unsigned i=2; i<temp.bestInts.size()-k-1 && !timeOut; i++){ //0 = depot, 1 = first pickup, 2= ? , size-1 = depot, size-2 = last drop, size-3 = ?
                     temp = betterPath;
@@ -146,6 +147,7 @@ std::vector<CourierSubpath> traveling_courier(
                     if(temp.courierTime < betterPath.courierTime){
 //                        std::cout << "try 1-" << z << " try 2-" << k << " try 3-" << i << std::endl;
 //                        std::cout << temp.courierTime << std::endl;
+                        somethingChanged = true;
                         betterPath = temp;
                     }
 
@@ -153,6 +155,7 @@ std::vector<CourierSubpath> traveling_courier(
                     auto wallClock = std::chrono::duration_cast<std::chrono::duration<double>> (currentTime-startTime);
 
                     if(wallClock.count() > CHICKEN*TIME_LIMIT){
+                        std::cout << "exit @ try 1-" << z << " try 2-" << k << " try 3-" << i << std::endl;
                         timeOut = true;
                     }
                 }
@@ -218,6 +221,8 @@ std::vector<CourierSubpath> traveling_courier(
         } else {
             tempSubpath.end_intersection = deliveries[bestCI.bestInts[i+1]/2].dropOff;
         }
+        
+//        std::cout << i << " " << tempSubpath.start_intersection << " " << tempSubpath.end_intersection << std::endl;
                 
         courierPath.push_back(tempSubpath);
     }
@@ -239,44 +244,65 @@ void opt_k_Swap(multiStruct &temp,
                 const std::vector<DeliveryInfo>& deliveries){
     
     multiStruct testNew = temp;
+    multiStruct original = temp;
     
     swap(testNew.intTypes[start], testNew.intTypes[start+len]);
     swap(testNew.bestInts[start], testNew.bestInts[start+len]);
- 
-    for(unsigned i = start; i<=start+len; i++){
-        if(testNew.intTypes[i] == PICKUP){
-            testNew.pickUpIndex[testNew.bestInts[i]/2] = i;
-            testNew.remWeightHere[i] = testNew.remWeightHere[i-1]-deliveries[testNew.bestInts[i]/2].itemWeight;
-        } else {
-            testNew.dropOffIndex[testNew.bestInts[i]/2] = i;
-            testNew.remWeightHere[i] = testNew.remWeightHere[i-1]+deliveries[testNew.bestInts[i]/2].itemWeight;
+    
+    std::vector<int> indices;
+    for(unsigned c = start; c<=start+len; c++){
+        indices.push_back(c);
+    }
+    
+    do {
+        testNew = original;
+        
+        for(unsigned i=0; i<indices.size(); i++){
+            testNew.intTypes[i+start] = original.intTypes[indices[i]];
+            testNew.bestInts[i+start] = original.bestInts[indices[i]];
+        }        
+        
+        for(unsigned i = start; i<=start+len; i++){
+            if(testNew.intTypes[i] == PICKUP){
+                testNew.pickUpIndex[testNew.bestInts[i]/2] = i;
+                testNew.remWeightHere[i] = testNew.remWeightHere[i-1]-deliveries[testNew.bestInts[i]/2].itemWeight;
+            } else {
+                testNew.dropOffIndex[testNew.bestInts[i]/2] = i;
+                testNew.remWeightHere[i] = testNew.remWeightHere[i-1]+deliveries[testNew.bestInts[i]/2].itemWeight;
+            }
+
+            // exceeds truck capacity
+            if(testNew.remWeightHere[i] < 0){
+                return;
+            }
         }
         
-        // exceeds truck capacity
-        if(testNew.remWeightHere[i] < 0){
-            return;
+//        for(unsigned i=0; i<testNew.bestInts.size(); i++){
+//            std::cout << testNew.bestInts[i] << " "; 
+//        }
+//        std::cout << std::endl;
+
+        for(unsigned i = start; i<=start+len; i++){
+            if(testNew.pickUpIndex[testNew.bestInts[i]/2] > testNew.dropOffIndex[testNew.bestInts[i]/2]){
+                return;
+            }
         }
-    }
-    
-    for(unsigned i = start; i<=start+len; i++){
-        if(testNew.pickUpIndex[testNew.bestInts[i]/2] > testNew.dropOffIndex[testNew.bestInts[i]/2]){
-            return;
+
+        double oldTime = 0;
+        double newTime = 0;
+        for(unsigned i = start-1; i<=start+len; i++){
+            oldTime = oldTime + testNew.timePerSub[i];
+            testNew.timePerSub[i] = pathTimes[testNew.bestInts[i]][testNew.bestInts[i+1]].time;
+            newTime = newTime + testNew.timePerSub[i];
         }
-    }
-    
-    double oldTime = 0;
-    double newTime = 0;
-    for(unsigned i = start-1; i<=start+len; i++){
-        oldTime = oldTime + testNew.timePerSub[i];
-        testNew.timePerSub[i] = pathTimes[testNew.bestInts[i]][testNew.bestInts[i+1]].time;
-        newTime = newTime + testNew.timePerSub[i];
-    }
-    
-    double deltaT = newTime - oldTime;
-    if(deltaT < 0){
-        testNew.courierTime = testNew.courierTime + deltaT;
-        temp = testNew;
-    }
+
+        double deltaT = newTime - oldTime;
+        if(deltaT < 0){
+            testNew.courierTime = testNew.courierTime + deltaT;
+            temp = testNew;
+        }
+        
+    } while (std::next_permutation(indices.begin(), indices.end()));
 }
 
 void swap(unsigned &a, unsigned &b){
