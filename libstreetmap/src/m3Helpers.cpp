@@ -149,6 +149,7 @@ double getNewScore(unsigned newPoint, LatLon end, double time){
 
 std::vector<unsigned> getFinalPath(Node *currNode, unsigned start){
     std::vector<unsigned> finalPath;
+    finalPath.clear();
    
     while(currNode!=NULL){
         if(static_cast<int> (currNode->reachingEdge) != NOEDGE){
@@ -164,6 +165,41 @@ std::vector<unsigned> getFinalPath(Node *currNode, unsigned start){
         
         // backtrack one node
         currNode = currNode->reachingNode;
+    }
+    
+    return finalPath;
+}
+
+
+/* getFinalPath4 function
+ * - backtracks on the path used to reach currNode (destination node)
+ * - inserts backtracked segment to the front of list, so that directions go from start to end
+ * 
+ * @param currNode <Node *> - pointer to the destination intersection 
+ * @param start <unsigned> - intersection ID for the start intersection
+ * 
+ * @return finalPath <std::vector<unsigned>> - an ordered list of street segment ids to get from
+ *                                               start to end intersection
+ */
+
+std::vector<unsigned> getFinalPath4(Node *currNode, unsigned start, std::vector<unsigned>& reachingEdge, std::vector<Node *>& reachingNode){
+    std::vector<unsigned> finalPath;
+    finalPath.clear();
+   
+    while(currNode!=NULL){
+        if(static_cast<int> (reachingEdge[currNode->id]) != NOEDGE){
+            // add segment used to reach node to front of list
+            finalPath.insert(finalPath.begin(), reachingEdge[currNode->id]);
+
+            // if backtracked back to start, we are done
+            if(static_cast<unsigned>(getInfoStreetSegment(reachingEdge[currNode->id]).to) == start || 
+                    static_cast<unsigned>(getInfoStreetSegment(reachingEdge[currNode->id]).from) == start){
+                break;
+            }
+        }
+        
+        // backtrack one node
+        currNode = reachingNode[currNode->id];
     }
     
     return finalPath;

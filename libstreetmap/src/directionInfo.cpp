@@ -28,6 +28,13 @@ waveElem::waveElem(unsigned from, Node* source, unsigned id, double time, double
     score = scoreIn;
 }
 
+waveElem4::waveElem4(unsigned from, Node* source, unsigned id, double time){
+    node = source;
+    edgeID = id;
+    travelTime = time;
+    reachingNode = from;
+}
+
 
 /* fillNodes function
  * - creates a node for every intersection on the map

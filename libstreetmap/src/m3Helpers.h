@@ -30,3 +30,4 @@ double getNewScore(unsigned newPoint, LatLon end, double time);
 
 // back-tracks the node information to get segment ids from start->end
 std::vector<unsigned> getFinalPath(Node *currNode, unsigned start);
+std::vector<unsigned> getFinalPath4(Node *currNode, unsigned start, std::vector<unsigned>& reachingEdge, std::vector<Node *>& reachingNode);

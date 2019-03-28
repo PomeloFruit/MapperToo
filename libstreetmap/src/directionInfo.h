@@ -42,6 +42,17 @@ struct waveElem {
     waveElem(unsigned from, Node* source, unsigned id, double time, double score);
 };
 
+struct waveElem4 {
+    unsigned reachingNode;
+    Node* node;
+    unsigned edgeID;
+    double travelTime;
+    
+    // instanties the waveElem4 variables
+    waveElem4(unsigned from, Node* source, unsigned id, double time);
+};
+
+
 enum class HumanTurnType {
     STRAIGHT, // going straight
     RIGHT, // turning right
