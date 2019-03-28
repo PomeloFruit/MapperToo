@@ -74,7 +74,7 @@ std::vector<CourierSubpath> traveling_courier(
     std::vector<std::vector<pathTime>> depotTimes;
     pathTimes.resize(2*numDeliveries);
     depotTimes.resize(numDepots);
-    
+       
     // get all path / time from start-dest combinations ===========================================
     
     for(unsigned i=0 ; i<pathTimes.size() ; i++){
@@ -93,7 +93,7 @@ std::vector<CourierSubpath> traveling_courier(
     
     for(unsigned i=0 ; i<depotTimes.size(); i++){
         for(unsigned j=0 ; j<depotTimes[i].size(); j++){
-            if(depotTimes[i][j].time < minTime){
+            if(depotTimes[i][j].time < minTime && depotTimes[i][j].time != 0){
                 minTime = depotTimes[i][j].time;
                 bestInter1 = i; //depot
                 bestInter2 = j; //delivery pickup
@@ -111,9 +111,8 @@ std::vector<CourierSubpath> traveling_courier(
     picked[bestInter2/2] = true;
     remainingWeight =  remainingWeight - deliveries[bestInter2/2].itemWeight;
     numPicked++;
-    
-    std::cout << remainingWeight << " eeee " << truck_capacity << std::endl;
-    
+   // std::cout << bestInter2 << " at " << minTime << std::endl;
+        
     // do all the deliveries ===========================================================
     while(numPicked < numDeliveries || numDropped < numDeliveries){
         bool isCurrentPickUp;
@@ -144,6 +143,7 @@ std::vector<CourierSubpath> traveling_courier(
         }
 
         bestInts.push_back(bestInter2);
+     //   std::cout << bestInter2 << " at " << minTime << std::endl;
         
         if(isCurrentPickUp){
             remainingWeight = remainingWeight - deliveries[bestInter2/2].itemWeight;
@@ -164,7 +164,7 @@ std::vector<CourierSubpath> traveling_courier(
     minTime = 99999999999999999;
     
     for(unsigned j=pathTimes.size() ; j<pathTimes[bestInter1].size(); j++){
-        if(pathTimes[bestInter1][j].time < minTime){
+        if(pathTimes[bestInter1][j].time < minTime && pathTimes[bestInter1][j].time != 0){
             minTime = pathTimes[bestInter1][j].time;
             bestInter2 = j; //depot
         }
@@ -175,17 +175,20 @@ std::vector<CourierSubpath> traveling_courier(
 
     // get the courier path now
     
+   // std::cout << "---------------------------------------------------\n";
+    //std::cout << numDeliveries << " deliveries and depots: " << numDepots << std::endl;
+    
     for(unsigned i=0; i<bestInts.size()-1; i++){
         CourierSubpath tempSubpath;
         tempSubpath.pickUp_indices.clear();
          
         if(intTypes[i] == DEPOT){
-            
+         //   std::cout << "1depot #" << bestInts[i] << std::endl;
             tempSubpath.start_intersection = depots[bestInts[i]];
             tempSubpath.subpath = depotTimes[bestInts[i]][bestInts[i+1]/2].path;
             
         } else if(intTypes[i] == PICKUP){
-            
+           // std::cout << "1pickup #" << bestInts[i] << std::endl;
             tempSubpath.start_intersection = deliveries[bestInts[i]/2].pickUp;
             
             tempSubpath.pickUp_indices.push_back(bestInts[i]/2);
@@ -201,27 +204,37 @@ std::vector<CourierSubpath> traveling_courier(
             tempSubpath.subpath = pathTimes[bestInts[i]][bestInts[i+1]].path;
             
         } else { //dropoff
-            
+         //   std::cout << "1dropoff #" << bestInts[i] << std::endl;
             tempSubpath.start_intersection = deliveries[bestInts[i]/2].dropOff;
             tempSubpath.subpath = pathTimes[bestInts[i]][bestInts[i+1]].path;
 
         }
         
-        
-        
         // set the end intersection locations 
         
         if(intTypes[i+1] == DEPOT){
+         //   std::cout << "2depot #" << bestInts[i+1] << std::endl;
             tempSubpath.end_intersection = depots[bestInts[i+1]-2*numDeliveries];
         } else if(intTypes[i+1] == PICKUP){
+         //   std::cout << "2pickup #" << bestInts[i+1] << std::endl;
             tempSubpath.end_intersection = deliveries[bestInts[i+1]/2].pickUp;
         } else {
+          //  std::cout << "2dropoff #" << bestInts[i+1] << std::endl;
             tempSubpath.end_intersection = deliveries[bestInts[i+1]/2].dropOff;
         }
         
+      //  std::cout << tempSubpath.start_intersection << " to " << tempSubpath.end_intersection << "with size " << tempSubpath.subpath.size() << std::endl;
+        
         courierPath.push_back(tempSubpath);
     }
-
+    
+    bestInts.clear();
+    intTypes.clear();
+    pathTimes.clear();
+    depotTimes.clear();
+    picked.clear();
+    dropped.clear();
+    
     return courierPath;
 }
 
