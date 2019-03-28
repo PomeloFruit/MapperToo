@@ -121,7 +121,7 @@ std::vector<CourierSubpath> traveling_courier(
     
     // do k-opt stuff ================================================================================
     // this is a multi start k-opt kinda?
-    
+        
     #pragma omp parallel for
     for(unsigned a=0; a<numDepots; a++){
         
@@ -130,7 +130,7 @@ std::vector<CourierSubpath> traveling_courier(
         }        
 
         multiStruct betterPath = tempStarts[a];
-        double kOpt = betterPath.bestInts.size();
+        double kOpt = 5;//betterPath.bestInts.size();
         double numIterations = 14;
 
         bool timeOut = false;
@@ -162,9 +162,10 @@ std::vector<CourierSubpath> traveling_courier(
             }
         }
 
+        //bestCI = betterPath;
         tempStarts[a] = betterPath;
     }
-      
+        
     // find best result
     for(unsigned i=0; i<numDepots; i++){
         if(tempStarts[i].courierTime < bestCourier){
@@ -174,6 +175,8 @@ std::vector<CourierSubpath> traveling_courier(
     }
 
     tempStarts.clear();
+      
+   
     
     // ========================================================== print outs =============
     
