@@ -63,6 +63,20 @@ void opt_k_Swap(multiStruct &temp,
 
 void swap(unsigned &a, unsigned &b);
 
+void opt_k_Rotate(multiStruct &temp, 
+                const unsigned size,
+                const unsigned len,
+                const unsigned ror,
+                const std::vector<std::vector<pathTime>>& pathTimes,
+                const std::vector<DeliveryInfo>& deliveries);
+
+void opt_k_Checks(multiStruct &temp,
+                  multiStruct &testNew,  
+                  const unsigned start,
+                  const unsigned len, 
+                  const std::vector<std::vector<pathTime>>& pathTimes,
+                  const std::vector<DeliveryInfo>& deliveries);
+
 multiStruct multiStart(const unsigned numDeliveries, 
                        const unsigned startDepot,
                        const std::vector<std::vector<pathTime>>& pathTimes, 
@@ -130,8 +144,8 @@ std::vector<CourierSubpath> traveling_courier(
         }        
 
         multiStruct betterPath = tempStarts[a];
-        double kOpt = 7;//betterPath.bestInts.size();
-        double numIterations = 14;
+        double kOpt = betterPath.bestInts.size();
+        double numIterations = 1000;
 
         bool timeOut = false;
         bool somethingChanged = true;
@@ -139,14 +153,47 @@ std::vector<CourierSubpath> traveling_courier(
         
         for(unsigned z = 0; z < numIterations && !timeOut && somethingChanged; z++){
             somethingChanged = false;
-            for(unsigned k = 2; k < kOpt && !timeOut; k++){
+           // std::cout << z << std::endl;
+            for(unsigned k = 1; k < kOpt && !timeOut; k++){
                 for(unsigned i=2; temp.bestInts.size() > (k+1) && i< temp.bestInts.size()-k-1 && !timeOut; i++){
 //                    std::cout << i << " " << k << " " << temp.bestInts.size()-k-1  << " " << temp.bestInts.size() << std::endl;
 //                    std::string garb;
 //                    std::cin >> garb;
                     
                     temp = betterPath;
+                    opt_k_Rotate(temp, i, k, 1, pathTimes, deliveries); // will test for swap then rotate
+                   
+                    if(temp.courierTime < betterPath.courierTime){
+                        somethingChanged = true;
+                        betterPath = temp;
+                    }
+                    
                     opt_k_Swap(temp, i, k, pathTimes, deliveries);
+
+                    if(temp.courierTime < betterPath.courierTime){
+                        somethingChanged = true;
+                        betterPath = temp;
+                    }
+                    
+                    temp = betterPath;
+                    opt_k_Rotate(temp, i, k, 2, pathTimes, deliveries);
+
+                    if(temp.courierTime < betterPath.courierTime){
+                        somethingChanged = true;
+                        betterPath = temp;
+                    }
+                    
+                    
+                    temp = betterPath;
+                    opt_k_Rotate(temp, i, k, 3, pathTimes, deliveries);
+
+                    if(temp.courierTime < betterPath.courierTime){
+                        somethingChanged = true;
+                        betterPath = temp;
+                    }
+                    
+                    temp = betterPath;
+                    opt_k_Rotate(temp, i, k, 5, pathTimes, deliveries);
 
                     if(temp.courierTime < betterPath.courierTime){
                         somethingChanged = true;
@@ -249,71 +296,96 @@ void opt_k_Swap(multiStruct &temp,
                 const std::vector<DeliveryInfo>& deliveries){
     
     multiStruct testNew = temp;
-    multiStruct original = temp;
+    //multiStruct original = temp;
     
+//    std::vector<int> indices;
+//    for(unsigned c = start; c<=start+len; c++){
+//        indices.push_back(c);
+//    }
+    
+//    do {        
+//        testNew = original;
+//        
+//        for(unsigned i=0; i<indices.size(); i++){
+//            testNew.intTypes[i+start] = original.intTypes[indices[i]];
+//            testNew.bestInts[i+start] = original.bestInts[indices[i]];
+//        }        
     swap(testNew.intTypes[start], testNew.intTypes[start+len]);
     swap(testNew.bestInts[start], testNew.bestInts[start+len]);
     
-    std::vector<int> indices;
-    for(unsigned c = start; c<=start+len; c++){
-        indices.push_back(c);
-    }
-    
-    do {        
-        testNew = original;
+    opt_k_Checks(temp, testNew, start, len, pathTimes, deliveries);
         
-        for(unsigned i=0; i<indices.size(); i++){
-            testNew.intTypes[i+start] = original.intTypes[indices[i]];
-            testNew.bestInts[i+start] = original.bestInts[indices[i]];
-        }        
-        
-        for(unsigned i = start; i<=start+len; i++){
-            if(testNew.intTypes[i] == PICKUP){
-                testNew.pickUpIndex[testNew.bestInts[i]/2] = i;
-                testNew.remWeightHere[i] = testNew.remWeightHere[i-1]-deliveries[testNew.bestInts[i]/2].itemWeight;
-            } else {
-                testNew.dropOffIndex[testNew.bestInts[i]/2] = i;
-                testNew.remWeightHere[i] = testNew.remWeightHere[i-1]+deliveries[testNew.bestInts[i]/2].itemWeight;
-            }
-
-            // exceeds truck capacity
-            if(testNew.remWeightHere[i] < 0){
-                return;
-            }
-        }
-        
-//        for(unsigned i=0; i<testNew.bestInts.size(); i++){
-//            std::cout << testNew.bestInts[i] << " "; 
-//        }
-//        std::cout << std::endl;
-
-        for(unsigned i = start; i<=start+len; i++){
-            if(testNew.pickUpIndex[testNew.bestInts[i]/2] > testNew.dropOffIndex[testNew.bestInts[i]/2]){
-                return;
-            }
-        }
-
-        double oldTime = 0;
-        double newTime = 0;
-        for(unsigned i = start-1; i<=start+len; i++){
-            oldTime = oldTime + testNew.timePerSub[i];
-            testNew.timePerSub[i] = pathTimes[testNew.bestInts[i]][testNew.bestInts[i+1]].time;
-            newTime = newTime + testNew.timePerSub[i];
-        }
-
-        double deltaT = newTime - oldTime;
-        if(deltaT < 0){
-            testNew.courierTime = testNew.courierTime + deltaT;
-            temp = testNew;
-        }
-        
-    } while (std::next_permutation(indices.begin(), indices.end()));
+    //} while (std::next_permutation(indices.begin(), indices.end()));
 }
 
 void swap(unsigned &a, unsigned &b){
     unsigned temp = a;
     a = b;
     b = temp;
+}
+
+void opt_k_Rotate(multiStruct &temp, 
+                const unsigned start,
+                const unsigned len,
+                const unsigned ror,
+                const std::vector<std::vector<pathTime>>& pathTimes,
+                const std::vector<DeliveryInfo>& deliveries){
+    
+    multiStruct testNew = temp;
+
+    for(unsigned r=0; r<ror; r++){
+        for(unsigned i=start; i<(start+len); i++){
+            swap(testNew.intTypes[i], testNew.intTypes[i+1]);
+            swap(testNew.bestInts[i], testNew.bestInts[i+1]);
+        }
+    }
+      
+    opt_k_Checks(temp, testNew, start, len, pathTimes, deliveries);
+}
+
+
+void opt_k_Checks(multiStruct &temp,
+                  multiStruct &testNew,  
+                  const unsigned start,
+                  const unsigned len, 
+                  const std::vector<std::vector<pathTime>>& pathTimes,
+                  const std::vector<DeliveryInfo>& deliveries){
+    
+    for(unsigned i = start; i<=start+len; i++){
+        if(testNew.intTypes[i] == PICKUP){
+            testNew.pickUpIndex[testNew.bestInts[i]/2] = i;
+            testNew.remWeightHere[i] = testNew.remWeightHere[i-1]-deliveries[testNew.bestInts[i]/2].itemWeight;
+        } else {
+            testNew.dropOffIndex[testNew.bestInts[i]/2] = i;
+            testNew.remWeightHere[i] = testNew.remWeightHere[i-1]+deliveries[testNew.bestInts[i]/2].itemWeight;
+        }
+
+        // exceeds truck capacity
+        if(testNew.remWeightHere[i] < 0){
+            return;
+        }
+    }
+
+    for(unsigned i = start; i<=start+len; i++){
+        if(testNew.pickUpIndex[testNew.bestInts[i]/2] > testNew.dropOffIndex[testNew.bestInts[i]/2]){
+            return;
+        }
+    }
+
+    double oldTime = 0;
+    double newTime = 0;
+    for(unsigned i = start-1; i<=start+len; i++){
+        oldTime = oldTime + testNew.timePerSub[i];
+        testNew.timePerSub[i] = pathTimes[testNew.bestInts[i]][testNew.bestInts[i+1]].time;
+        newTime = newTime + testNew.timePerSub[i];
+    }
+
+    double deltaT = newTime - oldTime;
+    if(deltaT < 0){
+        testNew.courierTime = testNew.courierTime + deltaT;
+        temp = testNew;
+    }
+    
 }
 
 
