@@ -10,6 +10,7 @@
 #include "directionInfo.h"
 
 #include <math.h>
+#include <time.h>
 #include <vector>
 #include <list>
 #include <algorithm>
@@ -86,6 +87,12 @@ multiStruct multiStart(const unsigned numDeliveries,
                        const double truckCap);
 
 double addSubPathTimes(std::vector<double> times);
+
+std::vector<CourierSubpath> anneal (std::vector<CourierSubpath> courierPath, 
+             multiStruct &best, const float truck_capacity, 
+             const std::vector<std::vector<pathTime>>& pathTimes,
+             const std::vector<std::vector<pathTime>>& depotTimes,
+             const std::vector<DeliveryInfo>& deliveries);
 
 // ==================================================================================
 
@@ -169,6 +176,7 @@ std::vector<CourierSubpath> traveling_courier(
 
         ///////////////////////////////////////////////////////////////////// TODO: make it so u can change the depot->pickup route
         
+<<<<<<< HEAD
         somethingChanged = false;
         //std::cout << z << " " << std::endl;
         for(unsigned k = 1; k < kOpt && !timeOut; k++){
@@ -188,6 +196,22 @@ std::vector<CourierSubpath> traveling_courier(
                     opt_k_Rotate(temp, i, k, d, pathTimes, deliveries);
                     if(temp.courierTime < pathToTry[d].courierTime){
                         pathToTry[d] = temp;
+=======
+        for(unsigned z = 0; z < numIterations && !timeOut && somethingChanged; z++){
+            somethingChanged = false;
+            for(unsigned k = 2; k < kOpt && !timeOut; k++){
+                for(unsigned i=2; temp.bestInts.size() > (k+1) && i< temp.bestInts.size()-k-1 && !timeOut; i++){
+//                    std::cout << i << " " << k << " " << temp.bestInts.size()-k-1  << " " << temp.bestInts.size() << std::endl;
+//                    std::string garb;
+//                    std::cin >> garb;
+                    
+                    temp = betterPath;
+                    opt_k_Swap(temp, i, k, pathTimes, deliveries);
+
+                    if(temp.courierTime < betterPath.courierTime){
+                        somethingChanged = true;
+                        betterPath = temp;
+>>>>>>> added annealling code - not finished yet and not tested
                     }
 
                     multiStruct beforeSwap = pathToTry[d];
@@ -262,11 +286,13 @@ std::vector<CourierSubpath> traveling_courier(
                 
         courierPath.push_back(tempSubpath);
     }
-    
+    //or call anneal ehre idrk
     bestCI.bestInts.clear();
     bestCI.intTypes.clear();
     pathTimes.clear();
     depotTimes.clear();
+    
+    //call anneal here
     
     return courierPath;
 }
@@ -300,7 +326,26 @@ void opt_k_Rotate(multiStruct &temp,
                 const std::vector<std::vector<pathTime>>& pathTimes,
                 const std::vector<DeliveryInfo>& deliveries){
     
+<<<<<<< HEAD
     multiStruct testNew = temp;
+=======
+    do {        
+        testNew = original;
+        
+        for(unsigned i=0; i<indices.size(); i++){
+            testNew.intTypes[i+start] = original.intTypes[indices[i]];
+            testNew.bestInts[i+start] = original.bestInts[indices[i]];
+        }        
+        
+        for(unsigned i = start; i<=start+len; i++){
+            if(testNew.intTypes[i] == PICKUP){
+                testNew.pickUpIndex[testNew.bestInts[i]/2] = i;
+                testNew.remWeightHere[i] = testNew.remWeightHere[i-1]-deliveries[testNew.bestInts[i]/2].itemWeight;
+            } else {
+                testNew.dropOffIndex[testNew.bestInts[i]/2] = i;
+                testNew.remWeightHere[i] = testNew.remWeightHere[i-1]+deliveries[testNew.bestInts[i]/2].itemWeight;
+            }
+>>>>>>> added annealling code - not finished yet and not tested
 
     for(unsigned r=0; r<ror; r++){
         for(unsigned i=start; i<(start+len); i++){
@@ -358,6 +403,213 @@ void opt_k_Checks(multiStruct &temp,
     }
     
 }
+
+
+std::vector<CourierSubpath> anneal (std::vector<CourierSubpath> courierPath, 
+             multiStruct &best, const float truck_capacity, 
+             const std::vector<std::vector<pathTime>>& pathTimes,
+             const std::vector<std::vector<pathTime>>& depotTimes,
+             const std::vector<DeliveryInfo>& deliveries)
+{
+    //NOTE ADD CHRONO TIME HERE
+    int seed = 0;
+    double time = best.courierTime; 
+    double currentTruckWeight = 0; 
+    double Tungsten = 3422.0; 
+    double dTime = Tungsten; 
+    double perturbRatio = 1.0; 
+    int perturb1, perturb2;
+    std::vector<std::pair<unsigned, bool>> packages; 
+    bool isValid=true;
+    
+    while(Tungsten > 0){
+        seed++; 
+        srand(seed); 
+        perturb1 = rand()%(int(courierPath.size()/perturbRatio)-2)+1;
+        
+        seed++; 
+        srand(seed);
+        perturb2 = rand()%(int(courierPath.size()/perturbRatio)-2)+1;
+        
+        CourierSubpath temp = courierPath[perturb1]; 
+        
+        //Swap the two paths
+        courierPath[perturb1] = courierPath[perturb2]; 
+        courierPath[perturb2] = temp; 
+        
+        
+        CourierSubpath swappedThis = courierPath[perturb1];
+        CourierSubpath withThis = courierPath[perturb2]; 
+        
+        
+        for(int i = 0; i < perturb1; i++){
+            for(int j = 0; j < courierPath[i].pickUp_indices.size(); j++){
+                int index = courierPath[i].pickUp_indices[j];
+                
+                currentTruckWeight = currentTruckWeight + deliveries[index].itemWeight; 
+                
+                packages.push_back(std::make_pair(index, false));
+            }
+            //check if we have already visited a dropoff of the first changes pickups, if so this is hella illegal and we gotta stop before the cops come
+            int dropIndexSize = courierPath[perturb1].pickUp_indices.size();
+            for(int j=0;j< dropIndexSize;j++){
+                int dropIndex = courierPath[perturb1].pickUp_indices[j];
+                if(deliveries[dropIndex].dropOff==courierPath[i].start_intersection){
+                    //if we ever reach the dropoff in this loop it's fucked, like it won't work you know
+                    isValid=false;
+                }
+            }
+            if(!isValid){
+                //if the path is bad leave the for loop and shit
+                break;
+            }
+            //get all the packages up until the first swapped spot
+            for(int j = 0; j < packages.size(); j++){
+                if((packages[j].second == false) && (deliveries[packages[j].first].dropOff == courierPath[i].start_intersection)){
+                    currentTruckWeight = currentTruckWeight - deliveries[packages[j].first].itemWeight;
+                    packages[j].first=true;
+                }
+            }
+            //drop off all packages up until first swapped spot
+        }
+        //what else did we need to take care of in the first loop? we've done the weight and checked if the path was valid up until that point
+        //well yeah but like was there any other dumb shit we had to deal with?
+        
+        
+        //handles p1 and everything up until p2
+        if(isValid){ 
+            // pick stuff up
+            for(int i = 0; i < swappedThis.pickUp_indices.size(); i++){
+                currentTruckWeight = currentTruckWeight + deliveries[swappedThis.pickUp_indices[i]].itemWeight; 
+                if(currentTruckWeight <= truck_capacity){
+                    packages.push_back(std::make_pair(swappedThis.pickUp_indices[i], false)); 
+                }else{
+                    isValid = false; 
+                    break; 
+                }
+            }
+            // drop things off if needed
+            for(int i = 0; i < packages.size(); i++){
+                if((packages[i].second == false)&&(deliveries[packages[i].first].dropOff == courierPath[i].start_intersection)){
+                    currentTruckWeight = currentTruckWeight - deliveries[packages[i].first].itemWeight;
+                    packages[i].first=true;
+                }
+            }
+            //pick up the stuff at perturb1
+            //what happens if we can't pick up all the stuff at 1?
+            //is it illegal then because we don't return?
+            //if cannot reach pickup reqs at 1 the move is also illegal!
+            
+            //then check perturb2
+            //what if p1&p2 are right after eachother? fine I guess since we just need to check p2 after
+            //and then after that we have to check from p2 to end
+            for(int i=(perturb1+1);i<perturb2;i++){
+                //here we pick up all the new shit at the index place
+                for(int j=0;j<courierPath[i].pickUp_indices.size();j++){
+                    int index=courierPath[i].pickUp_indices[j];
+                    currentTruckWeight = currentTruckWeight + deliveries[index].itemWeight; 
+                    packages.push_back(std::make_pair(index, false));
+                }
+                
+                
+                //now I have to check if I've already been to the dropoff stuff, you know how it is 
+                int dropIndexSize=courierPath[perturb2].pickUp_indices.size();
+                for(int j=0;j<dropIndexSize;j++){
+                   int dropIndex=courierPath[perturb2].pickUp_indices[j];
+                   if(deliveries[dropIndex].dropOff==courierPath[i].start_intersection){
+                       isValid=false;
+                   }
+                }
+                if(!isValid){
+                    break;
+                }
+                
+                //now I have to drop off all the stuff that I can! hehe
+                for(int j=0;j<packages.size();j++){
+                    if((packages[j].second==false)&&(deliveries[packages[j].first].dropOff==courierPath[i].start_intersection)){
+                        currentTruckWeight=currentTruckWeight-deliveries[packages[j].first].itemWeight;
+                        packages[j].first=true;
+                    }
+                }
+                
+                //now we have to check if we've gone overweight (didn't have to do it for the first part since nothing had changed!)
+                //if we have gone over shit be bad and invalid
+                if(currentTruckWeight>truck_capacity){
+                    isValid=false;
+                    break;
+                }
+                
+            }
+   
+        }
+        
+        //handles p2 and everything up to the end
+        if(isValid){
+            //pick up all the stuff
+            for(int i = 0; i < withThis.pickUp_indices.size(); i++){
+                currentTruckWeight = currentTruckWeight + deliveries[withThis.pickUp_indices[i]].itemWeight; 
+                if(currentTruckWeight <= truck_capacity){
+                    packages.push_back(std::make_pair(withThis.pickUp_indices[i], false)); 
+                }else{
+                    isValid = false; 
+                    break; 
+                }
+            }
+            // drop things off if needed
+            for(int i = 0; i < packages.size(); i++){
+                if((packages[i].second == false)&&(deliveries[packages[i].first].dropOff == courierPath[i].start_intersection)){
+                    currentTruckWeight = currentTruckWeight - deliveries[packages[i].first].itemWeight;
+                    packages[i].first=true;
+                }
+            }
+            
+            //time to go from p2+1 to the end of courierPath
+            for(int i=perturb2+1;i<courierPath[i].size();i++){
+                //here we pick up all the new shit at the index place
+                for(int j=0;j<courierPath[i].pickUp_indices.size();j++){
+                    int index=courierPath[i].pickUp_indices[j];
+                    currentTruckWeight = currentTruckWeight + deliveries[index].itemWeight; 
+                    packages.push_back(std::make_pair(index, false));
+                }
+                
+                //drop the stuff that you can off
+                for(int j=0;j<packages.size();j++){
+                    if((packages[j].second==false)&&(deliveries[packages[j].first].dropOff==courierPath[i].start_intersection)){
+                       currentTruckWeight=currentTruckWeight-deliveries[packages[j].first].itemWeight;
+                       packages[j].first=true; 
+                    }
+                }
+                //check if overweight
+                if(currentTruckWeight>truck_capacity){
+                    isValid=false;
+                    break;
+                }
+            }
+        }
+        
+        
+        if(isValid){
+            //finalize swap and clear stuff
+            //get time
+        }else{
+            //undo swap and clear stuff
+        }
+        //so we have covered all of the shit things before the first change
+
+        
+//        //Check legality 
+//        if(swappedThis.pickUp_indices.size() > 0){
+//            
+//        }else{
+//            
+//        }
+        
+        
+    }
+    
+    return courierPath; 
+}
+
 
 
 void fillAllPathTimes(std::vector<std::vector<pathTime>>& pathTimes,
