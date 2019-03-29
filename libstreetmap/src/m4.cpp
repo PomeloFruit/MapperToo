@@ -56,11 +56,11 @@ void multiDestPath(Node *sourceNode,
                    const double rtPen,
                    const double ltPen);
 
-void opt_k_Swap(multiStruct &temp, 
-                const unsigned size,
-                const unsigned len,
-                const std::vector<std::vector<pathTime>>& pathTimes,
-                const std::vector<DeliveryInfo>& deliveries);
+//void opt_k_Swap(multiStruct &temp, 
+//                const unsigned size,
+//                const unsigned len,
+//                const std::vector<std::vector<pathTime>>& pathTimes,
+//                const std::vector<DeliveryInfo>& deliveries);
 
 void swap(unsigned &a, unsigned &b);
 
@@ -146,6 +146,7 @@ std::vector<CourierSubpath> traveling_courier(
         }
     }
         
+<<<<<<< HEAD
     multiStruct betterPath = tempStarts[bestIndex];
     double kOpt = betterPath.bestInts.size();
     double maxIter = 50;
@@ -228,6 +229,77 @@ std::vector<CourierSubpath> traveling_courier(
     }
 
     bestCI = betterPath;
+=======
+//    #pragma omp parallel for
+//    for(unsigned a=0; a<numDepots; a++){
+//        
+//        if(tempStarts[a].bestInts.empty()){
+//            continue;
+//        }        
+//
+//        multiStruct betterPath = tempStarts[a];
+//        double kOpt = 7;//betterPath.bestInts.size();
+//        double numIterations = 14;
+//
+//        bool timeOut = false;
+//        bool somethingChanged = true;
+//        multiStruct temp = betterPath;
+//        
+//        for(unsigned z = 0; z < numIterations && !timeOut && somethingChanged; z++){
+//            somethingChanged = false;
+//            for(unsigned k = 0; k < kOpt && !timeOut; k++){
+//                for(unsigned i=0; i<temp.bestInts.size()-k-3 && !timeOut; i++){ //0 = depot, 1 = first pickup, 2= ? , size-1 = depot, size-2 = last drop, size-3 = ?
+//                    temp = betterPath;
+//                    opt_k_Swap(temp, i+2, k+2, pathTimes, deliveries);
+//
+//                    if(temp.courierTime < betterPath.courierTime){
+//                        somethingChanged = true;
+//                        betterPath = temp;
+//                    }
+//
+//                    auto currentTime = std::chrono::high_resolution_clock::now();
+//                    auto wallClock = std::chrono::duration_cast<std::chrono::duration<double>> (currentTime-startTime);
+//
+//                    if(wallClock.count() > CHICKEN*TIME_LIMIT){
+//                        std::cout << "exit @ try 1-" << z << " try 2-" << k << " try 3-" << i << std::endl;
+//                        timeOut = true;
+//                    }
+//                }
+//            }
+//        }
+//
+//        //bestCI = betterPath;
+//        tempStarts[a] = betterPath;
+//    }
+//        
+//    // find best result
+//    for(unsigned i=0; i<numDepots; i++){
+//        if(tempStarts[i].courierTime < bestCourier){
+//            bestCI = tempStarts[i];
+//            bestCourier = tempStarts[i].courierTime;
+//        }
+//    }
+//
+//    tempStarts.clear();
+//      
+   
+    
+    // ========================================================== print outs =============
+    
+//    for(unsigned i=0; i<bestCI.dropOffIndex.size(); i++){ 
+//        std::cout << bestCI.pickUpIndex[i] << " ";
+//    }
+//    
+//    std::cout << std::endl;
+//        
+//    for(unsigned i=0; i<bestCI.dropOffIndex.size(); i++){
+//        std::cout << bestCI.dropOffIndex[i] << " ";
+//    }
+//    
+//    std::cout << std::endl;
+//    
+//   std::cout << bestCI.courierTime << std::endl;
+>>>>>>> git is making me commit before checkout to a previous version
     
     tempStarts.clear();
     
@@ -274,6 +346,7 @@ std::vector<CourierSubpath> traveling_courier(
 
 // ==========================================================================================================================
 
+<<<<<<< HEAD
 void opt_k_Swap(multiStruct &temp, 
                 const unsigned start,
                 const unsigned len, 
@@ -359,6 +432,81 @@ void opt_k_Checks(multiStruct &temp,
     }
     
 }
+=======
+//void opt_k_Swap(multiStruct &temp, 
+//                const unsigned start,
+//                const unsigned len, 
+//                const std::vector<std::vector<pathTime>>& pathTimes,
+//                const std::vector<DeliveryInfo>& deliveries){
+//    
+//    multiStruct testNew = temp;
+//    multiStruct original = temp;                                    // perhaps remove original since temp is the original
+//    
+//    swap(testNew.intTypes[start], testNew.intTypes[start+len]);
+//    swap(testNew.bestInts[start], testNew.bestInts[start+len]);
+//    
+//    std::vector<int> indices;
+//    for(unsigned c = start; c<=start+len; c++){
+//        indices.push_back(c);
+//    }
+//    
+//    do {
+//        testNew = original;
+//        
+//        for(unsigned i=0; i<indices.size(); i++){
+//            testNew.intTypes[i+start] = original.intTypes[indices[i]];
+//            testNew.bestInts[i+start] = original.bestInts[indices[i]];
+//        }        
+//        
+//        for(unsigned i = start; i<=start+len; i++){
+//            if(testNew.intTypes[i] == PICKUP){
+//                testNew.pickUpIndex[testNew.bestInts[i]/2] = i;
+//                testNew.remWeightHere[i] = testNew.remWeightHere[i-1]-deliveries[testNew.bestInts[i]/2].itemWeight;
+//            } else {
+//                testNew.dropOffIndex[testNew.bestInts[i]/2] = i;
+//                testNew.remWeightHere[i] = testNew.remWeightHere[i-1]+deliveries[testNew.bestInts[i]/2].itemWeight;
+//            }
+//
+//            // exceeds truck capacity
+//            if(testNew.remWeightHere[i] < 0){
+//                return;
+//            }
+//        }
+//        
+////        for(unsigned i=0; i<testNew.bestInts.size(); i++){
+////            std::cout << testNew.bestInts[i] << " "; 
+////        }
+////        std::cout << std::endl;
+//
+//        for(unsigned i = start; i<=start+len; i++){
+//            if(testNew.pickUpIndex[testNew.bestInts[i]/2] > testNew.dropOffIndex[testNew.bestInts[i]/2]){
+//                return;
+//            }
+//        }
+//
+//        double oldTime = 0;
+//        double newTime = 0;
+//        for(unsigned i = start-1; i<=start+len; i++){
+//            oldTime = oldTime + testNew.timePerSub[i];
+//            testNew.timePerSub[i] = pathTimes[testNew.bestInts[i]][testNew.bestInts[i+1]].time;
+//            newTime = newTime + testNew.timePerSub[i];
+//        }
+//
+//        double deltaT = newTime - oldTime;
+//        if(deltaT < 0){
+//            testNew.courierTime = testNew.courierTime + deltaT;
+//            temp = testNew;
+//        }
+//        
+//    } while (std::next_permutation(indices.begin(), indices.end()));
+//}
+//
+//void swap(unsigned &a, unsigned &b){
+//    unsigned temp = a;
+//    a = b;
+//    b = temp;
+//}
+>>>>>>> git is making me commit before checkout to a previous version
 
 
 void fillAllPathTimes(std::vector<std::vector<pathTime>>& pathTimes,
