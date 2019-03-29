@@ -139,10 +139,14 @@ std::vector<CourierSubpath> traveling_courier(
         
         for(unsigned z = 0; z < numIterations && !timeOut && somethingChanged; z++){
             somethingChanged = false;
-            for(unsigned k = 0; k < kOpt && !timeOut; k++){
-                for(unsigned i=0; i<temp.bestInts.size()-k-3 && !timeOut; i++){ //0 = depot, 1 = first pickup, 2= ? , size-1 = depot, size-2 = last drop, size-3 = ?
+            for(unsigned k = 2; k < kOpt && !timeOut; k++){
+                for(unsigned i=2; temp.bestInts.size() > (k+1) && i< temp.bestInts.size()-k-1 && !timeOut; i++){
+//                    std::cout << i << " " << k << " " << temp.bestInts.size()-k-1  << " " << temp.bestInts.size() << std::endl;
+//                    std::string garb;
+//                    std::cin >> garb;
+                    
                     temp = betterPath;
-                    opt_k_Swap(temp, i+2, k+2, pathTimes, deliveries);
+                    opt_k_Swap(temp, i, k, pathTimes, deliveries);
 
                     if(temp.courierTime < betterPath.courierTime){
                         somethingChanged = true;
@@ -255,7 +259,7 @@ void opt_k_Swap(multiStruct &temp,
         indices.push_back(c);
     }
     
-    do {
+    do {        
         testNew = original;
         
         for(unsigned i=0; i<indices.size(); i++){
