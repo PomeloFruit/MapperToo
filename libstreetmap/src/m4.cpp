@@ -35,7 +35,8 @@ struct multiStruct {
 };
 
 #define TIME_LIMIT 45
-#define CHICKEN 0.9
+#define CHICKEN 0.99
+#define SCARED 0.7
 
 #define PICKUP 0
 #define DROPOFF 1
@@ -96,7 +97,7 @@ std::vector<CourierSubpath> traveling_courier(
 		const float truck_capacity){
     
     auto startTime = std::chrono::high_resolution_clock::now();
-    
+   
     std::vector<CourierSubpath> courierPath;
 
     unsigned numDeliveries = deliveries.size();
@@ -135,118 +136,102 @@ std::vector<CourierSubpath> traveling_courier(
     
     // do k-opt stuff ================================================================================
     // this is a multi start k-opt kinda?
-        
-    #pragma omp parallel for
-    for(unsigned a=0; a<numDepots; a++){
-        
-        if(tempStarts[a].bestInts.empty()){
-            continue;
-        }        
-
-        multiStruct betterPath = tempStarts[a];
-        double kOpt = betterPath.bestInts.size();
-        double numIterations = 1000;
-
-        bool timeOut = false;
-        bool somethingChanged = true;
-        multiStruct temp = betterPath;
-        
-        for(unsigned z = 0; z < numIterations && !timeOut && somethingChanged; z++){
-            somethingChanged = false;
-           // std::cout << z << std::endl;
-            for(unsigned k = 1; k < kOpt && !timeOut; k++){
-                for(unsigned i=2; temp.bestInts.size() > (k+1) && i< temp.bestInts.size()-k-1 && !timeOut; i++){
-//                    std::cout << i << " " << k << " " << temp.bestInts.size()-k-1  << " " << temp.bestInts.size() << std::endl;
-//                    std::string garb;
-//                    std::cin >> garb;
-                    
-                    temp = betterPath;
-                    opt_k_Rotate(temp, i, k, 1, pathTimes, deliveries); // will test for swap then rotate
-                   
-                    if(temp.courierTime < betterPath.courierTime){
-                        somethingChanged = true;
-                        betterPath = temp;
-                    }
-                    
-                    opt_k_Swap(temp, i, k, pathTimes, deliveries);
-
-                    if(temp.courierTime < betterPath.courierTime){
-                        somethingChanged = true;
-                        betterPath = temp;
-                    }
-                    
-                    temp = betterPath;
-                    opt_k_Rotate(temp, i, k, 2, pathTimes, deliveries);
-
-                    if(temp.courierTime < betterPath.courierTime){
-                        somethingChanged = true;
-                        betterPath = temp;
-                    }
-                    
-                    
-                    temp = betterPath;
-                    opt_k_Rotate(temp, i, k, 3, pathTimes, deliveries);
-
-                    if(temp.courierTime < betterPath.courierTime){
-                        somethingChanged = true;
-                        betterPath = temp;
-                    }
-                    
-                    temp = betterPath;
-                    opt_k_Rotate(temp, i, k, 5, pathTimes, deliveries);
-
-                    if(temp.courierTime < betterPath.courierTime){
-                        somethingChanged = true;
-                        betterPath = temp;
-                    }
-
-                    auto currentTime = std::chrono::high_resolution_clock::now();
-                    auto wallClock = std::chrono::duration_cast<std::chrono::duration<double>> (currentTime-startTime);
-
-                    if(wallClock.count() > CHICKEN*TIME_LIMIT){
-                        std::cout << "exit @ try 1-" << z << " try 2-" << k << " try 3-" << i << std::endl;
-                        timeOut = true;
-                    }
-                }
-            }
-        }
-
-        //bestCI = betterPath;
-        tempStarts[a] = betterPath;
-    }
-        
+    
+    unsigned bestIndex = 0;
     // find best result
     for(unsigned i=0; i<numDepots; i++){
         if(tempStarts[i].courierTime < bestCourier){
-            bestCI = tempStarts[i];
+            bestIndex = i;
             bestCourier = tempStarts[i].courierTime;
         }
     }
+        
+    multiStruct betterPath = tempStarts[bestIndex];
+    double kOpt = betterPath.bestInts.size();
+    double maxIter = 50;
 
+    bool timeOut = false;
+    bool scared = false;
+    bool somethingChanged = true;
+    unsigned numIter = 5;
+    auto prevTime = std::chrono::high_resolution_clock::now();
+
+    for(unsigned z = 0; z < maxIter && !timeOut; z++){
+        if(!somethingChanged && !scared){
+            numIter += numIter;
+        } else if(!somethingChanged){
+            numIter += 1;
+        }
+
+        if(numIter>betterPath.bestInts.size()){
+            break;
+        }
+
+        ///////////////////////////////////////////////////////////////////// TODO: make it so u can change the depot->pickup route
+        
+        somethingChanged = false;
+        //std::cout << z << " " << std::endl;
+        for(unsigned k = 1; k < kOpt && !timeOut; k++){
+            for(unsigned i=2; betterPath.bestInts.size() > (k+1) && i< betterPath.bestInts.size()-k-1 && !timeOut; i++){
+
+                std::vector<multiStruct> pathToTry;
+                pathToTry.resize(numIter);
+
+                #pragma omp parallel for
+                for(unsigned d=0; d<numIter; d++){
+                    pathToTry[d] = betterPath;
+                }
+
+                #pragma omp parallel for
+                for(unsigned d=0; d<numIter; d++){
+                    multiStruct temp = pathToTry[d];
+                    opt_k_Rotate(temp, i, k, d, pathTimes, deliveries);
+                    if(temp.courierTime < pathToTry[d].courierTime){
+                        pathToTry[d] = temp;
+                    }
+
+                    multiStruct beforeSwap = pathToTry[d];
+
+                    #pragma omp parallel for
+                    for(unsigned f=1; f<k; f++){
+                        multiStruct temp1 = beforeSwap;
+                        opt_k_Swap(temp1, i, f, pathTimes, deliveries);
+                        if(temp1.courierTime < pathToTry[d].courierTime){
+                            pathToTry[d] = temp1;
+                        }
+                    }
+                }
+
+                for(unsigned d=0; d<numIter; d++){
+                    if(pathToTry[d].courierTime < betterPath.courierTime){
+                        betterPath = pathToTry[d];
+                        somethingChanged = true;
+                    }
+                }               
+
+                auto currentTime = std::chrono::high_resolution_clock::now();
+                auto diffClock = std::chrono::duration_cast<std::chrono::duration<double>> (currentTime-prevTime);
+                auto wallClock = std::chrono::duration_cast<std::chrono::duration<double>> (currentTime-startTime);
+                double timeElapsed = wallClock.count();
+                double timeForLast = diffClock.count();
+
+                prevTime = currentTime;
+
+                if((TIME_LIMIT*CHICKEN - timeElapsed) < timeForLast){
+                    std::cout << "exit @ try 1-" << z << " try 2-" << k << " try 3-" << i << " time " << timeForLast << " " << timeElapsed << " " << TIME_LIMIT - timeElapsed << std::endl;
+                    timeOut = true;
+                } else if(timeElapsed > SCARED*TIME_LIMIT){
+                    scared = true;
+                }
+            }
+        }
+    }
+
+    bestCI = betterPath;
+    
     tempStarts.clear();
-      
-   
     
-    // ========================================================== print outs =============
-    
-//    for(unsigned i=0; i<bestCI.dropOffIndex.size(); i++){ 
-//        std::cout << bestCI.pickUpIndex[i] << " ";
-//    }
-//    
-//    std::cout << std::endl;
-//        
-//    for(unsigned i=0; i<bestCI.dropOffIndex.size(); i++){
-//        std::cout << bestCI.dropOffIndex[i] << " ";
-//    }
-//    
-//    std::cout << std::endl;
-//    
-//   std::cout << bestCI.courierTime << std::endl;
-    
-
-    // get the courier path now ===========================================================
-    
-    for(unsigned i=0; i<bestCI.bestInts.size()-1; i++){
+    for(unsigned i=0; i<bestCI.bestInts.size()-1 && !bestCI.bestInts.empty(); i++){
         CourierSubpath tempSubpath;
         tempSubpath.pickUp_indices.clear();
          
@@ -296,26 +281,11 @@ void opt_k_Swap(multiStruct &temp,
                 const std::vector<DeliveryInfo>& deliveries){
     
     multiStruct testNew = temp;
-    //multiStruct original = temp;
-    
-//    std::vector<int> indices;
-//    for(unsigned c = start; c<=start+len; c++){
-//        indices.push_back(c);
-//    }
-    
-//    do {        
-//        testNew = original;
-//        
-//        for(unsigned i=0; i<indices.size(); i++){
-//            testNew.intTypes[i+start] = original.intTypes[indices[i]];
-//            testNew.bestInts[i+start] = original.bestInts[indices[i]];
-//        }        
+
     swap(testNew.intTypes[start], testNew.intTypes[start+len]);
     swap(testNew.bestInts[start], testNew.bestInts[start+len]);
     
     opt_k_Checks(temp, testNew, start, len, pathTimes, deliveries);
-        
-    //} while (std::next_permutation(indices.begin(), indices.end()));
 }
 
 void swap(unsigned &a, unsigned &b){
@@ -362,12 +332,14 @@ void opt_k_Checks(multiStruct &temp,
 
         // exceeds truck capacity
         if(testNew.remWeightHere[i] < 0){
+            testNew = temp;
             return;
         }
     }
 
     for(unsigned i = start; i<=start+len; i++){
         if(testNew.pickUpIndex[testNew.bestInts[i]/2] > testNew.dropOffIndex[testNew.bestInts[i]/2]){
+            testNew = temp;
             return;
         }
     }
