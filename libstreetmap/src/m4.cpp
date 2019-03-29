@@ -176,7 +176,6 @@ std::vector<CourierSubpath> traveling_courier(
 
         ///////////////////////////////////////////////////////////////////// TODO: make it so u can change the depot->pickup route
         
-<<<<<<< HEAD
         somethingChanged = false;
         //std::cout << z << " " << std::endl;
         for(unsigned k = 1; k < kOpt && !timeOut; k++){
@@ -196,22 +195,6 @@ std::vector<CourierSubpath> traveling_courier(
                     opt_k_Rotate(temp, i, k, d, pathTimes, deliveries);
                     if(temp.courierTime < pathToTry[d].courierTime){
                         pathToTry[d] = temp;
-=======
-        for(unsigned z = 0; z < numIterations && !timeOut && somethingChanged; z++){
-            somethingChanged = false;
-            for(unsigned k = 2; k < kOpt && !timeOut; k++){
-                for(unsigned i=2; temp.bestInts.size() > (k+1) && i< temp.bestInts.size()-k-1 && !timeOut; i++){
-//                    std::cout << i << " " << k << " " << temp.bestInts.size()-k-1  << " " << temp.bestInts.size() << std::endl;
-//                    std::string garb;
-//                    std::cin >> garb;
-                    
-                    temp = betterPath;
-                    opt_k_Swap(temp, i, k, pathTimes, deliveries);
-
-                    if(temp.courierTime < betterPath.courierTime){
-                        somethingChanged = true;
-                        betterPath = temp;
->>>>>>> added annealling code - not finished yet and not tested
                     }
 
                     multiStruct beforeSwap = pathToTry[d];
@@ -326,27 +309,8 @@ void opt_k_Rotate(multiStruct &temp,
                 const std::vector<std::vector<pathTime>>& pathTimes,
                 const std::vector<DeliveryInfo>& deliveries){
     
-<<<<<<< HEAD
     multiStruct testNew = temp;
-=======
-    do {        
-        testNew = original;
-        
-        for(unsigned i=0; i<indices.size(); i++){
-            testNew.intTypes[i+start] = original.intTypes[indices[i]];
-            testNew.bestInts[i+start] = original.bestInts[indices[i]];
-        }        
-        
-        for(unsigned i = start; i<=start+len; i++){
-            if(testNew.intTypes[i] == PICKUP){
-                testNew.pickUpIndex[testNew.bestInts[i]/2] = i;
-                testNew.remWeightHere[i] = testNew.remWeightHere[i-1]-deliveries[testNew.bestInts[i]/2].itemWeight;
-            } else {
-                testNew.dropOffIndex[testNew.bestInts[i]/2] = i;
-                testNew.remWeightHere[i] = testNew.remWeightHere[i-1]+deliveries[testNew.bestInts[i]/2].itemWeight;
-            }
->>>>>>> added annealling code - not finished yet and not tested
-
+    
     for(unsigned r=0; r<ror; r++){
         for(unsigned i=start; i<(start+len); i++){
             swap(testNew.intTypes[i], testNew.intTypes[i+1]);
