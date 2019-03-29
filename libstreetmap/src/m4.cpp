@@ -564,7 +564,7 @@ std::vector<CourierSubpath> anneal (std::vector<CourierSubpath> courierPath,
             }
             
             //time to go from p2+1 to the end of courierPath
-            for(int i=perturb2+1;i<courierPath[i].size();i++){
+            for(int i=perturb2+1;i<courierPath.size();i++){
                 //here we pick up all the new shit at the index place
                 for(int j=0;j<courierPath[i].pickUp_indices.size();j++){
                     int index=courierPath[i].pickUp_indices[j];
