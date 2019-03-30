@@ -48,12 +48,12 @@ struct multiStruct {
 #define DROPOFF 1
 #define DEPOT 2
 
-std::vector<unsigned> PrimeNumbers = {13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 
-                                      79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151, 157, 163,
-                                      167, 173, 179, 181, 191, 193, 197, 199, 211, 223, 227, 229, 233, 239, 241, 251, 
-                                      257, 263, 269, 271, 277, 281, 283, 293, 307, 311, 313, 317, 331, 337, 347, 349,
-                                      353, 359, 367, 373, 379, 383, 389, 397, 401, 409, 419, 421, 431, 433, 439, 443,
-                                      449, 457, 461, 463, 467, 479, 487, 491, 499, 503};
+std::vector<unsigned> PrimeNumbers = {13,  17,  19,  23,  29,  31,  37,  41,  43,  47,  53,  59,  61,  67,  71,  73, 
+                                      79,  83,  89,  97,  101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151, 157, 
+                                      163, 167, 173, 179, 181, 191, 193, 197, 199, 211, 223, 227, 229, 233, 239, 241, 
+                                      251, 257, 263, 269, 271, 277, 281, 283, 293, 307, 311, 313, 317, 331, 337, 347, 
+                                      349, 353, 359, 367, 373, 379, 383, 389, 397, 401, 409, 419, 421, 431, 433, 439, 
+                                      443, 449, 457, 461, 463, 467, 479, 487, 491, 499, 503};
 
 // ==================================================================================
 void fillAllPathTimes(std::vector<std::vector<pathTime>>& pathTimes,
@@ -77,6 +77,13 @@ void opt_2_Swap(multiStruct &temp,
                 const std::vector<DeliveryInfo>& deliveries);
 
 void opt_3_Swap(multiStruct &temp, 
+                const unsigned dest,
+                const unsigned len,
+                const std::vector<std::vector<pathTime>>& pathTimes,
+                const std::vector<interestingDepotTime>& bestDepotToDest,
+                const std::vector<DeliveryInfo>& deliveries);
+
+void opt_4_Swap(multiStruct &temp, 
                 const unsigned dest,
                 const unsigned len,
                 const std::vector<std::vector<pathTime>>& pathTimes,
@@ -219,26 +226,39 @@ std::vector<CourierSubpath> traveling_courier(
         }
 
         if(z>0){
-            for(unsigned f=0; f<100;f++){
-                if(PrimeNumbers[f]>(2*numDeliveries-1)){
-                    break;
-                }
-                for(unsigned i=0;i<100;i++){
-                    if(PrimeNumbers[i] > (2*numDeliveries - PrimeNumbers[f]-1)){
-                        break;
+            std::vector<multiStruct> pathToTry;
+            pathToTry.resize(90);
+            
+            #pragma omp parallel for
+            for(unsigned f=0; f<90; f++){
+                pathToTry[f] = betterPath;
+            }
+            
+            #pragma omp parallel for
+            for(unsigned f=0; f<90; f++){
+                for(unsigned i=0; i<90; i++){
+                    multiStruct temp = pathToTry[f];
+                    opt_3_Swap(temp, PrimeNumbers[f], PrimeNumbers[i], pathTimes, bestDepotToDest, deliveries);
+                    if(temp.courierTime < pathToTry[f].courierTime){
+                        pathToTry[f] = temp;
                     }
                     
-                    multiStruct temp = betterPath;
-                    opt_3_Swap(temp, PrimeNumbers[f], PrimeNumbers[i], pathTimes, bestDepotToDest, deliveries);
-                    if(temp.courierTime < betterPath.courierTime){
-                        betterPath = temp;
+                    temp = pathToTry[f];
+                    opt_4_Swap(temp, PrimeNumbers[f], PrimeNumbers[i], pathTimes, bestDepotToDest, deliveries);
+                    if(temp.courierTime < pathToTry[f].courierTime){
+                        pathToTry[f] = temp;
                     }
+                }
+            }
+            
+            for(unsigned f=1; f<90; f++){
+                if(pathToTry[f].courierTime < betterPath.courierTime){
+                    betterPath = pathToTry[f];
                 }
             }
         }
         
         somethingChanged = false;
-        //std::cout << z << " " << std::endl;
         
         unsigned e = 1;
         if(numDeliveries > 200  && z==0){
@@ -394,6 +414,27 @@ void opt_3_Swap(multiStruct &temp,
         swap(testNew.bestDests[start], testNew.bestDests[start+len]);
         swap(testNew.destTypes[start+(len/2)], testNew.destTypes[start+len]);
         swap(testNew.bestDests[start+(len/2)], testNew.bestDests[start+len]);
+
+        opt_k_Checks(temp, testNew, start, len, pathTimes, bestDepotToDest, deliveries);
+    }
+}
+
+void opt_4_Swap(multiStruct &temp, 
+                const unsigned start,
+                const unsigned len,
+                const std::vector<std::vector<pathTime>>& pathTimes,
+                const std::vector<interestingDepotTime>& bestDepotToDest,
+                const std::vector<DeliveryInfo>& deliveries){
+    
+    multiStruct testNew = temp;
+
+    if((start+len+2)<temp.bestDests.size()-2 && (start+len-2)>0){
+        swap(testNew.destTypes[start], testNew.destTypes[start+len-2]);
+        swap(testNew.bestDests[start], testNew.bestDests[start+len-2]);
+        swap(testNew.destTypes[start+1], testNew.destTypes[start+len-1]);
+        swap(testNew.bestDests[start+1], testNew.bestDests[start+len-1]);
+        swap(testNew.destTypes[start+2], testNew.destTypes[start+len]);
+        swap(testNew.bestDests[start+2], testNew.bestDests[start+len]);
 
         opt_k_Checks(temp, testNew, start, len, pathTimes, bestDepotToDest, deliveries);
     }
