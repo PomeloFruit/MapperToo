@@ -129,7 +129,7 @@ std::vector<CourierSubpath> traveling_courier(
    
     std::vector<CourierSubpath> courierPath;
     
-    std::cout << "Deliveries: " << deliveries.size() << " Depots: " << depots.size() << std::endl;
+    // std::cout << "Deliveries: " << deliveries.size() << " Depots: " << depots.size() << std::endl;
 
     unsigned numDeliveries = deliveries.size();
     unsigned numDepots = depots.size();
