@@ -260,16 +260,16 @@ std::vector<CourierSubpath> traveling_courier(
             }
             
             
-            #pragma omp parallel for
-            for(unsigned f=0; f<numPrime; f++){
-                for(unsigned i=0; i<numPrime; i++){
-                    multiStruct temp = pathToTry[f];
-                    opt_n_GroupSwap(temp, z, PrimeNumbers[f], PrimeNumbers[i], pathTimes, bestDepotToDest, deliveries);
-                    if(temp.courierTime < pathToTry[f].courierTime){
-                        pathToTry[f] = temp;
-                    }
-                }
-            }
+//            #pragma omp parallel for
+//            for(unsigned f=0; f<numPrime; f++){
+//                for(unsigned i=0; i<numPrime; i++){
+//                    multiStruct temp = pathToTry[f];
+//                    opt_n_GroupSwap(temp, z, PrimeNumbers[f], PrimeNumbers[i], pathTimes, bestDepotToDest, deliveries);
+//                    if(temp.courierTime < pathToTry[f].courierTime){
+//                        pathToTry[f] = temp;
+//                    }
+//                }
+//            }
             
             
             for(unsigned f=0; f<numPrime; f++){
@@ -448,13 +448,14 @@ void opt_n_GroupSwap(multiStruct &temp,
                 const std::vector<interestingDepotTime>& bestDepotToDest,
                 const std::vector<DeliveryInfo>& deliveries){
     
-    unsigned secondSwap = start+len-n;
-    if((start+len) < temp.bestDests.size()-3 && secondSwap > 0 && secondSwap < temp.bestDests.size()-3 && start < temp.bestDests.size()-3){
+    unsigned secondSwap = start+len-n-1;
+    if(start<temp.bestDests.size()-2 && start>0 &&
+            secondSwap > 0 && (start+len) < temp.bestDests.size()-2){
         multiStruct testNew = temp;
         
-        for(unsigned i = 0; i <= n && (i < secondSwap); i++){
-            swap(testNew.destTypes[start+i], testNew.destTypes[secondSwap]);
-            swap(testNew.bestDests[start+i], testNew.bestDests[secondSwap]);
+        for(unsigned i = start; i<start+len-n-1 && (i < secondSwap); i++){
+            swap(testNew.destTypes[i], testNew.destTypes[secondSwap]);
+            swap(testNew.bestDests[i], testNew.bestDests[secondSwap]);
             secondSwap++;
         }
 
