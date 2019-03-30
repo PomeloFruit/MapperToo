@@ -211,7 +211,7 @@ std::vector<CourierSubpath> traveling_courier(
     unsigned numIter = 5;
     auto prevTime = std::chrono::high_resolution_clock::now();
 
-    for(unsigned z = 0; z < maxIter && !timeOut && numDeliveries > 5; z++){
+    for(unsigned z = 0; z < maxIter && !timeOut && numDeliveries > 10; z++){
         if(!somethingChanged && !scared){
             numIter += numIter;
         } else if(!somethingChanged){
@@ -262,7 +262,7 @@ std::vector<CourierSubpath> traveling_courier(
                 #pragma omp parallel for
                 for(unsigned d=0; d<numIter; d++){
                     multiStruct temp = pathToTry[d];
-                   // opt_k_Rotate(temp, i, k, d, pathTimes, bestDepotToDest, deliveries);
+                    opt_k_Rotate(temp, i, k, d, pathTimes, bestDepotToDest, deliveries);
                     if(temp.courierTime < pathToTry[d].courierTime){
                         pathToTry[d] = temp;
                     }
