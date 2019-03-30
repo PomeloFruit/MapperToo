@@ -48,12 +48,13 @@ struct multiStruct {
 #define DROPOFF 1
 #define DEPOT 2
 
-std::vector<unsigned> PrimeNumbers = {13,  17,  19,  23,  29,  31,  37,  41,  43,  47,  53,  59,  61,  67,  71,  73, 
-                                      79,  83,  89,  97,  101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151, 157, 
-                                      163, 167, 173, 179, 181, 191, 193, 197, 199, 211, 223, 227, 229, 233, 239, 241, 
-                                      251, 257, 263, 269, 271, 277, 281, 283, 293, 307, 311, 313, 317, 331, 337, 347, 
-                                      349, 353, 359, 367, 373, 379, 383, 389, 397, 401, 409, 419, 421, 431, 433, 439, 
-                                      443, 449, 457, 461, 463, 467, 479, 487, 491, 499, 503};
+//                                                          5                         10                        15                                              
+std::vector<unsigned> PrimeNumbers = {1,   2,   3,   5,   7,   11,  13,  17,  19,  23,  29,  31,  37,  41,  43,  47,  
+                                      53,  59,  61,  67,  71,  73,  79,  83,  89,  97,  101, 103, 107, 109, 113, 127, 
+                                      131, 137, 139, 149, 151, 157, 163, 167, 173, 179, 181, 191, 193, 197, 199, 211, 
+                                      223, 227, 229, 233, 239, 241, 251, 257, 263, 269, 271, 277, 281, 283, 293, 307, 
+                                      311, 313, 317, 331, 337, 347, 349, 353, 359, 367, 373, 379, 383, 389, 397, 401, 
+                                      409, 419, 421, 431, 433, 439, 443, 449, 457, 461, 463, 467, 479, 487, 491, 499, 503};
 
 // ==================================================================================
 void fillAllPathTimes(std::vector<std::vector<pathTime>>& pathTimes,
@@ -83,7 +84,8 @@ void opt_3_Swap(multiStruct &temp,
                 const std::vector<interestingDepotTime>& bestDepotToDest,
                 const std::vector<DeliveryInfo>& deliveries);
 
-void opt_4_Swap(multiStruct &temp, 
+void opt_n_GroupSwap(multiStruct &temp,
+                const unsigned n,
                 const unsigned dest,
                 const unsigned len,
                 const std::vector<std::vector<pathTime>>& pathTimes,
@@ -109,8 +111,8 @@ void opt_k_Reverse(multiStruct &temp,
 
 void opt_k_Checks(multiStruct &temp,
                   multiStruct &testNew,  
-                  const unsigned start,
-                  const unsigned len, 
+                  unsigned start,
+                  unsigned len, 
                   const std::vector<std::vector<pathTime>>& pathTimes,
                   const std::vector<interestingDepotTime>& bestDepotToDest,
                   const std::vector<DeliveryInfo>& deliveries);
@@ -226,32 +228,51 @@ std::vector<CourierSubpath> traveling_courier(
         }
 
         if(z>0){
+            unsigned numPrime = PrimeNumbers.size()-1;
+            for(unsigned f=numPrime; f>=0; f++){
+                if(PrimeNumbers[f] > 1.5*numDeliveries){
+                    numPrime = f;
+                } else {
+                    numPrime = f;
+                    break;
+                }
+            }
+            
             std::vector<multiStruct> pathToTry;
-            pathToTry.resize(90);
+            pathToTry.resize(numPrime);
             
             #pragma omp parallel for
-            for(unsigned f=0; f<90; f++){
+            for(unsigned f=0; f<numPrime; f++){
                 pathToTry[f] = betterPath;
             }
             
             #pragma omp parallel for
-            for(unsigned f=0; f<90; f++){
-                for(unsigned i=0; i<90; i++){
+            for(unsigned f=0; f<numPrime; f++){
+                for(unsigned i=0; i<numPrime; i++){
                     multiStruct temp = pathToTry[f];
                     opt_3_Swap(temp, PrimeNumbers[f], PrimeNumbers[i], pathTimes, bestDepotToDest, deliveries);
                     if(temp.courierTime < pathToTry[f].courierTime){
                         pathToTry[f] = temp;
                     }
                     
-                    temp = pathToTry[f];
-                    opt_4_Swap(temp, PrimeNumbers[f], PrimeNumbers[i], pathTimes, bestDepotToDest, deliveries);
+                    
+                }
+            }
+            
+            
+            #pragma omp parallel for
+            for(unsigned f=0; f<numPrime; f++){
+                for(unsigned i=0; i<numPrime; i++){
+                    multiStruct temp = pathToTry[f];
+                    opt_n_GroupSwap(temp, z, PrimeNumbers[f], PrimeNumbers[i], pathTimes, bestDepotToDest, deliveries);
                     if(temp.courierTime < pathToTry[f].courierTime){
                         pathToTry[f] = temp;
                     }
                 }
             }
             
-            for(unsigned f=1; f<90; f++){
+            
+            for(unsigned f=0; f<numPrime; f++){
                 if(pathToTry[f].courierTime < betterPath.courierTime){
                     betterPath = pathToTry[f];
                 }
@@ -419,22 +440,23 @@ void opt_3_Swap(multiStruct &temp,
     }
 }
 
-void opt_4_Swap(multiStruct &temp, 
+void opt_n_GroupSwap(multiStruct &temp,
+                const unsigned n,
                 const unsigned start,
                 const unsigned len,
                 const std::vector<std::vector<pathTime>>& pathTimes,
                 const std::vector<interestingDepotTime>& bestDepotToDest,
                 const std::vector<DeliveryInfo>& deliveries){
     
-    multiStruct testNew = temp;
-
-    if((start+len+2)<temp.bestDests.size()-2 && (start+len-2)>0){
-        swap(testNew.destTypes[start], testNew.destTypes[start+len-2]);
-        swap(testNew.bestDests[start], testNew.bestDests[start+len-2]);
-        swap(testNew.destTypes[start+1], testNew.destTypes[start+len-1]);
-        swap(testNew.bestDests[start+1], testNew.bestDests[start+len-1]);
-        swap(testNew.destTypes[start+2], testNew.destTypes[start+len]);
-        swap(testNew.bestDests[start+2], testNew.bestDests[start+len]);
+    unsigned secondSwap = start+len-n;
+    if((start+len) < temp.bestDests.size()-3 && secondSwap > 0 && secondSwap < temp.bestDests.size()-3 && start < temp.bestDests.size()-3){
+        multiStruct testNew = temp;
+        
+        for(unsigned i = 0; i <= n && (i < secondSwap); i++){
+            swap(testNew.destTypes[start+i], testNew.destTypes[secondSwap]);
+            swap(testNew.bestDests[start+i], testNew.bestDests[secondSwap]);
+            secondSwap++;
+        }
 
         opt_k_Checks(temp, testNew, start, len, pathTimes, bestDepotToDest, deliveries);
     }
@@ -487,12 +509,20 @@ void opt_k_Reverse(multiStruct &temp,
 
 void opt_k_Checks(multiStruct &temp,
                   multiStruct &testNew,  
-                  const unsigned start,
-                  const unsigned len, 
+                  unsigned start,
+                  unsigned len, 
                   const std::vector<std::vector<pathTime>>& pathTimes,
                   const std::vector<interestingDepotTime>& bestDepotToDest,
                   const std::vector<DeliveryInfo>& deliveries){
 
+    bool repaired = false;
+    unsigned minRepaired = start;
+    unsigned maxRepaired = start+len;
+    
+    if(maxRepaired > temp.bestDests.size()-2){
+        return;
+    }
+    
     // if it is the first destination after a depot
     if(start == 1){
         if(testNew.destTypes[1] == PICKUP){
@@ -505,7 +535,7 @@ void opt_k_Checks(multiStruct &temp,
         }
     }
     
-    for(unsigned i = start; i<=start+len && i<(temp.bestDests.size()-1); i++){ //size-1 is depot-1 = last dropoff
+    for(unsigned i = minRepaired; i<=maxRepaired && i<(temp.bestDests.size()-1); i++){ //size-1 is depot-1 = last dropoff
         if(testNew.destTypes[i] == PICKUP){
             testNew.pickUpIndex[testNew.bestDests[i]/2] = i;
             testNew.remWeightHere[i] = testNew.remWeightHere[i-1]-deliveries[testNew.bestDests[i]/2].itemWeight;
@@ -521,24 +551,65 @@ void opt_k_Checks(multiStruct &temp,
         }
     }
 
-    for(unsigned i = start; i<=start+len && i<(temp.bestDests.size()-1); i++){
-        if(testNew.pickUpIndex[testNew.bestDests[i]/2] > testNew.dropOffIndex[testNew.bestDests[i]/2]){
-            testNew = temp;
-            return;
+    // try to repair the route so that it can work, swap the pickup and dropoff if possible
+    for(unsigned i = minRepaired; i<=maxRepaired && i<(temp.bestDests.size()-1); i++){
+        
+        unsigned oldPickUpNum = testNew.pickUpIndex[testNew.bestDests[i]/2];
+        unsigned oldDropOffNum = testNew.dropOffIndex[testNew.bestDests[i]/2];
+        
+        if(oldPickUpNum > oldDropOffNum){
+            // try and repair the route so that it can work
+            swap(testNew.pickUpIndex[testNew.bestDests[i]/2], testNew.dropOffIndex[testNew.bestDests[i]/2]);
+            swap(testNew.bestDests[oldPickUpNum], testNew.bestDests[oldDropOffNum]);
+            swap(testNew.destTypes[oldPickUpNum], testNew.destTypes[oldDropOffNum]);
+
+            if(minRepaired > oldPickUpNum){
+                minRepaired = oldPickUpNum;
+            } 
+            if(minRepaired > oldDropOffNum){
+                minRepaired = oldDropOffNum;
+            }
+            if(maxRepaired < oldPickUpNum){
+                maxRepaired = oldPickUpNum;
+            }
+            if(maxRepaired < oldDropOffNum){
+                maxRepaired = oldDropOffNum;
+            }
+            
+            repaired = true;
         }
     }
+    
+    if(repaired){
+        for(unsigned i = minRepaired; i <= maxRepaired && i<(temp.bestDests.size()-1); i++){ //size-1 is depot-1 = last dropoff
+            if(testNew.destTypes[i] == PICKUP){
+                testNew.pickUpIndex[testNew.bestDests[i]/2] = i;
+                testNew.remWeightHere[i] = testNew.remWeightHere[i-1]-deliveries[testNew.bestDests[i]/2].itemWeight;
+            } else {
+                testNew.dropOffIndex[testNew.bestDests[i]/2] = i;
+                testNew.remWeightHere[i] = testNew.remWeightHere[i-1]+deliveries[testNew.bestDests[i]/2].itemWeight;
+            }
+
+            // exceeds truck capacity
+            if(testNew.remWeightHere[i] < 0){
+                testNew = temp;
+                return;
+            }
+        }
+    }
+    
 
     double oldTime = 0;
     double newTime = 0;
-     // check before and after the range changed and only calculate times if start or end has changed
-    for(unsigned i = start-1; i<=start+len && i<(temp.bestDests.size()-1); i++){
-        if((testNew.bestDests[i] != temp.bestDests[i]) || (testNew.bestDests[i+1] != temp.bestDests[i+1])){
-            oldTime = oldTime + testNew.timePerSub[i];
-            testNew.timePerSub[i] = pathTimes[testNew.bestDests[i]][testNew.bestDests[i+1]].time;
-            newTime = newTime + testNew.timePerSub[i];
-        }
+    
+    // check before and after the range changed and only calculate times if start or end has changed
+    for(unsigned i = minRepaired-1; i <= maxRepaired && i<(temp.bestDests.size()-1); i++){
+        oldTime = oldTime + testNew.timePerSub[i];
+        testNew.timePerSub[i] = pathTimes[testNew.bestDests[i]][testNew.bestDests[i+1]].time;
+        newTime = newTime + testNew.timePerSub[i];
     }
 
+    // if time is shorter, set temp to the good stuff and update total time
     double deltaT = newTime - oldTime;
     if(deltaT < 0){
         testNew.courierTime = testNew.courierTime + deltaT;
