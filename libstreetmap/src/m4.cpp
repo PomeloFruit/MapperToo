@@ -254,22 +254,20 @@ std::vector<CourierSubpath> traveling_courier(
                     if(temp.courierTime < pathToTry[f].courierTime){
                         pathToTry[f] = temp;
                     }
-                    
-                    
                 }
             }
             
             
-//            #pragma omp parallel for
-//            for(unsigned f=0; f<numPrime; f++){
-//                for(unsigned i=0; i<numPrime; i++){
-//                    multiStruct temp = pathToTry[f];
-//                    opt_n_GroupSwap(temp, z, PrimeNumbers[f], PrimeNumbers[i], pathTimes, bestDepotToDest, deliveries);
-//                    if(temp.courierTime < pathToTry[f].courierTime){
-//                        pathToTry[f] = temp;
-//                    }
-//                }
-//            }
+            #pragma omp parallel for
+            for(unsigned f=0; f<numPrime; f++){
+                for(unsigned i=0; i<numPrime; i++){
+                    multiStruct temp = pathToTry[f];
+                    opt_n_GroupSwap(temp, z+3, PrimeNumbers[f], PrimeNumbers[i], pathTimes, bestDepotToDest, deliveries);
+                    if(temp.courierTime < pathToTry[f].courierTime){
+                        pathToTry[f] = temp;
+                    }
+                }
+            }
             
             
             for(unsigned f=0; f<numPrime; f++){
@@ -312,7 +310,7 @@ std::vector<CourierSubpath> traveling_courier(
 
                     // try some swaps within the numIter range
                     #pragma omp parallel for
-                    for(unsigned f=0; f<k; f++){
+                    for(unsigned f=0; f<k; f=f+2){
                         multiStruct temp1 = beforeSwap;
                         opt_2_Swap(temp1, i, f, pathTimes, bestDepotToDest, deliveries);
                         
@@ -448,15 +446,12 @@ void opt_n_GroupSwap(multiStruct &temp,
                 const std::vector<interestingDepotTime>& bestDepotToDest,
                 const std::vector<DeliveryInfo>& deliveries){
     
-    unsigned secondSwap = start+len-n-1;
-    if(start<temp.bestDests.size()-2 && start>0 &&
-            secondSwap > 0 && (start+len) < temp.bestDests.size()-2){
+    if(start<temp.bestDests.size()-2 && start+len<temp.bestDests.size()-2 && start+len-n>0){
         multiStruct testNew = temp;
-        
-        for(unsigned i = start; i<start+len-n-1 && (i < secondSwap); i++){
-            swap(testNew.destTypes[i], testNew.destTypes[secondSwap]);
-            swap(testNew.bestDests[i], testNew.bestDests[secondSwap]);
-            secondSwap++;
+                
+        for(unsigned i = 0; i<n && i<(len-i); i++){
+            swap(testNew.destTypes[start+i], testNew.destTypes[start+len-i]);
+            swap(testNew.bestDests[start+i], testNew.bestDests[start+len-i]);
         }
 
         opt_k_Checks(temp, testNew, start, len, pathTimes, bestDepotToDest, deliveries);
