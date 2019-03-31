@@ -41,7 +41,7 @@ struct multiStruct {
 };
 
 #define TIME_LIMIT 45
-#define CHICKEN 0.99
+#define CHICKEN 0.995
 #define SCARED 0.7
 
 #define PICKUP 0
@@ -233,17 +233,7 @@ std::vector<CourierSubpath> traveling_courier(
     for(unsigned z = 0; z < maxIter && !timeOut && numDeliveries > 10; z++){
         numIter += numIter;
 
-        if(z>0){
-            unsigned numPrime = PrimeNumbers.size()-1;
-            for(unsigned f=numPrime; f>=0; f++){
-                if(PrimeNumbers[f] > 1.5*numDeliveries){
-                    numPrime = f;
-                } else {
-                    numPrime = f;
-                    break;
-                }
-            }
-            
+        if(z>0){            
             std::vector<multiStruct> pathToTry;
             pathToTry.resize(2*numDeliveries);
             
@@ -253,10 +243,10 @@ std::vector<CourierSubpath> traveling_courier(
             }
             
             #pragma omp parallel for
-            for(unsigned f=0; f<2*numDeliveries; f+=(z%2+1)){
-                for(unsigned i=0; i<numPrime; i++){
+            for(unsigned f=0; f<2*numDeliveries; f++){
+                for(unsigned i=5; i<2*numDeliveries-f; i++){
                     multiStruct temp = pathToTry[f];
-                    opt_3_Swap(temp, f+1, PrimeNumbers[i], pathTimes, bestDepotToDest, deliveries);
+                    opt_3_Swap(temp, f+1, i+1, pathTimes, bestDepotToDest, deliveries);
                     if(temp.courierTime < pathToTry[f].courierTime){
                         pathToTry[f] = temp;
                     }
@@ -265,18 +255,20 @@ std::vector<CourierSubpath> traveling_courier(
             
             
             #pragma omp parallel for
-            for(unsigned f=0; f<2*numDeliveries; f+=((z+1)%2+1)){
-                for(unsigned i=0; i<numPrime; i++){
-                    multiStruct temp = pathToTry[f];
-                    opt_n_GroupSwap(temp, 7*z, f+1, PrimeNumbers[i], pathTimes, bestDepotToDest, deliveries);
-                    if(temp.courierTime < pathToTry[f].courierTime){
-                        pathToTry[f] = temp;
+            for(unsigned f=0; f<2*numDeliveries; f++){
+                for(unsigned i=5; i<2*numDeliveries-f; i++){
+                    for(unsigned y=2; y<20; y++){
+                        multiStruct temp = pathToTry[f];
+                        opt_n_GroupSwap(temp, y*z, f+1, i+1, pathTimes, bestDepotToDest, deliveries);
+                        if(temp.courierTime < pathToTry[f].courierTime){
+                            pathToTry[f] = temp;
+                        }
                     }
                 }
             }
             
             
-            for(unsigned f=0; f<2*numDeliveries; f+=(z%2+1)){
+            for(unsigned f=0; f<2*numDeliveries; f++){
                 if(pathToTry[f].courierTime < betterPath.courierTime){
                     betterPath = pathToTry[f];
                 }
@@ -361,7 +353,13 @@ std::vector<CourierSubpath> traveling_courier(
                     #pragma omp parallel for
                     for(unsigned f=0; f<k; f+=(i%2+1)){
                         multiStruct temp1 = beforeSwap;
-                        opt_2_Swap(temp1, i, f, pathTimes, bestDepotToDest, deliveries);
+                        unsigned size = 4;
+                        
+                        if(f > 2*size){
+                            opt_n_GroupSwap(temp, size, i, f, pathTimes, bestDepotToDest, deliveries);
+                        } else {
+                            opt_2_Swap(temp1, i, f, pathTimes, bestDepotToDest, deliveries);
+                        }
                         
                         if(temp1.courierTime < pathToTry[d].courierTime){
                             pathToTry[d] = temp1;
