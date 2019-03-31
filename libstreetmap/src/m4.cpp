@@ -245,18 +245,18 @@ std::vector<CourierSubpath> traveling_courier(
             }
             
             std::vector<multiStruct> pathToTry;
-            pathToTry.resize(numPrime);
+            pathToTry.resize(2*numDeliveries);
             
             #pragma omp parallel for
-            for(unsigned f=0; f<numPrime; f++){
+            for(unsigned f=0; f<2*numDeliveries; f++){
                 pathToTry[f] = betterPath;
             }
             
             #pragma omp parallel for
-            for(unsigned f=0; f<numPrime; f+=(z%2+1)){
+            for(unsigned f=0; f<2*numDeliveries; f+=(z%2+1)){
                 for(unsigned i=0; i<numPrime; i++){
                     multiStruct temp = pathToTry[f];
-                    opt_3_Swap(temp, PrimeNumbers[f], PrimeNumbers[i], pathTimes, bestDepotToDest, deliveries);
+                    opt_3_Swap(temp, f+1, PrimeNumbers[i], pathTimes, bestDepotToDest, deliveries);
                     if(temp.courierTime < pathToTry[f].courierTime){
                         pathToTry[f] = temp;
                     }
@@ -265,10 +265,10 @@ std::vector<CourierSubpath> traveling_courier(
             
             
             #pragma omp parallel for
-            for(unsigned f=0; f<numPrime; f+=((z+1)%2+1)){
+            for(unsigned f=0; f<2*numDeliveries; f+=((z+1)%2+1)){
                 for(unsigned i=0; i<numPrime; i++){
                     multiStruct temp = pathToTry[f];
-                    opt_n_GroupSwap(temp, 7*z, PrimeNumbers[f], PrimeNumbers[i], pathTimes, bestDepotToDest, deliveries);
+                    opt_n_GroupSwap(temp, 7*z, f+1, PrimeNumbers[i], pathTimes, bestDepotToDest, deliveries);
                     if(temp.courierTime < pathToTry[f].courierTime){
                         pathToTry[f] = temp;
                     }
@@ -276,11 +276,59 @@ std::vector<CourierSubpath> traveling_courier(
             }
             
             
-            for(unsigned f=0; f<numPrime; f+=(z%2+1)){
+            for(unsigned f=0; f<2*numDeliveries; f+=(z%2+1)){
                 if(pathToTry[f].courierTime < betterPath.courierTime){
                     betterPath = pathToTry[f];
                 }
             }
+            
+//                        unsigned numPrime = PrimeNumbers.size()-1;
+//            for(unsigned f=numPrime; f>=0; f++){
+//                if(PrimeNumbers[f] > 1.5*numDeliveries){
+//                    numPrime = f;
+//                } else {
+//                    numPrime = f;
+//                    break;
+//                }
+//            }
+//            
+//            std::vector<multiStruct> pathToTry;
+//            pathToTry.resize(numPrime);
+//            
+//            #pragma omp parallel for
+//            for(unsigned f=0; f<numPrime; f++){
+//                pathToTry[f] = betterPath;
+//            }
+//            
+//            #pragma omp parallel for
+//            for(unsigned f=0; f<numPrime; f+=(z%2+1)){
+//                for(unsigned i=0; i<numPrime; i++){
+//                    multiStruct temp = pathToTry[f];
+//                    opt_3_Swap(temp, PrimeNumbers[f], PrimeNumbers[i], pathTimes, bestDepotToDest, deliveries);
+//                    if(temp.courierTime < pathToTry[f].courierTime){
+//                        pathToTry[f] = temp;
+//                    }
+//                }
+//            }
+//            
+//            
+//            #pragma omp parallel for
+//            for(unsigned f=0; f<numPrime; f+=((z+1)%2+1)){
+//                for(unsigned i=0; i<numPrime; i++){
+//                    multiStruct temp = pathToTry[f];
+//                    opt_n_GroupSwap(temp, 7*z, PrimeNumbers[f], PrimeNumbers[i], pathTimes, bestDepotToDest, deliveries);
+//                    if(temp.courierTime < pathToTry[f].courierTime){
+//                        pathToTry[f] = temp;
+//                    }
+//                }
+//            }
+//            
+//            
+//            for(unsigned f=0; f<numPrime; f+=(z%2+1)){
+//                if(pathToTry[f].courierTime < betterPath.courierTime){
+//                    betterPath = pathToTry[f];
+//                }
+//            }
         }
         
         somethingChanged = false;
