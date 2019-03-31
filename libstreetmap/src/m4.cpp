@@ -218,14 +218,20 @@ std::vector<CourierSubpath> traveling_courier(
     bool scared = false;
     bool somethingChanged = true;
     unsigned numIter = 5;
+    
+    unsigned e;
+    if(numDeliveries > 200){
+        e = 6;
+    } else if(numDeliveries > 100){
+        e = 3;
+    } else {
+        e = 1;
+    }
+    
     auto prevTime = std::chrono::high_resolution_clock::now();
 
     for(unsigned z = 0; z < maxIter && !timeOut && numDeliveries > 10; z++){
-        if(!somethingChanged && !scared){
-            numIter += numIter;
-        } else if(!somethingChanged){
-            numIter += 1;
-        }
+        numIter += numIter;
 
         if(z>0){
             unsigned numPrime = PrimeNumbers.size()-1;
@@ -247,7 +253,7 @@ std::vector<CourierSubpath> traveling_courier(
             }
             
             #pragma omp parallel for
-            for(unsigned f=0; f<numPrime; f++){
+            for(unsigned f=0; f<numPrime; f+=(z%2+1)){
                 for(unsigned i=0; i<numPrime; i++){
                     multiStruct temp = pathToTry[f];
                     opt_3_Swap(temp, PrimeNumbers[f], PrimeNumbers[i], pathTimes, bestDepotToDest, deliveries);
@@ -259,10 +265,10 @@ std::vector<CourierSubpath> traveling_courier(
             
             
             #pragma omp parallel for
-            for(unsigned f=0; f<numPrime; f++){
+            for(unsigned f=0; f<numPrime; f+=((z+1)%2+1)){
                 for(unsigned i=0; i<numPrime; i++){
                     multiStruct temp = pathToTry[f];
-                    opt_n_GroupSwap(temp, z+3, PrimeNumbers[f], PrimeNumbers[i], pathTimes, bestDepotToDest, deliveries);
+                    opt_n_GroupSwap(temp, 7*z, PrimeNumbers[f], PrimeNumbers[i], pathTimes, bestDepotToDest, deliveries);
                     if(temp.courierTime < pathToTry[f].courierTime){
                         pathToTry[f] = temp;
                     }
@@ -270,7 +276,7 @@ std::vector<CourierSubpath> traveling_courier(
             }
             
             
-            for(unsigned f=0; f<numPrime; f++){
+            for(unsigned f=0; f<numPrime; f+=(z%2+1)){
                 if(pathToTry[f].courierTime < betterPath.courierTime){
                     betterPath = pathToTry[f];
                 }
@@ -279,12 +285,7 @@ std::vector<CourierSubpath> traveling_courier(
         
         somethingChanged = false;
         
-        unsigned e = 1;
-        if(numDeliveries > 200  && z==0){
-            e = 3;
-        } else if(numDeliveries > 100 && z==0){
-            e = 2;
-        } 
+        e = e/2 + 1;
         
         for(unsigned k = 1; k < kOpt && !timeOut; k+=e){
             for(unsigned i = 1; betterPath.bestDests.size() > (k+1) && i< betterPath.bestDests.size()-k-1 && !timeOut; i++){
