@@ -41,7 +41,7 @@ struct multiStruct {
 };
 
 #define TIME_LIMIT 45
-#define CHICKEN 0.995
+#define CHICKEN 0.99
 #define SCARED 0.7
 
 #define PICKUP 0
