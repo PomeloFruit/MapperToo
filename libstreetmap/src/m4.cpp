@@ -310,7 +310,7 @@ std::vector<CourierSubpath> traveling_courier(
 
                     // try some swaps within the numIter range
                     #pragma omp parallel for
-                    for(unsigned f=0; f<k; f=f+2){
+                    for(unsigned f=0; f<k; f+=(i%2+1)){
                         multiStruct temp1 = beforeSwap;
                         opt_2_Swap(temp1, i, f, pathTimes, bestDepotToDest, deliveries);
                         
