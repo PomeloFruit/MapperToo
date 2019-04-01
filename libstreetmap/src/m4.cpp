@@ -251,7 +251,7 @@ std::vector<CourierSubpath> traveling_courier(
                 for(unsigned i=5; i<2*numDeliveries-f; i++){
                     for(unsigned y=2; y<20; y++){
                         multiStruct temp = pathToTry[f];
-                        opt_n_GroupSwap(temp, y*z, f+1, i+1, pathTimes, bestDepotToDest, deliveries);
+                        opt_k_Rotate(temp, y*z, f+1, i+1, pathTimes, bestDepotToDest, deliveries);
                         if(temp.courierTime < pathToTry[f].courierTime){
                             pathToTry[f] = temp;
                         }
@@ -297,7 +297,7 @@ std::vector<CourierSubpath> traveling_courier(
                         unsigned size = 4;
                         
                         if(f > 2*size){
-                            opt_n_GroupSwap(temp, size, i, f, pathTimes, bestDepotToDest, deliveries);
+                            opt_k_Rotate(temp, size, i, f, pathTimes, bestDepotToDest, deliveries);
                         } else {
                             opt_2_Swap(temp1, i, f, pathTimes, bestDepotToDest, deliveries);
                         }
@@ -331,7 +331,7 @@ std::vector<CourierSubpath> traveling_courier(
                 prevTime = currentTime;
 
                 if((TIME_LIMIT*CHICKEN - timeElapsed) < 2*timeForLast){
-                    //std::cout << "exit @ try 1-" << z << " try 2-" << k << " try 3-" << i << " time " << timeForLast << " " << timeElapsed << " " << TIME_LIMIT - timeElapsed << std::endl;
+                    std::cout << "exit @ try 1-" << z << " try 2-" << k << " try 3-" << i << " time " << timeForLast << " " << timeElapsed << " " << TIME_LIMIT - timeElapsed << std::endl;
                     timeOut = true;
                 }
             }
