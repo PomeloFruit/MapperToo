@@ -197,7 +197,7 @@ std::vector<CourierSubpath> traveling_courier(
     }
         
     // return empty vector if no paths exist
-    if(bestCourier == NOTIME){
+    if(bestCourier >= NOTIME){
         return courierPath;
     }
     
@@ -341,7 +341,7 @@ std::vector<CourierSubpath> traveling_courier(
     bestCI = betterPath;
     tempStarts.clear();
     
-    if(betterPath.courierTime != NOTIME){
+    if(betterPath.courierTime <= NOTIME){
         for(unsigned i=0; i<bestCI.bestDests.size()-1 && !bestCI.bestDests.empty(); i++){
             CourierSubpath tempSubpath;
             tempSubpath.pickUp_indices.clear();
