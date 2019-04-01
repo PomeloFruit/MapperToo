@@ -140,7 +140,7 @@ std::vector<CourierSubpath> traveling_courier(
     unsigned numDepots = depots.size();
     unsigned totDest = 2*numDeliveries + numDepots;
         
-    std::vector<std::vector<pathTime>> pathTimes; // from pickup/dropoff to pickup/dropoff/depot
+    std::vector<std::vector<pathTime>> pathTimes; // from pickup/dropoff to pickup/dropoff/depot so there is the first pickup and then the first dropoff, after all pickups+dropoffs you get to the depots
     std::vector<std::vector<pathTime>> depotTimes; // from all depots to all pickups
     std::vector<interestingDepotTime> bestDepotToDest; // best times between depot and all pickups
     
@@ -151,7 +151,7 @@ std::vector<CourierSubpath> traveling_courier(
     // get all path / time from start-dest combinations ===========================================
     
     for(unsigned i=0 ; i<pathTimes.size() ; i++){
-        pathTimes[i].resize(totDest);
+        pathTimes[i].resize(totDest);//
     }
     
     for(unsigned i=0 ; i<depotTimes.size() ; i++){
@@ -271,7 +271,6 @@ std::vector<CourierSubpath> traveling_courier(
         
         for(unsigned k = 1; k < kOpt && !timeOut; k+=e){
             for(unsigned i = 1; betterPath.bestDests.size() > (k+1) && i< betterPath.bestDests.size()-k-1 && !timeOut; i++){
-
                 std::vector<multiStruct> pathToTry;
                 pathToTry.resize(numIter);
 
