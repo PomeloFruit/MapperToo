@@ -10,6 +10,8 @@
 #define NOINTERSECTION -100
 #define SAMESTREET -99
 
+extern bool hardpass;
+
 //=========================== Function Prototypes ===========================
 
 // finds the path between sourceNode and node with intersection Id of destID

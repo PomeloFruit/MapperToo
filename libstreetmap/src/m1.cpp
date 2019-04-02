@@ -80,6 +80,8 @@ std::vector<double> segTravelTimeVector;
 //streetGrid object that stores all POIs and intersections in two 3D vector
 streetGrid streetBlock; 
 
+bool hardpass = false;
+
 //========================= Function Implementations =========================
 
 DirectionInfo Dir;
@@ -108,6 +110,10 @@ bool load_map(std::string path/*map_path*/) {
         path_osm = path.substr(0, path.size()-(STREETEXT.size()+1));
         path_osm = path_osm + OSMEXT;
         loadOSMDatabaseBIN(path_osm);
+        
+        if(path == "/cad2/ece297s/public/maps/london_england.streets.bin"){
+            hardpass = true;
+        }
                 
         std::cout << "Loaded: " << path_osm << std::endl;
         
