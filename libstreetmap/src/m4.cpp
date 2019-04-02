@@ -226,6 +226,8 @@ std::vector<CourierSubpath> traveling_courier(
     auto wallClock = std::chrono::duration_cast<std::chrono::duration<double>> (currentTime-startTime);
     double timeElapsed = wallClock.count();
     double timeForLast = diffClock.count();
+    double lastZPt1 = 0;
+    double lastZPt2 = 0;
 
     for(unsigned z = 0; z < maxIter && !timeOut && numDeliveries > 10; z++){
         numIter += numIter;
@@ -241,8 +243,11 @@ std::vector<CourierSubpath> traveling_courier(
             timeForLast = diffClock.count();
 
             prevTime = currentTime;
+            if(lastZPt1 == 0){
+                lastZPt1 = timeForLast;
+            }
 
-            if((TIME_LIMIT*CHICKEN - 0.5 - timeElapsed) < 2*timeForLast){
+            if((TIME_LIMIT*CHICKEN - timeElapsed) < 2*lastZPt1){
                 std::cout << "exit @ try 1-" << z << " time " << timeForLast << " " << timeElapsed << " " << TIME_LIMIT - timeElapsed << std::endl;
                 timeOut = true;
             }
@@ -276,8 +281,12 @@ std::vector<CourierSubpath> traveling_courier(
                 timeForLast = diffClock.count();
 
                 prevTime = currentTime;
+                lastZPt1 = timeForLast;
+                if(lastZPt2 == 0){
+                    lastZPt2 = timeForLast;
+                }
 
-                if((TIME_LIMIT*CHICKEN - 1 - timeElapsed) < 2*timeForLast){
+                if((TIME_LIMIT*CHICKEN - timeElapsed) < 2*lastZPt2){
                     std::cout << "exit 1 @ try 1-" << z << " time " << timeForLast << " " << timeElapsed << " " << TIME_LIMIT - timeElapsed << std::endl;
                     timeOut = true;
                 }
@@ -288,7 +297,8 @@ std::vector<CourierSubpath> traveling_courier(
                         for(unsigned i=5; i<2*numDeliveries-f; i++){
                             for(unsigned y=2; y<20; y++){
                                 multiStruct temp = pathToTry[f];
-                                opt_n_GroupSwap(temp, y*z, f+1, i+1, pathTimes, bestDepotToDest, deliveries);                                if(temp.courierTime < pathToTry[f].courierTime){
+                                opt_n_GroupSwap(temp, y*z, f+1, i+1, pathTimes, bestDepotToDest, deliveries);                                
+                                if(temp.courierTime < pathToTry[f].courierTime){
                                     pathToTry[f] = temp;
                                 }
                             }
@@ -317,8 +327,9 @@ std::vector<CourierSubpath> traveling_courier(
             timeForLast = diffClock.count();
 
             prevTime = currentTime;
+            lastZPt2 = timeForLast;
 
-            if((TIME_LIMIT*CHICKEN - 0.5) < timeElapsed){
+            if((TIME_LIMIT*(CHICKEN+0.005)) < timeElapsed){
                 std::cout << "exit 2 @ try 1-" << z << " time " << timeForLast << " " << timeElapsed << " " << TIME_LIMIT - timeElapsed << std::endl;
                 timeOut = true;
             }

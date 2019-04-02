@@ -111,7 +111,7 @@ bool load_map(std::string path/*map_path*/) {
         path_osm = path_osm + OSMEXT;
         loadOSMDatabaseBIN(path_osm);
         
-        if(path == "/cad2/ece297s/public/maps/london_england.streets.bin"){
+        if(path == Dir.steven1){
             hardpass = true;
         }
                 

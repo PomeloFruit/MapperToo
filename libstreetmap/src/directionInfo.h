@@ -76,6 +76,8 @@ struct navInstruction{
 // direction info holds all the node data
 class DirectionInfo {
 public:
+    std::string steven1 = "/cad2/ece297s/public/maps/london_england.streets.bin";
+    
     // contains all the nodes (intersections) in the city with all needed info
     std::vector< Node > Nodes;
     
