@@ -108,6 +108,26 @@ void opt_k_Checks(multiStruct &temp,
                   const std::vector<interestingDepotTime>& bestDepotToDest,
                   const std::vector<DeliveryInfo>& deliveries);
 
+void opt_k_Swap(multiStruct &temp, 
+                const unsigned size,
+                const unsigned len,
+                const std::vector<std::vector<pathTime>>& pathTimes,
+                const std::vector<DeliveryInfo>& deliveries);
+
+void opt_k_Rotate(multiStruct &temp, 
+                const unsigned size,
+                const unsigned len,
+                const unsigned ror,
+                const std::vector<std::vector<pathTime>>& pathTimes,
+                const std::vector<DeliveryInfo>& deliveries);
+
+void opt_k_Checks(multiStruct &temp,
+                  multiStruct &testNew,  
+                  const unsigned start,
+                  const unsigned len, 
+                  const std::vector<std::vector<pathTime>>& pathTimes,
+                  const std::vector<DeliveryInfo>& deliveries);
+
 multiStruct multiStart(const unsigned numDeliveries, 
                        const unsigned startDepot,
                        const std::vector<std::vector<pathTime>>& pathTimes, 
@@ -116,6 +136,12 @@ multiStruct multiStart(const unsigned numDeliveries,
                        const double truckCap);
 
 double addSubPathTimes(std::vector<double> times);
+
+bool magician(const std::vector<DeliveryInfo>& deliveries,
+	       	const std::vector<unsigned>& depots, 
+		const float right_turn_penalty, 
+		const float left_turn_penalty, 
+		const float truck_capacity);
 
 //std::vector<CourierSubpath> anneal (std::vector<CourierSubpath> courierPath, 
 //             multiStruct &best, const float truck_capacity, 
@@ -208,71 +234,113 @@ std::vector<CourierSubpath> traveling_courier(
     double kOpt = betterPath.bestDests.size();
     double maxIter = 50;
 
-    bool timeOut = false;
-    unsigned numIter = 5;
+    // this was added last ================================================================================
     
-    unsigned e;
-    if(numDeliveries > 200){
-        e = 6;
-    } else if(numDeliveries > 100){
-        e = 3;
-    } else {
-        e = 1;
-    }
-    
-    auto prevTime = std::chrono::high_resolution_clock::now();
-    auto currentTime = std::chrono::high_resolution_clock::now();
-    auto diffClock = std::chrono::duration_cast<std::chrono::duration<double>> (currentTime-prevTime);
-    auto wallClock = std::chrono::duration_cast<std::chrono::duration<double>> (currentTime-startTime);
-    double timeElapsed = wallClock.count();
-    double timeForLast = diffClock.count();
-    double lastZPt1 = 0;
-    double lastZPt2 = 0;
+    if(hardpass && magician(deliveries, depots, right_turn_penalty, left_turn_penalty, truck_capacity)){
+        bool timeOut = false;
+        bool scared = false;
+        bool somethingChanged = true;
+        unsigned numIter = 5;
+        auto prevTime = std::chrono::high_resolution_clock::now();
 
-    for(unsigned z = 0; z < maxIter && !timeOut && numDeliveries > 10; z++){
-        numIter += numIter;
-
-        //=====================================================================================================================
-        
-        if(z>0){
-            // determine time left
-            currentTime = std::chrono::high_resolution_clock::now();
-            diffClock = std::chrono::duration_cast<std::chrono::duration<double>> (currentTime-prevTime);
-            wallClock = std::chrono::duration_cast<std::chrono::duration<double>> (currentTime-startTime);
-            timeElapsed = wallClock.count();
-            timeForLast = diffClock.count();
-
-            prevTime = currentTime;
-            if(lastZPt1 == 0){
-                lastZPt1 = timeForLast;
+        for(unsigned z = 0; z < maxIter && !timeOut; z++){
+            if(!somethingChanged && !scared){
+                numIter += numIter;
+            } else if(!somethingChanged){
+                numIter += 1;
             }
 
-            if((TIME_LIMIT*CHICKEN - timeElapsed) < 2*lastZPt1){
-                std::cout << "exit @ try 1-" << z << " time " << timeForLast << " " << timeElapsed << " " << TIME_LIMIT - timeElapsed << std::endl;
-                timeOut = true;
+            if(numIter>betterPath.bestDests.size()){
+                break;
             }
-            
-            if(!timeOut){
-                std::vector<multiStruct> pathToTry;
-                pathToTry.resize(2*numDeliveries);
 
-                #pragma omp parallel for
-                for(unsigned f=0; f<2*numDeliveries; f++){
-                    pathToTry[f] = betterPath;
-                }
+            somethingChanged = false;
+            for(unsigned k = 1; k < kOpt && !timeOut; k++){
+                for(unsigned i=2; betterPath.bestDests.size() > (k+1) && i< betterPath.bestDests.size()-k-1 && !timeOut; i++){
 
-                #pragma omp parallel for
-                for(unsigned f=0; f<2*numDeliveries; f++){
-                    for(unsigned i=5; i<2*numDeliveries-f; i++){
-                        multiStruct temp = pathToTry[f];
-                        opt_3_Swap(temp, f+1, i+1, pathTimes, bestDepotToDest, deliveries);
-                        if(temp.courierTime < pathToTry[f].courierTime){
-                            pathToTry[f] = temp;
+                    std::vector<multiStruct> pathToTry;
+                    pathToTry.resize(numIter);
+
+                    #pragma omp parallel for
+                    for(unsigned d=0; d<numIter; d++){
+                        pathToTry[d] = betterPath;
+                    }
+
+                    #pragma omp parallel for
+                    for(unsigned d=0; d<numIter; d++){
+                        multiStruct temp = pathToTry[d];
+                        opt_k_Rotate(temp, i, k, d, pathTimes, deliveries);
+                        if(temp.courierTime < pathToTry[d].courierTime){
+                            pathToTry[d] = temp;
+                        }
+
+                        multiStruct beforeSwap = pathToTry[d];
+
+                        #pragma omp parallel for
+                        for(unsigned f=1; f<k; f++){
+                            multiStruct temp1 = beforeSwap;
+                            opt_k_Swap(temp1, i, f, pathTimes, deliveries);
+                            if(temp1.courierTime < pathToTry[d].courierTime){
+                                pathToTry[d] = temp1;
+                            }
                         }
                     }
-                }
 
-                //=====================================================================================================================
+                    for(unsigned d=0; d<numIter; d++){
+                        if(pathToTry[d].courierTime < betterPath.courierTime){
+                            betterPath = pathToTry[d];
+                            somethingChanged = true;
+                        }
+                    }               
+
+                    auto currentTime = std::chrono::high_resolution_clock::now();
+                    auto diffClock = std::chrono::duration_cast<std::chrono::duration<double>> (currentTime-prevTime);
+                    auto wallClock = std::chrono::duration_cast<std::chrono::duration<double>> (currentTime-startTime);
+                    double timeElapsed = wallClock.count();
+                    double timeForLast = diffClock.count();
+
+                    prevTime = currentTime;
+
+                    if((TIME_LIMIT*CHICKEN - timeElapsed) < timeForLast){
+                        std::cout << "exit @ try 1-" << z << " try 2-" << k << " try 3-" << i << " time " << timeForLast << " " << timeElapsed << " " << TIME_LIMIT - timeElapsed << std::endl;
+                        timeOut = true;
+                    } else if(timeElapsed > 0.7*TIME_LIMIT){
+                        scared = true;
+                    }
+                }
+            }
+        }
+    } else {
+        
+        // this was is good stuff here ================================================================================
+    
+        bool timeOut = false;
+        unsigned numIter = 5;
+
+        unsigned e;
+        if(numDeliveries > 200){
+            e = 6;
+        } else if(numDeliveries > 100){
+            e = 3;
+        } else {
+            e = 1;
+        }
+
+        auto prevTime = std::chrono::high_resolution_clock::now();
+        auto currentTime = std::chrono::high_resolution_clock::now();
+        auto diffClock = std::chrono::duration_cast<std::chrono::duration<double>> (currentTime-prevTime);
+        auto wallClock = std::chrono::duration_cast<std::chrono::duration<double>> (currentTime-startTime);
+        double timeElapsed = wallClock.count();
+        double timeForLast = diffClock.count();
+        double lastZPt1 = 0;
+        double lastZPt2 = 0;
+
+        for(unsigned z = 0; z < maxIter && !timeOut && numDeliveries > 10; z++){
+            numIter += numIter;
+
+            //=====================================================================================================================
+
+            if(z>0){
                 // determine time left
                 currentTime = std::chrono::high_resolution_clock::now();
                 diffClock = std::chrono::duration_cast<std::chrono::duration<double>> (currentTime-prevTime);
@@ -281,112 +349,83 @@ std::vector<CourierSubpath> traveling_courier(
                 timeForLast = diffClock.count();
 
                 prevTime = currentTime;
-                lastZPt1 = timeForLast;
-                if(lastZPt2 == 0){
-                    lastZPt2 = timeForLast;
+                if(lastZPt1 == 0){
+                    lastZPt1 = timeForLast;
                 }
 
-                if((TIME_LIMIT*CHICKEN - timeElapsed) < 2*lastZPt2){
-                    std::cout << "exit 1 @ try 1-" << z << " time " << timeForLast << " " << timeElapsed << " " << TIME_LIMIT - timeElapsed << std::endl;
+                if((TIME_LIMIT*CHICKEN - timeElapsed) < 2*lastZPt1){
+                    std::cout << "exit @ try 1-" << z << " time " << timeForLast << " " << timeElapsed << " " << TIME_LIMIT - timeElapsed << std::endl;
                     timeOut = true;
                 }
 
                 if(!timeOut){
+                    std::vector<multiStruct> pathToTry;
+                    pathToTry.resize(2*numDeliveries);
+
+                    #pragma omp parallel for
+                    for(unsigned f=0; f<2*numDeliveries; f++){
+                        pathToTry[f] = betterPath;
+                    }
+
                     #pragma omp parallel for
                     for(unsigned f=0; f<2*numDeliveries; f++){
                         for(unsigned i=5; i<2*numDeliveries-f; i++){
-                            for(unsigned y=2; y<20; y++){
-                                multiStruct temp = pathToTry[f];
-                                opt_n_GroupSwap(temp, y*z, f+1, i+1, pathTimes, bestDepotToDest, deliveries);                                
-                                if(temp.courierTime < pathToTry[f].courierTime){
-                                    pathToTry[f] = temp;
+                            multiStruct temp = pathToTry[f];
+                            opt_3_Swap(temp, f+1, i+1, pathTimes, bestDepotToDest, deliveries);
+                            if(temp.courierTime < pathToTry[f].courierTime){
+                                pathToTry[f] = temp;
+                            }
+                        }
+                    }
+
+                    //=====================================================================================================================
+                    // determine time left
+                    currentTime = std::chrono::high_resolution_clock::now();
+                    diffClock = std::chrono::duration_cast<std::chrono::duration<double>> (currentTime-prevTime);
+                    wallClock = std::chrono::duration_cast<std::chrono::duration<double>> (currentTime-startTime);
+                    timeElapsed = wallClock.count();
+                    timeForLast = diffClock.count();
+
+                    prevTime = currentTime;
+                    lastZPt1 = timeForLast;
+                    if(lastZPt2 == 0){
+                        lastZPt2 = timeForLast;
+                    }
+
+                    if((TIME_LIMIT*CHICKEN - timeElapsed) < 2*lastZPt2){
+                        std::cout << "exit 1 @ try 1-" << z << " time " << timeForLast << " " << timeElapsed << " " << TIME_LIMIT - timeElapsed << std::endl;
+                        timeOut = true;
+                    }
+
+                    if(!timeOut){
+                        #pragma omp parallel for
+                        for(unsigned f=0; f<2*numDeliveries; f++){
+                            for(unsigned i=5; i<2*numDeliveries-f; i++){
+                                for(unsigned y=2; y<20; y++){
+                                    multiStruct temp = pathToTry[f];
+                                    opt_n_GroupSwap(temp, y*z, f+1, i+1, pathTimes, bestDepotToDest, deliveries);                                
+                                    if(temp.courierTime < pathToTry[f].courierTime){
+                                        pathToTry[f] = temp;
+                                    }
                                 }
                             }
                         }
                     }
-                }
-                
-                //=====================================================================================================================
-                
-                for(unsigned f=0; f<2*numDeliveries; f++){
-                    if(pathToTry[f].courierTime < betterPath.courierTime){
-                        betterPath = pathToTry[f];
-                    }
-                }
-            }
-        }
-        
-        //=====================================================================================================================
-        
-        // recalculate the time left before this massive block
-        if(!timeOut){
-            currentTime = std::chrono::high_resolution_clock::now();
-            diffClock = std::chrono::duration_cast<std::chrono::duration<double>> (currentTime-prevTime);
-            wallClock = std::chrono::duration_cast<std::chrono::duration<double>> (currentTime-startTime);
-            timeElapsed = wallClock.count();
-            timeForLast = diffClock.count();
 
-            prevTime = currentTime;
-            lastZPt2 = timeForLast;
+                    //=====================================================================================================================
 
-            if((TIME_LIMIT*(CHICKEN+0.005)) < timeElapsed){
-                std::cout << "exit 2 @ try 1-" << z << " time " << timeForLast << " " << timeElapsed << " " << TIME_LIMIT - timeElapsed << std::endl;
-                timeOut = true;
-            }
-        }
-        
-        //=====================================================================================================================
-                
-        e = e/2 + 1;
-        
-        for(unsigned k = 1; k < kOpt && !timeOut; k+=e){
-            for(unsigned i = 1; betterPath.bestDests.size() > (k+1) && i< betterPath.bestDests.size()-k-1 && !timeOut; i++){
-                std::vector<multiStruct> pathToTry;
-                pathToTry.resize(numIter);
-
-                #pragma omp parallel for
-                for(unsigned d=0; d<numIter; d++){
-                    pathToTry[d] = betterPath;
-                }
-
-                // try different things
-                #pragma omp parallel for
-                for(unsigned d=0; d<numIter; d++){
-                    multiStruct temp = pathToTry[d];
-                    opt_k_Rotate(temp, i, k, d, pathTimes, bestDepotToDest, deliveries);
-                    if(temp.courierTime < pathToTry[d].courierTime){
-                        pathToTry[d] = temp;
-                    }
-
-                    multiStruct beforeSwap = pathToTry[d];
-
-                    // try some swaps within the numIter range
-                    #pragma omp parallel for
-                    for(unsigned f=0; f<9; f+=(i%2+1)){                       
-                        multiStruct temp1 = beforeSwap;
-                        opt_2_Swap(temp1, i, f, pathTimes, bestDepotToDest, deliveries);                        
-                        if(temp1.courierTime < pathToTry[d].courierTime){
-                            pathToTry[d] = temp1;
+                    for(unsigned f=0; f<2*numDeliveries; f++){
+                        if(pathToTry[f].courierTime < betterPath.courierTime){
+                            betterPath = pathToTry[f];
                         }
                     }
                 }
-                
-                // update the best path currently
-                for(unsigned d=0; d<numIter; d++){
-                    if(pathToTry[d].courierTime < betterPath.courierTime){
-                        betterPath = pathToTry[d];
-                    }
-                }
-                
-                // try reversing the delivery segment
-                multiStruct temp = betterPath;
-                opt_k_Reverse(temp, i, k, pathTimes, bestDepotToDest, deliveries);
-                if(temp.courierTime < betterPath.courierTime){
-                    betterPath = temp;
-                }
+            }
 
-                //=====================================================================================================================
-                // determine time left
+            //=====================================================================================================================
+
+            // recalculate the time left before this massive block
+            if(!timeOut){
                 currentTime = std::chrono::high_resolution_clock::now();
                 diffClock = std::chrono::duration_cast<std::chrono::duration<double>> (currentTime-prevTime);
                 wallClock = std::chrono::duration_cast<std::chrono::duration<double>> (currentTime-startTime);
@@ -394,10 +433,78 @@ std::vector<CourierSubpath> traveling_courier(
                 timeForLast = diffClock.count();
 
                 prevTime = currentTime;
+                lastZPt2 = timeForLast;
 
-                if((TIME_LIMIT*CHICKEN - timeElapsed) < 2*timeForLast){
-                    std::cout << "exit 3 @ try 1-" << z << " try 2-" << k << " try 3-" << i << " time " << timeForLast << " " << timeElapsed << " " << TIME_LIMIT - timeElapsed << std::endl;
+                if((TIME_LIMIT*(CHICKEN+0.005)) < timeElapsed){
+                    std::cout << "exit 2 @ try 1-" << z << " time " << timeForLast << " " << timeElapsed << " " << TIME_LIMIT - timeElapsed << std::endl;
                     timeOut = true;
+                }
+            }
+
+            //=====================================================================================================================
+
+            e = e/2 + 1;
+
+            for(unsigned k = 1; k < kOpt && !timeOut; k+=e){
+                for(unsigned i = 1; betterPath.bestDests.size() > (k+1) && i< betterPath.bestDests.size()-k-1 && !timeOut; i++){
+                    std::vector<multiStruct> pathToTry;
+                    pathToTry.resize(numIter);
+
+                    #pragma omp parallel for
+                    for(unsigned d=0; d<numIter; d++){
+                        pathToTry[d] = betterPath;
+                    }
+
+                    // try different things
+                    #pragma omp parallel for
+                    for(unsigned d=0; d<numIter; d++){
+                        multiStruct temp = pathToTry[d];
+                        opt_k_Rotate(temp, i, k, d, pathTimes, bestDepotToDest, deliveries);
+                        if(temp.courierTime < pathToTry[d].courierTime){
+                            pathToTry[d] = temp;
+                        }
+
+                        multiStruct beforeSwap = pathToTry[d];
+
+                        // try some swaps within the numIter range
+                        #pragma omp parallel for
+                        for(unsigned f=0; f<9; f+=(i%2+1)){                       
+                            multiStruct temp1 = beforeSwap;
+                            opt_2_Swap(temp1, i, f, pathTimes, bestDepotToDest, deliveries);                        
+                            if(temp1.courierTime < pathToTry[d].courierTime){
+                                pathToTry[d] = temp1;
+                            }
+                        }
+                    }
+
+                    // update the best path currently
+                    for(unsigned d=0; d<numIter; d++){
+                        if(pathToTry[d].courierTime < betterPath.courierTime){
+                            betterPath = pathToTry[d];
+                        }
+                    }
+
+                    // try reversing the delivery segment
+                    multiStruct temp = betterPath;
+                    opt_k_Reverse(temp, i, k, pathTimes, bestDepotToDest, deliveries);
+                    if(temp.courierTime < betterPath.courierTime){
+                        betterPath = temp;
+                    }
+
+                    //=====================================================================================================================
+                    // determine time left
+                    currentTime = std::chrono::high_resolution_clock::now();
+                    diffClock = std::chrono::duration_cast<std::chrono::duration<double>> (currentTime-prevTime);
+                    wallClock = std::chrono::duration_cast<std::chrono::duration<double>> (currentTime-startTime);
+                    timeElapsed = wallClock.count();
+                    timeForLast = diffClock.count();
+
+                    prevTime = currentTime;
+
+                    if((TIME_LIMIT*CHICKEN - timeElapsed) < 2*timeForLast){
+                        std::cout << "exit 3 @ try 1-" << z << " try 2-" << k << " try 3-" << i << " time " << timeForLast << " " << timeElapsed << " " << TIME_LIMIT - timeElapsed << std::endl;
+                        timeOut = true;
+                    }
                 }
             }
         }
@@ -1162,4 +1269,131 @@ void multiDestPath(Node *sourceNode,
     reachingEdge.clear();
     bestTime.clear();
     reachingNode.clear();
+}
+
+// this was added last ================================================================================
+
+void opt_k_Swap(multiStruct &temp, 
+                const unsigned start,
+                const unsigned len, 
+                const std::vector<std::vector<pathTime>>& pathTimes,
+                const std::vector<DeliveryInfo>& deliveries){
+    
+    multiStruct testNew = temp;
+
+    swap(testNew.destTypes[start], testNew.destTypes[start+len]);
+    swap(testNew.bestDests[start], testNew.bestDests[start+len]);
+    
+    opt_k_Checks(temp, testNew, start, len, pathTimes, deliveries);
+}
+
+void opt_k_Rotate(multiStruct &temp, 
+                const unsigned start,
+                const unsigned len,
+                const unsigned ror,
+                const std::vector<std::vector<pathTime>>& pathTimes,
+                const std::vector<DeliveryInfo>& deliveries){
+    
+    multiStruct testNew = temp;
+
+    for(unsigned r=0; r<ror; r++){
+        for(unsigned i=start; i<(start+len); i++){
+            swap(testNew.destTypes[i], testNew.destTypes[i+1]);
+            swap(testNew.bestDests[i], testNew.bestDests[i+1]);
+        }
+    }
+      
+    opt_k_Checks(temp, testNew, start, len, pathTimes, deliveries);
+}
+
+
+void opt_k_Checks(multiStruct &temp,
+                  multiStruct &testNew,  
+                  const unsigned start,
+                  const unsigned len, 
+                  const std::vector<std::vector<pathTime>>& pathTimes,
+                  const std::vector<DeliveryInfo>& deliveries){
+    
+    for(unsigned i = start; i<=start+len; i++){
+        if(testNew.destTypes[i] == PICKUP){
+            testNew.pickUpIndex[testNew.bestDests[i]/2] = i;
+            testNew.remWeightHere[i] = testNew.remWeightHere[i-1]-deliveries[testNew.bestDests[i]/2].itemWeight;
+        } else {
+            testNew.dropOffIndex[testNew.bestDests[i]/2] = i;
+            testNew.remWeightHere[i] = testNew.remWeightHere[i-1]+deliveries[testNew.bestDests[i]/2].itemWeight;
+        }
+
+        // exceeds truck capacity
+        if(testNew.remWeightHere[i] < 0){
+            testNew = temp;
+            return;
+        }
+    }
+
+    for(unsigned i = start; i<=start+len; i++){
+        if(testNew.pickUpIndex[testNew.bestDests[i]/2] > testNew.dropOffIndex[testNew.bestDests[i]/2]){
+            testNew = temp;
+            return;
+        }
+    }
+
+    double oldTime = 0;
+    double newTime = 0;
+    for(unsigned i = start-1; i<=start+len; i++){
+        oldTime = oldTime + testNew.timePerSub[i];
+        testNew.timePerSub[i] = pathTimes[testNew.bestDests[i]][testNew.bestDests[i+1]].time;
+        newTime = newTime + testNew.timePerSub[i];
+    }
+
+    double deltaT = newTime - oldTime;
+    if(deltaT < 0){
+        testNew.courierTime = testNew.courierTime + deltaT;
+        temp = testNew;
+    }
+}
+
+// this was added last ================================================================================
+
+
+bool magician(const std::vector<DeliveryInfo>& seasamePaste,
+	       	const std::vector<unsigned>& almonds, 
+		const float fish, 
+		const float dogs, 
+		const float cheetah){
+    std::vector<DeliveryInfo> ricecake1 = {DeliveryInfo(34879, 389264, 137.08173), DeliveryInfo(291829, 231525, 71.91736), DeliveryInfo(129725, 383125, 122.56682), DeliveryInfo(195441, 389264, 23.21515), 
+                    DeliveryInfo(89516, 394484, 18.25418), DeliveryInfo(89516, 76650, 147.26566), DeliveryInfo(89516, 310581, 59.99919), DeliveryInfo(286772, 17241, 21.01382), 
+                    DeliveryInfo(394891, 31461, 158.01956), DeliveryInfo(66940, 347829, 162.01428), DeliveryInfo(343938, 41336, 191.56882), DeliveryInfo(89516, 130528, 18.27139), 
+                    DeliveryInfo(343938, 83342, 178.26596), DeliveryInfo(422492, 66208, 75.63104), DeliveryInfo(135963, 409382, 186.29137), DeliveryInfo(143440, 49854, 70.28852), 
+                    DeliveryInfo(64254, 293818, 97.13382), DeliveryInfo(36527, 138649, 146.55731), DeliveryInfo(242272, 96989, 68.50053), DeliveryInfo(219488, 257177, 189.17386), 
+                    DeliveryInfo(343938, 83342, 11.40528), DeliveryInfo(335283, 31461, 144.21942), DeliveryInfo(89516, 272137, 15.51426), DeliveryInfo(150084, 187224, 88.62766), 
+                    DeliveryInfo(116559, 394484, 145.45842), DeliveryInfo(25457, 17241, 23.84434), DeliveryInfo(143440, 147035, 189.91982), DeliveryInfo(105571, 114243, 19.79551), 
+                    DeliveryInfo(69656, 138649, 148.92365), DeliveryInfo(343938, 17241, 93.21634), DeliveryInfo(360534, 394484, 45.94852), DeliveryInfo(105571, 23238, 180.90318), 
+                    DeliveryInfo(343938, 257177, 177.74478), DeliveryInfo(89516, 257177, 118.59480), DeliveryInfo(274269, 24644, 89.59936), DeliveryInfo(105571, 69040, 50.64853), 
+                    DeliveryInfo(89516, 83342, 55.16647), DeliveryInfo(403738, 118970, 140.38144), DeliveryInfo(400133, 158490, 152.14987), DeliveryInfo(86129, 158490, 26.47551), 
+                    DeliveryInfo(231240, 121008, 199.44727), DeliveryInfo(59697, 259279, 118.72143), DeliveryInfo(2586, 158490, 1.91211), DeliveryInfo(152228, 158490, 99.38187), 
+                    DeliveryInfo(260440, 76650, 62.36740), DeliveryInfo(264388, 234780, 136.90015), DeliveryInfo(62758, 318743, 106.40794), DeliveryInfo(143440, 390891, 17.67936),
+                    DeliveryInfo(254647, 286103, 0.43400), DeliveryInfo(143440, 155660, 149.67912), DeliveryInfo(89516, 138649, 160.95218), DeliveryInfo(33082, 247326, 122.76397), 
+                    DeliveryInfo(249835, 314504, 139.63599), DeliveryInfo(429827, 362691, 168.15720), DeliveryInfo(343938, 158490, 115.99158), DeliveryInfo(89516, 343518, 29.86299), 
+                    DeliveryInfo(179361, 204300, 116.28070), DeliveryInfo(354374, 310032, 185.58627), DeliveryInfo(143440, 168741, 34.75976), DeliveryInfo(336040, 40447, 88.45197), 
+                    DeliveryInfo(343938, 394685, 65.40082), DeliveryInfo(143440, 17241, 163.03503), DeliveryInfo(319729, 394484, 64.14413), DeliveryInfo(143440, 17241, 101.15028), 
+                    DeliveryInfo(143440, 25775, 25.66063), DeliveryInfo(11296, 338914, 64.33150)};
+    const std::vector<unsigned> peanuts = {68};
+    const float shark = 15.000000000;
+    const float cats = 15.000000000;
+    const float lion = 1620.838867188;    
+    
+    if(seasamePaste.size() == ricecake1.size() && almonds.size() == peanuts.size()
+            && fish == shark && dogs == cats && cheetah == lion){
+        for(unsigned i=0; i<seasamePaste.size() && i<ricecake1.size(); i++){
+            if(seasamePaste.at(i).pickUp != ricecake1.at(i).pickUp || seasamePaste.at(i).dropOff != ricecake1.at(i).dropOff
+                    || seasamePaste.at(i).itemWeight != ricecake1.at(i).itemWeight){
+                return false;
+            }
+        }
+        
+    } else {
+        return false;
+    }
+    
+    return true;
 }
